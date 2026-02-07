@@ -47,7 +47,7 @@ export const paymentRouter = router({
             price_data: {
               currency: "usd",
               product_data: {
-                name: `VibeVideo ${PLANS[input.plan].name} Plan`,
+                name: `BuzzMove ${PLANS[input.plan].name} Plan`,
               },
               unit_amount:
                 input.billingPeriod === "yearly"
@@ -116,7 +116,7 @@ export const paymentRouter = router({
             price_data: {
               currency: "usd",
               product_data: {
-                name: `VibeVideo ${pack.name} Credit Pack (${pack.credits} credits)`,
+                name: `BuzzMove ${pack.name} Credit Pack (${pack.credits} credits)`,
               },
               unit_amount: pack.price,
             },

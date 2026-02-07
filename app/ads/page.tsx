@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "VibeVideo for Ads - Turn One Image into 10 Ad-Ready Videos",
+  title: "BuzzMove for Ads - Turn One Image into 10 Ad-Ready Videos",
   description:
     "Generate high-performing video ads from a single product image. Designed for ROAS. Minutes, not days.",
 };

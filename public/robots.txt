@@ -20,4 +20,4 @@ Disallow: /
 User-agent: Bytespider
 Disallow: /
 
-Sitemap: https://vibevideo.art/sitemap.xml
+Sitemap: https://buzzmove.art/sitemap.xml

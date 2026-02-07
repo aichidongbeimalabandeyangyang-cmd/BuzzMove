@@ -1,4 +1,4 @@
--- VibeVideo Database Schema
+-- BuzzMove Database Schema
 -- Run this in Supabase SQL Editor
 
 -- Enable UUID extension

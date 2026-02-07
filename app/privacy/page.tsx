@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Privacy Policy - VibeVideo" };
+export const metadata: Metadata = { title: "Privacy Policy - BuzzMove" };
 
 export default function PrivacyPage() {
   return (

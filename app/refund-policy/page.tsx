@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Refund Policy - VibeVideo" };
+export const metadata: Metadata = { title: "Refund Policy - BuzzMove" };
 
 export default function RefundPolicyPage() {
   return (
@@ -32,7 +32,7 @@ export default function RefundPolicyPage() {
 
       <h2>Contact</h2>
       <p>
-        For refund requests, contact us at support@vibevideo.art.
+        For refund requests, contact us at support@buzzmove.art.
       </p>
     </div>
   );

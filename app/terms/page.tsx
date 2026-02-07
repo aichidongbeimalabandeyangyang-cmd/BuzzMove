@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Terms of Service - VibeVideo" };
+export const metadata: Metadata = { title: "Terms of Service - BuzzMove" };
 
 export default function TermsPage() {
   return (
@@ -12,14 +12,14 @@ export default function TermsPage() {
 
       <h2>1. Acceptance of Terms</h2>
       <p>
-        By accessing and using VibeVideo (&quot;Service&quot;), you agree to be
+        By accessing and using BuzzMove (&quot;Service&quot;), you agree to be
         bound by these Terms of Service. If you do not agree, do not use the
         Service.
       </p>
 
       <h2>2. Service Description</h2>
       <p>
-        VibeVideo provides AI-powered video generation from images. The Service
+        BuzzMove provides AI-powered video generation from images. The Service
         uses third-party AI models to generate video content based on user
         inputs.
       </p>

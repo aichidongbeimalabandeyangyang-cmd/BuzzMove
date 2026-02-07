@@ -47,7 +47,7 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div className="w-full max-w-sm rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 shadow-2xl mx-4">
-        <h2 className="mb-1 text-xl font-bold">Welcome to VibeVideo</h2>
+        <h2 className="mb-1 text-xl font-bold">Welcome to BuzzMove</h2>
         <p className="mb-6 text-sm text-[var(--muted-foreground)]">
           Sign in to generate AI videos
         </p>

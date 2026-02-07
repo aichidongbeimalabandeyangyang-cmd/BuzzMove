@@ -5,20 +5,20 @@ import { Footer } from "@/components/layout/footer";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "VibeVideo - AI Video Generator",
+  title: "BuzzMove - AI Video Generator",
   description:
     "Turn your photos into stunning AI videos. Create cinematic motion from any image in seconds.",
   openGraph: {
-    title: "VibeVideo - AI Video Generator",
+    title: "BuzzMove - AI Video Generator",
     description:
       "Turn your photos into stunning AI videos. Create cinematic motion from any image in seconds.",
-    url: "https://vibevideo.art",
-    siteName: "VibeVideo",
+    url: "https://buzzmove.art",
+    siteName: "BuzzMove",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "VibeVideo - AI Video Generator",
+    title: "BuzzMove - AI Video Generator",
     description:
       "Turn your photos into stunning AI videos. Create cinematic motion from any image in seconds.",
   },

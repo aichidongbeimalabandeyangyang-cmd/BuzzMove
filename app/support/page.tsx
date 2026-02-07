@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Support - VibeVideo" };
+export const metadata: Metadata = { title: "Support - BuzzMove" };
 
 export default function SupportPage() {
   return (
@@ -13,10 +13,10 @@ export default function SupportPage() {
           <p className="text-sm text-[var(--muted-foreground)]">
             Reach us at{" "}
             <a
-              href="mailto:support@vibevideo.art"
+              href="mailto:support@buzzmove.art"
               className="text-[var(--primary)] underline"
             >
-              support@vibevideo.art
+              support@buzzmove.art
             </a>
           </p>
           <p className="mt-1 text-xs text-[var(--muted-foreground)]">

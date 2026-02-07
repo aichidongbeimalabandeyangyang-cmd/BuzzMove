@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://vibevideo.art";
+  const baseUrl = "https://buzzmove.art";
 
   return [
     { url: baseUrl, lastModified: new Date(), priority: 1.0 },
