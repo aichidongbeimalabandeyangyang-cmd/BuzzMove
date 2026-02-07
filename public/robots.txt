@@ -1,0 +1,23 @@
+User-agent: *
+Allow: /
+Disallow: /_next/static/
+Disallow: /api/
+Disallow: /dashboard/
+
+# AI training opt-out
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: GPTBot
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+Sitemap: https://vibevideo.art/sitemap.xml
