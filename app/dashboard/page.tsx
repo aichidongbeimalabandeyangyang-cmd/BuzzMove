@@ -12,77 +12,100 @@ export default function DashboardPage() {
   });
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-12">
-      {/* Stats bar */}
-      <div className="mb-8 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">My Videos</h1>
-        <div className="flex items-center gap-4">
-          <div className="rounded-lg bg-[var(--secondary)] px-4 py-2">
-            <span className="text-xs text-[var(--muted-foreground)]">
-              Credits:{" "}
-            </span>
-            <span className="font-bold">
+    <div className="mx-auto max-w-6xl px-5 py-12">
+      {/* Header bar */}
+      <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between animate-fade-up">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">My Videos</h1>
+          <p className="mt-1 text-sm text-[var(--muted-foreground)]">
+            Your generated videos and history
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--secondary)] px-4 py-2.5">
+            <div className="h-2 w-2 rounded-full bg-[var(--primary)]" />
+            <span className="text-sm font-medium tabular-nums">
               {formatCredits(creditData?.balance ?? 0)}
             </span>
+            <span className="text-xs text-[var(--muted-foreground)]">credits</span>
           </div>
-          <span className="rounded-full bg-[var(--primary)]/20 px-3 py-1 text-xs font-medium text-[var(--accent)]">
-            {creditData?.plan ?? "free"} plan
+          <span className="rounded-full border border-[var(--primary)]/20 bg-[var(--primary)]/10 px-3 py-1.5 text-xs font-medium text-[var(--primary)] capitalize">
+            {creditData?.plan ?? "free"}
           </span>
           <Link
             href="/"
-            className="rounded-lg bg-[var(--primary)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--accent)] transition-colors"
+            className="btn-primary inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm"
           >
-            + New Video
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            New Video
           </Link>
         </div>
       </div>
 
       {/* Video grid */}
       {isLoading ? (
-        <div className="flex justify-center py-20">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--border)] border-t-[var(--primary)]" />
+        <div className="flex justify-center py-24">
+          <div className="relative h-12 w-12">
+            <div className="absolute inset-0 rounded-full border border-[var(--border)]" />
+            <div className="absolute inset-0 animate-spin-slow rounded-full border-2 border-transparent border-t-[var(--primary)]" />
+          </div>
         </div>
       ) : videosData?.videos.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-[var(--border)] py-20 text-center">
-          <p className="mb-4 text-[var(--muted-foreground)]">
-            You haven&apos;t created any videos yet
+        <div className="rounded-2xl border border-dashed border-[var(--border)] bg-[var(--card)] py-24 text-center animate-fade-up delay-200">
+          <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--secondary)]">
+            <svg className="h-6 w-6 text-[var(--muted-foreground)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 01-1.125-1.125M3.375 19.5h1.5C5.496 19.5 6 18.996 6 18.375m-3.75 0V5.625m0 12.75v-1.5c0-.621.504-1.125 1.125-1.125m18.375 2.625V5.625m0 12.75c0 .621-.504 1.125-1.125 1.125m1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125m0 3.75h-1.5A1.125 1.125 0 0118 18.375M20.625 4.5H3.375m17.25 0c.621 0 1.125.504 1.125 1.125M20.625 4.5h-1.5C18.504 4.5 18 5.004 18 5.625m3.75 0v1.5c0 .621-.504 1.125-1.125 1.125M3.375 4.5c-.621 0-1.125.504-1.125 1.125M3.375 4.5h1.5C5.496 4.5 6 5.004 6 5.625m-3.75 0v1.5c0 .621.504 1.125 1.125 1.125m0 0h1.5m-1.5 0c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125m1.5-3.75C5.496 8.25 6 7.746 6 7.125v-1.5M4.875 8.25C5.496 8.25 6 8.754 6 9.375v1.5m0-5.25v5.25m0-5.25C6 5.004 6.504 4.5 7.125 4.5h9.75c.621 0 1.125.504 1.125 1.125m1.125 2.625h1.5m-1.5 0A1.125 1.125 0 0118 7.125v-1.5m1.125 2.625c-.621 0-1.125.504-1.125 1.125v1.5m2.625-2.625c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125M18 5.625v5.25M7.125 12h9.75m-9.75 0A1.125 1.125 0 016 10.875M7.125 12C6.504 12 6 12.504 6 13.125m0-2.25C6 11.496 5.496 12 4.875 12M18 10.875c0 .621-.504 1.125-1.125 1.125M18 10.875c0 .621.504 1.125 1.125 1.125m-2.25 0c.621 0 1.125.504 1.125 1.125m-12 5.25v-5.25m0 5.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125m-12 0v-1.5c0-.621-.504-1.125-1.125-1.125M18 18.375v-5.25m0 5.25v-1.5c0-.621.504-1.125 1.125-1.125M18 13.125v1.5c0 .621.504 1.125 1.125 1.125M18 13.125c0-.621.504-1.125 1.125-1.125M6 13.125v1.5c0 .621-.504 1.125-1.125 1.125M6 13.125C6 12.504 5.496 12 4.875 12m-1.5 0h1.5m-1.5 0c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125m1.5-3.75C5.496 12 6 12.504 6 13.125" />
+            </svg>
+          </div>
+          <p className="mb-2 text-lg font-semibold">No videos yet</p>
+          <p className="mb-6 text-sm text-[var(--muted-foreground)]">
+            Upload an image to create your first AI video
           </p>
           <Link
             href="/"
-            className="inline-block rounded-lg bg-[var(--primary)] px-6 py-2.5 text-sm font-medium text-white hover:bg-[var(--accent)] transition-colors"
+            className="btn-primary inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm"
           >
             Create Your First Video
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 animate-fade-up delay-200">
           {videosData?.videos.map((video) => (
             <div
               key={video.id}
-              className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--card)]"
+              className="group overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)] transition-all duration-300 hover:border-[var(--primary)]/30"
             >
               {video.status === "completed" && video.output_video_url ? (
-                <video
-                  src={video.output_video_url}
-                  className="aspect-[9/16] w-full object-cover"
-                  muted
-                  loop
-                  playsInline
-                  onMouseEnter={(e) =>
-                    (e.target as HTMLVideoElement).play()
-                  }
-                  onMouseLeave={(e) => {
-                    const v = e.target as HTMLVideoElement;
-                    v.pause();
-                    v.currentTime = 0;
-                  }}
-                />
+                <div className="relative">
+                  <video
+                    src={video.output_video_url}
+                    className="aspect-[9/16] w-full object-cover"
+                    muted
+                    loop
+                    playsInline
+                    onMouseEnter={(e) =>
+                      (e.target as HTMLVideoElement).play()
+                    }
+                    onMouseLeave={(e) => {
+                      const v = e.target as HTMLVideoElement;
+                      v.pause();
+                      v.currentTime = 0;
+                    }}
+                  />
+                  {/* Hover overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                </div>
               ) : (
                 <div className="flex aspect-[9/16] items-center justify-center bg-[var(--secondary)]">
                   {video.status === "generating" ? (
-                    <div className="h-6 w-6 animate-spin rounded-full border-2 border-[var(--border)] border-t-[var(--primary)]" />
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="h-6 w-6 animate-spin-slow rounded-full border-2 border-[var(--border)] border-t-[var(--primary)]" />
+                      <span className="text-[10px] text-[var(--muted-foreground)]">Generating</span>
+                    </div>
                   ) : video.status === "failed" ? (
-                    <span className="text-xs text-[var(--destructive)]">
+                    <span className="rounded-full bg-[var(--destructive)]/10 px-3 py-1 text-xs text-[var(--destructive)]">
                       Failed
                     </span>
                   ) : (
@@ -93,13 +116,20 @@ export default function DashboardPage() {
                 </div>
               )}
               <div className="p-3">
-                <p className="line-clamp-1 text-xs text-[var(--muted-foreground)]">
+                <p className="line-clamp-1 text-xs text-[var(--foreground)]/80">
                   {video.prompt || "No prompt"}
                 </p>
-                <p className="mt-1 text-[10px] text-[var(--muted-foreground)]">
-                  {video.duration}s &middot; {video.mode} &middot;{" "}
-                  {video.credits_consumed} credits
-                </p>
+                <div className="mt-1.5 flex items-center gap-1.5">
+                  <span className="rounded bg-[var(--secondary)] px-1.5 py-0.5 text-[10px] text-[var(--muted-foreground)]">
+                    {video.duration}s
+                  </span>
+                  <span className="rounded bg-[var(--secondary)] px-1.5 py-0.5 text-[10px] text-[var(--muted-foreground)] capitalize">
+                    {video.mode}
+                  </span>
+                  <span className="ml-auto text-[10px] text-[var(--muted-foreground)]">
+                    {video.credits_consumed} cr
+                  </span>
+                </div>
               </div>
             </div>
           ))}

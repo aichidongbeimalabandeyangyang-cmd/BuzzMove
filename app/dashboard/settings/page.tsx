@@ -11,43 +11,63 @@ export default function SettingsPage() {
   });
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-12">
-      <h1 className="mb-8 text-2xl font-bold">Account Settings</h1>
+    <div className="mx-auto max-w-2xl px-5 py-12">
+      <div className="mb-10 animate-fade-up">
+        <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
+        <p className="mt-1 text-sm text-[var(--muted-foreground)]">
+          Manage your account and subscription
+        </p>
+      </div>
 
       {/* Profile info */}
-      <div className="mb-8 rounded-xl border border-[var(--border)] bg-[var(--card)] p-6">
-        <h2 className="mb-4 text-lg font-bold">Profile</h2>
-        <div className="space-y-3 text-sm">
-          <div className="flex justify-between">
-            <span className="text-[var(--muted-foreground)]">Email</span>
-            <span>{profile?.email}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-[var(--muted-foreground)]">Plan</span>
-            <span className="capitalize">{profile?.subscription_plan}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-[var(--muted-foreground)]">Credits</span>
-            <span>{profile?.credits_balance?.toLocaleString()}</span>
-          </div>
+      <div className="mb-6 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-7 animate-fade-up delay-100">
+        <h2 className="mb-5 text-base font-bold">Profile</h2>
+        <div className="space-y-4">
+          {[
+            { label: "Email", value: profile?.email },
+            { label: "Plan", value: profile?.subscription_plan, capitalize: true },
+            {
+              label: "Credits",
+              value: profile?.credits_balance?.toLocaleString(),
+            },
+          ].map((item) => (
+            <div
+              key={item.label}
+              className="flex items-center justify-between border-b border-[var(--border)] pb-4 last:border-0 last:pb-0"
+            >
+              <span className="text-sm text-[var(--muted-foreground)]">
+                {item.label}
+              </span>
+              <span
+                className={`text-sm font-medium ${
+                  item.capitalize ? "capitalize" : ""
+                }`}
+              >
+                {item.value ?? "—"}
+              </span>
+            </div>
+          ))}
         </div>
       </div>
 
       {/* Billing */}
-      <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6">
-        <h2 className="mb-4 text-lg font-bold">Billing</h2>
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-7 animate-fade-up delay-200">
+        <h2 className="mb-5 text-base font-bold">Billing</h2>
         {profile?.stripe_customer_id ? (
           <button
             onClick={() => portalMutation.mutate()}
             disabled={portalMutation.isPending}
-            className="rounded-lg bg-[var(--secondary)] px-4 py-2 text-sm font-medium hover:bg-[var(--border)] transition-colors"
+            className="rounded-xl border border-[var(--border)] bg-[var(--secondary)] px-5 py-3 text-sm font-medium transition-all hover:border-[var(--primary)]/30 hover:bg-[var(--primary)]/10 hover:text-[var(--primary)] disabled:opacity-50"
           >
-            Manage Subscription
+            {portalMutation.isPending ? "Loading..." : "Manage Subscription"}
           </button>
         ) : (
           <p className="text-sm text-[var(--muted-foreground)]">
             No active subscription.{" "}
-            <a href="/pricing" className="text-[var(--primary)] underline">
+            <a
+              href="/pricing"
+              className="font-medium text-[var(--primary)] transition-colors hover:text-[var(--accent)]"
+            >
               View plans
             </a>
           </p>

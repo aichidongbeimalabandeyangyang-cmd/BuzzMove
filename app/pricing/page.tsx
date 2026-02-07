@@ -25,81 +25,113 @@ export default function PricingPage() {
     });
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-16">
-      <div className="mb-12 text-center">
-        <h1 className="mb-3 text-4xl font-bold">Simple, Flexible Pricing</h1>
-        <p className="text-[var(--muted-foreground)]">
-          Start free. Scale as you create.
+    <div className="mx-auto max-w-5xl px-5 py-20">
+      {/* Header */}
+      <div className="mb-14 text-center animate-fade-up">
+        <h1 className="mb-3 text-4xl font-bold tracking-tight sm:text-5xl">
+          Simple, <span className="text-gradient">flexible</span> pricing
+        </h1>
+        <p className="mx-auto max-w-md text-base text-[var(--muted-foreground)]">
+          Start free with 9,000 credits. Upgrade when you need more.
         </p>
       </div>
 
       {/* Billing toggle */}
-      <div className="mb-10 flex items-center justify-center gap-3">
-        <button
-          onClick={() => setBillingPeriod("monthly")}
-          className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-            billingPeriod === "monthly"
-              ? "bg-[var(--primary)] text-white"
-              : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
-          }`}
-        >
-          Monthly
-        </button>
-        <button
-          onClick={() => setBillingPeriod("yearly")}
-          className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-            billingPeriod === "yearly"
-              ? "bg-[var(--primary)] text-white"
-              : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
-          }`}
-        >
-          Yearly
-          <span className="ml-1.5 rounded bg-green-500/20 px-1.5 py-0.5 text-xs text-green-400">
-            Save 20%+
-          </span>
-        </button>
+      <div className="mb-12 flex items-center justify-center animate-fade-up delay-100">
+        <div className="inline-flex rounded-xl border border-[var(--border)] bg-[var(--secondary)] p-1">
+          <button
+            onClick={() => setBillingPeriod("monthly")}
+            className={`rounded-lg px-5 py-2 text-sm font-medium transition-all ${
+              billingPeriod === "monthly"
+                ? "bg-[var(--primary)] text-[var(--background)] shadow-sm"
+                : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+            }`}
+          >
+            Monthly
+          </button>
+          <button
+            onClick={() => setBillingPeriod("yearly")}
+            className={`rounded-lg px-5 py-2 text-sm font-medium transition-all ${
+              billingPeriod === "yearly"
+                ? "bg-[var(--primary)] text-[var(--background)] shadow-sm"
+                : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+            }`}
+          >
+            Yearly
+            <span className="ml-2 rounded-md bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-400">
+              -20%
+            </span>
+          </button>
+        </div>
       </div>
 
       {/* Subscription plans */}
-      <div className="mb-16 grid gap-6 md:grid-cols-3">
+      <div className="mb-20 grid gap-5 md:grid-cols-3 animate-fade-up delay-200">
         {/* Free */}
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6">
-          <h3 className="mb-1 text-lg font-bold">{PLANS.free.name}</h3>
-          <p className="mb-4 text-3xl font-bold">$0</p>
-          <ul className="mb-6 space-y-2 text-sm text-[var(--muted-foreground)]">
-            <li>9,000 credits/month (~1 video/day)</li>
-            <li>Standard quality (480p)</li>
-            <li>Watermarked videos</li>
-            <li>Standard license</li>
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-7 transition-all hover:border-[var(--muted-foreground)]/30">
+          <div className="mb-5">
+            <h3 className="text-lg font-bold">{PLANS.free.name}</h3>
+            <p className="mt-0.5 text-xs text-[var(--muted-foreground)]">For trying things out</p>
+          </div>
+          <p className="mb-6 text-4xl font-bold tracking-tight">
+            $0
+            <span className="text-sm font-normal text-[var(--muted-foreground)]">/mo</span>
+          </p>
+          <ul className="mb-7 space-y-3 text-sm text-[var(--muted-foreground)]">
+            {[
+              "9,000 credits/month",
+              "~1 video per day",
+              "Standard quality (480p)",
+              "Watermarked output",
+            ].map((item) => (
+              <li key={item} className="flex items-start gap-2.5">
+                <svg className="mt-0.5 h-4 w-4 shrink-0 text-[var(--muted-foreground)]/50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+                {item}
+              </li>
+            ))}
           </ul>
           <button
             disabled
-            className="w-full rounded-lg border border-[var(--border)] py-2.5 text-sm font-medium opacity-50"
+            className="w-full rounded-xl border border-[var(--border)] py-3 text-sm font-medium text-[var(--muted-foreground)]"
           >
             Current Plan
           </button>
         </div>
 
-        {/* Pro */}
-        <div className="relative rounded-2xl border-2 border-[var(--primary)] bg-[var(--card)] p-6">
-          <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[var(--primary)] px-3 py-0.5 text-xs font-medium text-white">
-            Most Popular
+        {/* Pro - Featured */}
+        <div className="relative rounded-2xl border border-[var(--primary)]/40 bg-[var(--card)] p-7 shadow-lg shadow-[var(--primary)]/5">
+          <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+            <span className="rounded-full bg-gradient-to-r from-[var(--primary)] to-[var(--accent)] px-4 py-1 text-xs font-semibold text-[var(--background)]">
+              Most Popular
+            </span>
           </div>
-          <h3 className="mb-1 text-lg font-bold">{PLANS.pro.name}</h3>
-          <p className="mb-4 text-3xl font-bold">
+          <div className="mb-5">
+            <h3 className="text-lg font-bold">{PLANS.pro.name}</h3>
+            <p className="mt-0.5 text-xs text-[var(--muted-foreground)]">For regular creators</p>
+          </div>
+          <p className="mb-6 text-4xl font-bold tracking-tight">
             {billingPeriod === "yearly"
               ? formatPrice(PLANS.pro.price_yearly / 12)
               : formatPrice(PLANS.pro.price_monthly)}
-            <span className="text-base font-normal text-[var(--muted-foreground)]">
-              /mo
-            </span>
+            <span className="text-sm font-normal text-[var(--muted-foreground)]">/mo</span>
           </p>
-          <ul className="mb-6 space-y-2 text-sm text-[var(--muted-foreground)]">
-            <li>30,000 credits/month (~120 videos)</li>
-            <li>Priority processing queue</li>
-            <li>Up to 5 concurrent generations</li>
-            <li>No watermark, 1080p HD</li>
-            <li>Commercial license</li>
+          <ul className="mb-7 space-y-3 text-sm text-[var(--muted-foreground)]">
+            {[
+              "30,000 credits/month",
+              "~120 videos per month",
+              "1080p HD, no watermark",
+              "5 concurrent generations",
+              "Commercial license",
+            ].map((item) => (
+              <li key={item} className="flex items-start gap-2.5">
+                <svg className="mt-0.5 h-4 w-4 shrink-0 text-[var(--primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+                {item}
+              </li>
+            ))}
           </ul>
           <button
             onClick={() =>
@@ -109,29 +141,39 @@ export default function PricingPage() {
               })
             }
             disabled={subscriptionCheckout.isPending}
-            className="w-full rounded-lg bg-[var(--primary)] py-2.5 text-sm font-medium text-white hover:bg-[var(--accent)] transition-colors"
+            className="btn-primary w-full rounded-xl py-3 text-sm"
           >
             Get Pro
           </button>
         </div>
 
         {/* Premium */}
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6">
-          <h3 className="mb-1 text-lg font-bold">{PLANS.premium.name}</h3>
-          <p className="mb-4 text-3xl font-bold">
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-7 transition-all hover:border-[var(--muted-foreground)]/30">
+          <div className="mb-5">
+            <h3 className="text-lg font-bold">{PLANS.premium.name}</h3>
+            <p className="mt-0.5 text-xs text-[var(--muted-foreground)]">For power users</p>
+          </div>
+          <p className="mb-6 text-4xl font-bold tracking-tight">
             {billingPeriod === "yearly"
               ? formatPrice(PLANS.premium.price_yearly / 12)
               : formatPrice(PLANS.premium.price_monthly)}
-            <span className="text-base font-normal text-[var(--muted-foreground)]">
-              /mo
-            </span>
+            <span className="text-sm font-normal text-[var(--muted-foreground)]">/mo</span>
           </p>
-          <ul className="mb-6 space-y-2 text-sm text-[var(--muted-foreground)]">
-            <li>100,000 credits/month (~400 videos)</li>
-            <li>Top priority processing</li>
-            <li>Up to 10 concurrent generations</li>
-            <li>No watermark, 1080p HD</li>
-            <li>Commercial license</li>
+          <ul className="mb-7 space-y-3 text-sm text-[var(--muted-foreground)]">
+            {[
+              "100,000 credits/month",
+              "~400 videos per month",
+              "1080p HD, no watermark",
+              "10 concurrent generations",
+              "Commercial license",
+            ].map((item) => (
+              <li key={item} className="flex items-start gap-2.5">
+                <svg className="mt-0.5 h-4 w-4 shrink-0 text-[var(--muted-foreground)]/50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+                {item}
+              </li>
+            ))}
           </ul>
           <button
             onClick={() =>
@@ -141,79 +183,86 @@ export default function PricingPage() {
               })
             }
             disabled={subscriptionCheckout.isPending}
-            className="w-full rounded-lg bg-[var(--secondary)] py-2.5 text-sm font-medium hover:bg-[var(--border)] transition-colors"
+            className="w-full rounded-xl border border-[var(--border)] bg-[var(--secondary)] py-3 text-sm font-medium transition-all hover:bg-[var(--border)]"
           >
             Get Premium
           </button>
         </div>
       </div>
 
-      {/* Creator Weekly Plan */}
-      <div className="mb-16 mx-auto max-w-md rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 text-center">
-        <div className="mb-2 inline-block rounded-full bg-orange-500/20 px-3 py-0.5 text-xs font-medium text-orange-400">
-          50% OFF
+      {/* Creator Weekly */}
+      <div className="mb-20 animate-fade-up delay-300">
+        <div className="mx-auto max-w-md overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)]">
+          <div className="bg-gradient-to-r from-orange-500/10 to-amber-500/10 px-7 py-2 text-center">
+            <span className="text-xs font-semibold text-orange-400">
+              LIMITED OFFER &mdash; 50% OFF
+            </span>
+          </div>
+          <div className="p-7 text-center">
+            <h3 className="mb-1 text-xl font-bold">Creator Weekly</h3>
+            <p className="mb-4 text-4xl font-bold tracking-tight">
+              $4.99
+              <span className="ml-2 text-lg font-normal text-[var(--muted-foreground)] line-through">
+                $9.99
+              </span>
+              <span className="text-sm font-normal text-[var(--muted-foreground)]">
+                /week
+              </span>
+            </p>
+            <p className="mb-6 text-sm text-[var(--muted-foreground)]">
+              2,300 credits/week &middot; No watermark &middot; Commercial license
+            </p>
+            <button
+              onClick={() =>
+                subscriptionCheckout.mutate({
+                  plan: "creator",
+                  billingPeriod: "weekly",
+                })
+              }
+              disabled={subscriptionCheckout.isPending}
+              className="btn-primary rounded-xl px-10 py-3 text-sm"
+            >
+              Start for $4.99/week
+            </button>
+            <p className="mt-3 text-xs text-[var(--muted-foreground)]">
+              Cancel anytime. No questions asked.
+            </p>
+          </div>
         </div>
-        <h3 className="mb-1 text-lg font-bold">Creator Weekly</h3>
-        <p className="mb-2 text-3xl font-bold">
-          $4.99
-          <span className="ml-2 text-base font-normal text-[var(--muted-foreground)] line-through">
-            $9.99
-          </span>
-          <span className="text-base font-normal text-[var(--muted-foreground)]">
-            /week
-          </span>
-        </p>
-        <p className="mb-4 text-sm text-[var(--muted-foreground)]">
-          2,300 credits/week &middot; No watermark &middot; Commercial license
-        </p>
-        <button
-          onClick={() =>
-            subscriptionCheckout.mutate({
-              plan: "creator",
-              billingPeriod: "weekly",
-            })
-          }
-          disabled={subscriptionCheckout.isPending}
-          className="rounded-lg bg-[var(--primary)] px-8 py-2.5 text-sm font-medium text-white hover:bg-[var(--accent)] transition-colors"
-        >
-          Start for $4.99
-        </button>
-        <p className="mt-2 text-xs text-[var(--muted-foreground)]">
-          Cancel anytime. No questions asked.
-        </p>
       </div>
 
       {/* Credit Packs */}
-      <div className="mb-8 text-center">
-        <h2 className="mb-2 text-2xl font-bold">Credit Packs</h2>
-        <p className="text-sm text-[var(--muted-foreground)]">
-          One-time purchase. Credits never expire.
-        </p>
-      </div>
+      <div className="animate-fade-up delay-400">
+        <div className="mb-10 text-center">
+          <h2 className="mb-2 text-2xl font-bold tracking-tight">Credit Packs</h2>
+          <p className="text-sm text-[var(--muted-foreground)]">
+            One-time purchase. Credits never expire.
+          </p>
+        </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
-        {CREDIT_PACKS.map((pack) => (
-          <div
-            key={pack.id}
-            className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-5 text-center"
-          >
-            <h3 className="mb-1 font-bold">{pack.name}</h3>
-            <p className="mb-1 text-2xl font-bold">
-              {formatPrice(pack.price)}
-            </p>
-            <p className="mb-4 text-xs text-[var(--muted-foreground)]">
-              {pack.credits.toLocaleString()} credits &middot; $
-              {((pack.price / pack.credits) * 1000 / 100).toFixed(2)}/1K
-            </p>
-            <button
-              onClick={() => creditPackCheckout.mutate({ packId: pack.id })}
-              disabled={creditPackCheckout.isPending}
-              className="w-full rounded-lg border border-[var(--border)] py-2 text-sm font-medium hover:bg-[var(--secondary)] transition-colors"
+        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
+          {CREDIT_PACKS.map((pack, i) => (
+            <div
+              key={pack.id}
+              className="group rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 text-center transition-all hover:border-[var(--primary)]/30"
             >
-              Buy
-            </button>
-          </div>
-        ))}
+              <h3 className="mb-1 text-base font-bold">{pack.name}</h3>
+              <p className="mb-1 text-3xl font-bold tracking-tight">
+                {formatPrice(pack.price)}
+              </p>
+              <p className="mb-5 text-xs text-[var(--muted-foreground)]">
+                {pack.credits.toLocaleString()} credits
+              </p>
+              <button
+                onClick={() => creditPackCheckout.mutate({ packId: pack.id })}
+                disabled={creditPackCheckout.isPending}
+                className="w-full rounded-xl border border-[var(--border)] bg-[var(--secondary)] py-2.5 text-sm font-medium transition-all hover:border-[var(--primary)]/40 hover:bg-[var(--primary)]/10 hover:text-[var(--primary)]"
+              >
+                Buy
+              </button>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

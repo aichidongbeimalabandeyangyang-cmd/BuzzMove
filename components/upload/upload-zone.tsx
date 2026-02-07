@@ -47,10 +47,10 @@ export function UploadZone({ onFileSelected, disabled }: UploadZoneProps) {
 
   return (
     <div
-      className={`relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-12 transition-all cursor-pointer active:scale-[0.98] ${
+      className={`group relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-14 transition-all duration-300 cursor-pointer active:scale-[0.98] ${
         isDragging
-          ? "border-[var(--primary)] bg-[var(--primary)]/10"
-          : "border-[var(--border)] hover:border-[var(--muted-foreground)]"
+          ? "border-[var(--primary)] bg-[var(--primary)]/5 shadow-[0_0_40px_rgba(232,168,56,0.1)]"
+          : "border-[var(--border)] hover:border-[var(--primary)]/50 hover:bg-[var(--card)]"
       } ${disabled ? "opacity-50 pointer-events-none" : ""}`}
       onDragOver={(e) => {
         e.preventDefault();
@@ -71,42 +71,40 @@ export function UploadZone({ onFileSelected, disabled }: UploadZoneProps) {
         }}
       />
 
-      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--secondary)]">
-        <svg
-          className="h-8 w-8 text-[var(--primary)]"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
+      {/* Upload icon with glow effect */}
+      <div className="relative mb-5">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--primary)]/10 to-[var(--accent)]/5 transition-transform duration-300 group-hover:scale-110">
+          <svg
+            className="h-7 w-7 text-[var(--primary)] transition-transform duration-300 group-hover:-translate-y-0.5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
             strokeWidth={1.5}
-            d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
-          />
-        </svg>
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
+            />
+          </svg>
+        </div>
       </div>
 
-      <p className="mb-1 text-lg font-semibold">Tap to Upload</p>
+      <p className="mb-1 text-lg font-semibold">
+        Drop your image here
+      </p>
       <p className="text-sm text-[var(--muted-foreground)]">
-        JPG, PNG, WebP
+        or <span className="text-[var(--primary)] font-medium">browse files</span>
+      </p>
+      <p className="mt-3 text-xs text-[var(--muted-foreground)]/60">
+        JPG, PNG, WebP &middot; Up to 10 MB
       </p>
 
       {error && (
-        <p className="mt-3 text-sm text-[var(--destructive)]">{error}</p>
+        <div className="mt-4 rounded-lg bg-[var(--destructive)]/10 px-3 py-2 text-sm text-[var(--destructive)]">
+          {error}
+        </div>
       )}
-
-      <div className="mt-4 flex items-center gap-1.5 text-xs text-[var(--muted-foreground)]">
-        <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-          />
-        </svg>
-        Private & Secure
-      </div>
     </div>
   );
 }

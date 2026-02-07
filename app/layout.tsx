@@ -43,6 +43,18 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <head>
+        {/* Google Fonts: Sora + DM Sans */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Sora:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet"
+        />
+
         {/* Google Ads Pixel */}
         {process.env.NEXT_PUBLIC_GOOGLE_ADS_ID && (
           <>
@@ -77,7 +89,7 @@ export default function RootLayout({
           />
         )}
       </head>
-      <body className="min-h-screen antialiased">
+      <body className="grain-overlay min-h-screen antialiased">
         <Providers>
           <Header />
           <main className="min-h-[calc(100vh-3.5rem-5rem)]">{children}</main>
