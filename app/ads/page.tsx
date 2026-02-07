@@ -26,7 +26,8 @@ export default function AdsPage() {
         </p>
         <Link
           href="/"
-          className="btn-primary inline-block rounded-xl px-8 py-4 text-base"
+          className="inline-block rounded-xl px-8 py-4 text-base font-semibold text-[var(--background)] transition-all hover:brightness-110 active:scale-[0.98]"
+          style={{ background: "linear-gradient(135deg, var(--primary), #d4942e)" }}
         >
           Start Creating Ads
         </Link>

@@ -38,10 +38,10 @@ export default function PricingPage() {
 
       {/* Billing toggle */}
       <div className="mb-12 flex items-center justify-center animate-fade-up delay-100">
-        <div className="inline-flex rounded-xl border border-[var(--border)] bg-[var(--secondary)] p-1">
+        <div className="inline-flex rounded-xl border border-[var(--border)] bg-[var(--secondary)] p-1 gap-1">
           <button
             onClick={() => setBillingPeriod("monthly")}
-            className={`rounded-lg px-5 py-2 text-sm font-medium transition-all ${
+            className={`rounded-lg px-5 py-2.5 text-sm font-medium transition-all ${
               billingPeriod === "monthly"
                 ? "bg-[var(--primary)] text-[var(--background)] shadow-sm"
                 : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
@@ -51,14 +51,14 @@ export default function PricingPage() {
           </button>
           <button
             onClick={() => setBillingPeriod("yearly")}
-            className={`rounded-lg px-5 py-2 text-sm font-medium transition-all ${
+            className={`rounded-lg px-5 py-2.5 text-sm font-medium transition-all flex items-center gap-2 ${
               billingPeriod === "yearly"
                 ? "bg-[var(--primary)] text-[var(--background)] shadow-sm"
                 : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
             }`}
           >
             Yearly
-            <span className="ml-2 rounded-md bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-400">
+            <span className="rounded-md bg-emerald-900 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-400">
               -20%
             </span>
           </button>
@@ -68,14 +68,14 @@ export default function PricingPage() {
       {/* Subscription plans */}
       <div className="mb-20 grid gap-5 md:grid-cols-3 animate-fade-up delay-200">
         {/* Free */}
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-7 transition-all hover:border-[var(--muted-fg-30)]">
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-7">
           <div className="mb-5">
             <h3 className="text-lg font-bold">{PLANS.free.name}</h3>
             <p className="mt-0.5 text-xs text-[var(--muted-foreground)]">For trying things out</p>
           </div>
-          <p className="mb-6 text-4xl font-bold tracking-tight">
-            $0
-            <span className="text-sm font-normal text-[var(--muted-foreground)]">/mo</span>
+          <p className="mb-6">
+            <span className="text-4xl font-bold tracking-tight">$0</span>
+            <span className="ml-1 text-sm text-[var(--muted-foreground)]">/mo</span>
           </p>
           <ul className="mb-7 space-y-3 text-sm text-[var(--muted-foreground)]">
             {[
@@ -94,16 +94,19 @@ export default function PricingPage() {
           </ul>
           <button
             disabled
-            className="w-full rounded-xl border border-[var(--border)] py-3 text-sm font-medium text-[var(--muted-foreground)]"
+            className="w-full rounded-xl border border-[var(--border)] py-3 text-sm font-medium text-[var(--muted-foreground)] cursor-default"
           >
             Current Plan
           </button>
         </div>
 
         {/* Pro - Featured */}
-        <div className="relative rounded-2xl border border-[var(--primary-40)] bg-[var(--card)] p-7 shadow-lg shadow-[var(--primary-5)]">
-          <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-            <span className="rounded-full bg-gradient-to-r from-[var(--primary)] to-[var(--accent)] px-4 py-1 text-xs font-semibold text-[var(--background)]">
+        <div className="relative rounded-2xl border-2 border-[var(--primary-40)] bg-[var(--card)] p-7 pt-10">
+          <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10">
+            <span
+              className="rounded-full px-4 py-1.5 text-xs font-semibold text-[var(--background)] whitespace-nowrap"
+              style={{ background: "linear-gradient(135deg, var(--primary), var(--accent))" }}
+            >
               Most Popular
             </span>
           </div>
@@ -111,11 +114,13 @@ export default function PricingPage() {
             <h3 className="text-lg font-bold">{PLANS.pro.name}</h3>
             <p className="mt-0.5 text-xs text-[var(--muted-foreground)]">For regular creators</p>
           </div>
-          <p className="mb-6 text-4xl font-bold tracking-tight">
-            {billingPeriod === "yearly"
-              ? formatPrice(PLANS.pro.price_yearly / 12)
-              : formatPrice(PLANS.pro.price_monthly)}
-            <span className="text-sm font-normal text-[var(--muted-foreground)]">/mo</span>
+          <p className="mb-6">
+            <span className="text-4xl font-bold tracking-tight">
+              {billingPeriod === "yearly"
+                ? formatPrice(PLANS.pro.price_yearly / 12)
+                : formatPrice(PLANS.pro.price_monthly)}
+            </span>
+            <span className="ml-1 text-sm text-[var(--muted-foreground)]">/mo</span>
           </p>
           <ul className="mb-7 space-y-3 text-sm text-[var(--muted-foreground)]">
             {[
@@ -135,29 +140,29 @@ export default function PricingPage() {
           </ul>
           <button
             onClick={() =>
-              subscriptionCheckout.mutate({
-                plan: "pro",
-                billingPeriod,
-              })
+              subscriptionCheckout.mutate({ plan: "pro", billingPeriod })
             }
             disabled={subscriptionCheckout.isPending}
-            className="btn-primary w-full rounded-xl py-3 text-sm"
+            className="w-full rounded-xl py-3 text-sm font-semibold text-[var(--background)] transition-all hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
+            style={{ background: "linear-gradient(135deg, var(--primary), #d4942e)" }}
           >
             Get Pro
           </button>
         </div>
 
         {/* Premium */}
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-7 transition-all hover:border-[var(--muted-fg-30)]">
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-7">
           <div className="mb-5">
             <h3 className="text-lg font-bold">{PLANS.premium.name}</h3>
             <p className="mt-0.5 text-xs text-[var(--muted-foreground)]">For power users</p>
           </div>
-          <p className="mb-6 text-4xl font-bold tracking-tight">
-            {billingPeriod === "yearly"
-              ? formatPrice(PLANS.premium.price_yearly / 12)
-              : formatPrice(PLANS.premium.price_monthly)}
-            <span className="text-sm font-normal text-[var(--muted-foreground)]">/mo</span>
+          <p className="mb-6">
+            <span className="text-4xl font-bold tracking-tight">
+              {billingPeriod === "yearly"
+                ? formatPrice(PLANS.premium.price_yearly / 12)
+                : formatPrice(PLANS.premium.price_monthly)}
+            </span>
+            <span className="ml-1 text-sm text-[var(--muted-foreground)]">/mo</span>
           </p>
           <ul className="mb-7 space-y-3 text-sm text-[var(--muted-foreground)]">
             {[
@@ -177,13 +182,10 @@ export default function PricingPage() {
           </ul>
           <button
             onClick={() =>
-              subscriptionCheckout.mutate({
-                plan: "premium",
-                billingPeriod,
-              })
+              subscriptionCheckout.mutate({ plan: "premium", billingPeriod })
             }
             disabled={subscriptionCheckout.isPending}
-            className="w-full rounded-xl border border-[var(--border)] bg-[var(--secondary)] py-3 text-sm font-medium transition-all hover:bg-[var(--border)]"
+            className="w-full rounded-xl border border-[var(--border)] bg-[var(--secondary)] py-3 text-sm font-medium transition-all hover:bg-[var(--border)] disabled:opacity-50"
           >
             Get Premium
           </button>
@@ -191,40 +193,34 @@ export default function PricingPage() {
       </div>
 
       {/* Creator Weekly */}
-      <div className="mb-20 animate-fade-up delay-300">
-        <div className="mx-auto max-w-md overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)]">
-          <div className="bg-gradient-to-r from-orange-500/10 to-amber-500/10 px-7 py-2 text-center">
+      <div className="mb-20 flex justify-center animate-fade-up delay-300">
+        <div className="w-full max-w-md overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)]">
+          <div className="px-7 py-2.5 text-center" style={{ background: "linear-gradient(90deg, rgba(249,115,22,0.1), rgba(245,158,11,0.1))" }}>
             <span className="text-xs font-semibold text-orange-400">
               LIMITED OFFER &mdash; 50% OFF
             </span>
           </div>
           <div className="p-7 text-center">
-            <h3 className="mb-1 text-xl font-bold">Creator Weekly</h3>
-            <p className="mb-4 text-4xl font-bold tracking-tight">
-              $4.99
-              <span className="ml-2 text-lg font-normal text-[var(--muted-foreground)] line-through">
-                $9.99
-              </span>
-              <span className="text-sm font-normal text-[var(--muted-foreground)]">
-                /week
-              </span>
+            <h3 className="mb-2 text-xl font-bold">Creator Weekly</h3>
+            <p className="mb-4">
+              <span className="text-4xl font-bold tracking-tight">$4.99</span>
+              <span className="ml-2 text-lg text-[var(--muted-foreground)] line-through">$9.99</span>
+              <span className="ml-1 text-sm text-[var(--muted-foreground)]">/week</span>
             </p>
             <p className="mb-6 text-sm text-[var(--muted-foreground)]">
               2,300 credits/week &middot; No watermark &middot; Commercial license
             </p>
             <button
               onClick={() =>
-                subscriptionCheckout.mutate({
-                  plan: "creator",
-                  billingPeriod: "weekly",
-                })
+                subscriptionCheckout.mutate({ plan: "creator", billingPeriod: "weekly" })
               }
               disabled={subscriptionCheckout.isPending}
-              className="btn-primary rounded-xl px-10 py-3 text-sm"
+              className="rounded-xl px-10 py-3 text-sm font-semibold text-[var(--background)] transition-all hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
+              style={{ background: "linear-gradient(135deg, var(--primary), #d4942e)" }}
             >
               Start for $4.99/week
             </button>
-            <p className="mt-3 text-xs text-[var(--muted-foreground)]">
+            <p className="mt-4 text-xs text-[var(--muted-foreground)]">
               Cancel anytime. No questions asked.
             </p>
           </div>
@@ -244,7 +240,7 @@ export default function PricingPage() {
           {CREDIT_PACKS.map((pack) => (
             <div
               key={pack.id}
-              className="group rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 text-center transition-all hover:border-[var(--primary-30)]"
+              className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 text-center transition-all hover:border-[var(--primary-30)]"
             >
               <h3 className="mb-1 text-base font-bold">{pack.name}</h3>
               <p className="mb-1 text-3xl font-bold tracking-tight">
@@ -256,7 +252,7 @@ export default function PricingPage() {
               <button
                 onClick={() => creditPackCheckout.mutate({ packId: pack.id })}
                 disabled={creditPackCheckout.isPending}
-                className="w-full rounded-xl border border-[var(--border)] bg-[var(--secondary)] py-2.5 text-sm font-medium transition-all hover:border-[var(--primary-40)] hover:bg-[var(--primary-10)] hover:text-[var(--primary)]"
+                className="w-full rounded-xl border border-[var(--border)] bg-[var(--secondary)] py-2.5 text-sm font-medium transition-all hover:border-[var(--primary-40)] hover:bg-[var(--primary-10)] hover:text-[var(--primary)] disabled:opacity-50"
               >
                 Buy
               </button>

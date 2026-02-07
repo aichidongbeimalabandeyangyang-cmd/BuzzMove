@@ -29,13 +29,11 @@ export function Header() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Check URL for login trigger
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("login") === "1") setShowLogin(true);
   }, []);
 
-  // Track scroll for header style
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -45,21 +43,19 @@ export function Header() {
   return (
     <>
       <header
-        className={`sticky top-0 z-50 transition-all duration-300 ${
+        className={`sticky top-0 z-50 transition-all duration-300 border-b ${
           scrolled
-            ? "glass border-b border-[var(--border)]"
-            : "bg-transparent"
+            ? "glass border-[var(--border)]"
+            : "bg-[var(--background)] border-transparent"
         }`}
       >
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
-          <Link href="/" className="group flex items-center gap-2.5">
-            {/* Logo mark */}
-            <div className="relative flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-[var(--primary)] to-[var(--accent)]">
-              <svg
-                className="h-4 w-4 text-[var(--background)]"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg"
+              style={{ background: "linear-gradient(135deg, var(--primary), var(--accent))" }}
+            >
+              <svg className="h-4 w-4" fill="var(--background)" viewBox="0 0 24 24">
                 <path d="M8 5v14l11-7z" />
               </svg>
             </div>
@@ -68,7 +64,8 @@ export function Header() {
             </span>
           </Link>
 
-          <nav className="flex items-center gap-1">
+          {/* Nav */}
+          <nav className="flex items-center gap-2">
             <Link
               href="/explorer"
               className="rounded-lg px-3 py-2 text-sm text-[var(--muted-foreground)] transition-colors hover:text-[var(--foreground)] hover:bg-[var(--secondary)]"
@@ -83,8 +80,8 @@ export function Header() {
             </Link>
 
             {user ? (
-              <div className="flex items-center gap-2 ml-2">
-                <div className="flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--secondary)] px-3 py-1.5">
+              <>
+                <div className="ml-2 flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--secondary)] px-3 py-1.5">
                   <div className="h-1.5 w-1.5 rounded-full bg-[var(--primary)]" />
                   <span className="text-xs font-medium tabular-nums">
                     {formatCredits(creditData?.balance ?? 0)}
@@ -96,11 +93,12 @@ export function Header() {
                 >
                   Dashboard
                 </Link>
-              </div>
+              </>
             ) : (
               <button
                 onClick={() => setShowLogin(true)}
-                className="ml-2 rounded-lg btn-primary px-5 py-2 text-sm"
+                className="ml-3 rounded-lg px-5 py-2 text-sm font-semibold text-[var(--background)] transition-all hover:brightness-110 active:scale-[0.97]"
+                style={{ background: "linear-gradient(135deg, var(--primary), #d4942e)" }}
               >
                 Get Started
               </button>

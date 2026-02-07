@@ -34,7 +34,8 @@ export default function DashboardPage() {
           </span>
           <Link
             href="/"
-            className="btn-primary inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm"
+            className="inline-flex items-center gap-2 rounded-xl font-semibold text-[var(--background)] hover:brightness-110 active:scale-[0.98] px-5 py-2.5 text-sm transition-all"
+            style={{ background: "linear-gradient(135deg, var(--primary), #d4942e)" }}
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -65,7 +66,8 @@ export default function DashboardPage() {
           </p>
           <Link
             href="/"
-            className="btn-primary inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm"
+            className="inline-flex items-center gap-2 rounded-xl font-semibold text-[var(--background)] hover:brightness-110 active:scale-[0.98] px-6 py-3 text-sm transition-all"
+            style={{ background: "linear-gradient(135deg, var(--primary), #d4942e)" }}
           >
             Create Your First Video
           </Link>

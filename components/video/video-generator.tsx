@@ -156,7 +156,8 @@ export function VideoGenerator({
       <button
         onClick={handleGenerate}
         disabled={generateMutation.isPending}
-        className="btn-primary w-full rounded-xl py-4 text-base disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full rounded-xl py-4 text-base font-semibold text-[var(--background)] transition-all hover:brightness-110 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+        style={{ background: "linear-gradient(135deg, var(--primary), #d4942e)" }}
       >
         {generateMutation.isPending ? (
           <span className="flex items-center justify-center gap-2">

@@ -44,7 +44,8 @@ export function VideoPlayer({ videoId }: VideoPlayerProps) {
         <a
           href={video.output_video_url}
           download
-          className="btn-primary inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm"
+          className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-[var(--background)] transition-all hover:brightness-110 active:scale-[0.98]"
+          style={{ background: "linear-gradient(135deg, var(--primary), #d4942e)" }}
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
