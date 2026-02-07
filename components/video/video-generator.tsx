@@ -11,14 +11,16 @@ interface VideoGeneratorProps {
   imageUrl: string;
   imagePreview: string;
   onReset: () => void;
+  initialPrompt?: string;
 }
 
 export function VideoGenerator({
   imageUrl,
   imagePreview,
   onReset,
+  initialPrompt,
 }: VideoGeneratorProps) {
-  const [prompt, setPrompt] = useState("");
+  const [prompt, setPrompt] = useState(initialPrompt ?? "");
   const [duration, setDuration] = useState<"5" | "10">("5");
   const [mode, setMode] = useState<"standard" | "professional">("standard");
   const [videoId, setVideoId] = useState<string | null>(null);

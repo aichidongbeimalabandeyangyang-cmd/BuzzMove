@@ -60,6 +60,28 @@ export const STRICT_COUNTRIES = [
   "PK", "BD", "MM", "TH", "ID", "MY",
 ] as const;
 
+// Hero examples for homepage
+export const HERO_EXAMPLES = [
+  {
+    id: "example-1",
+    image: "/examples/example-1.svg",
+    prompt: "Gentle breeze blowing through hair, soft smile, cinematic movement",
+    label: "Portrait",
+  },
+  {
+    id: "example-2",
+    image: "/examples/example-2.svg",
+    prompt: "Slow zoom out revealing the full scene, atmospheric golden hour lighting",
+    label: "Landscape",
+  },
+  {
+    id: "example-3",
+    image: "/examples/example-3.svg",
+    prompt: "Product rotating slowly with dramatic lighting and reflections",
+    label: "Product",
+  },
+] as const;
+
 // Supported upload formats
 export const SUPPORTED_FORMATS = ["image/jpeg", "image/png", "image/webp"];
 export const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB

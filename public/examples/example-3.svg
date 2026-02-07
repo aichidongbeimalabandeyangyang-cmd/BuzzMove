@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="960" viewBox="0 0 720 960">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0a0a14"/>
+      <stop offset="100%" stop-color="#141420"/>
+    </linearGradient>
+    <radialGradient id="spot" cx="50%" cy="45%" r="40%">
+      <stop offset="0%" stop-color="#e8a838" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#e8a838" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="720" height="960" fill="url(#bg)"/>
+  <rect width="720" height="960" fill="url(#spot)"/>
+  <rect x="260" y="300" width="200" height="300" rx="20" fill="#1a1a28" stroke="#e8a838" stroke-width="1.5" opacity="0.6"/>
+  <rect x="280" y="320" width="160" height="200" rx="10" fill="#222236"/>
+  <circle cx="360" cy="580" r="8" fill="#e8a838" opacity="0.4"/>
+  <text x="360" y="700" text-anchor="middle" fill="#e8a838" font-family="system-ui" font-size="24" opacity="0.6">Product Example</text>
+  <text x="360" y="740" text-anchor="middle" fill="#7a7a86" font-family="system-ui" font-size="16">Replace with your photo</text>
+</svg>

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="960" viewBox="0 0 720 960">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0a0a1a"/>
+      <stop offset="40%" stop-color="#1a0a2e"/>
+      <stop offset="100%" stop-color="#2d1b4e"/>
+    </linearGradient>
+    <linearGradient id="sunset" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e8a838" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#e8a838" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="720" height="960" fill="url(#bg)"/>
+  <rect width="720" height="400" fill="url(#sunset)"/>
+  <circle cx="360" cy="280" r="60" fill="#e8a838" opacity="0.15"/>
+  <circle cx="360" cy="280" r="30" fill="#e8a838" opacity="0.2"/>
+  <path d="M0 500 Q180 420 360 480 Q540 540 720 460 L720 960 L0 960Z" fill="#12121a"/>
+  <path d="M0 550 Q180 480 360 530 Q540 580 720 510 L720 960 L0 960Z" fill="#0c0c14"/>
+  <text x="360" y="700" text-anchor="middle" fill="#e8a838" font-family="system-ui" font-size="24" opacity="0.6">Landscape Example</text>
+  <text x="360" y="740" text-anchor="middle" fill="#7a7a86" font-family="system-ui" font-size="16">Replace with your photo</text>
+</svg>
