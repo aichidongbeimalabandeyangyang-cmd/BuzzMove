@@ -5,7 +5,17 @@ export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
 
+  const forwardedHost = request.headers.get("x-forwarded-host");
+  const isLocalEnv = process.env.NODE_ENV === "development";
+  const baseUrl = isLocalEnv
+    ? origin
+    : forwardedHost
+      ? `https://${forwardedHost}`
+      : origin;
+
   if (code) {
+    const response = NextResponse.redirect(`${baseUrl}/dashboard`);
+
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -15,9 +25,10 @@ export async function GET(request: NextRequest) {
             return request.cookies.getAll();
           },
           setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value }) =>
-              request.cookies.set(name, value)
-            );
+            cookiesToSet.forEach(({ name, value, options }) => {
+              request.cookies.set(name, value);
+              response.cookies.set(name, value, options);
+            });
           },
         },
       }
@@ -42,23 +53,14 @@ export async function GET(request: NextRequest) {
           await supabase.from("profiles").insert({
             id: user.id,
             email: user.email,
-            credits_balance: 9000, // Free tier monthly credits
+            credits_balance: 9000,
           });
         }
       }
 
-      const forwardedHost = request.headers.get("x-forwarded-host");
-      const isLocalEnv = process.env.NODE_ENV === "development";
-
-      if (isLocalEnv) {
-        return NextResponse.redirect(`${origin}/dashboard`);
-      } else if (forwardedHost) {
-        return NextResponse.redirect(`https://${forwardedHost}/dashboard`);
-      } else {
-        return NextResponse.redirect(`${origin}/dashboard`);
-      }
+      return response;
     }
   }
 
-  return NextResponse.redirect(`${origin}/?error=auth`);
+  return NextResponse.redirect(`${baseUrl}/?error=auth`);
 }
