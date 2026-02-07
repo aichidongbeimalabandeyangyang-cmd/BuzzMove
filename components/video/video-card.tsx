@@ -14,7 +14,7 @@ export function VideoCard({ video }: VideoCardProps) {
   if (!video.output_video_url) return null;
 
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)] transition-all duration-300 hover:border-[var(--primary)]/30 hover:shadow-lg hover:shadow-black/10">
+    <div className="group relative overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)] transition-all duration-300 hover:border-[var(--primary-30)] hover:shadow-lg hover:shadow-black/10">
       <div className="relative aspect-[9/16]">
         <video
           src={video.output_video_url}

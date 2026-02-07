@@ -68,7 +68,7 @@ export default function PricingPage() {
       {/* Subscription plans */}
       <div className="mb-20 grid gap-5 md:grid-cols-3 animate-fade-up delay-200">
         {/* Free */}
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-7 transition-all hover:border-[var(--muted-foreground)]/30">
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-7 transition-all hover:border-[var(--muted-fg-30)]">
           <div className="mb-5">
             <h3 className="text-lg font-bold">{PLANS.free.name}</h3>
             <p className="mt-0.5 text-xs text-[var(--muted-foreground)]">For trying things out</p>
@@ -85,7 +85,7 @@ export default function PricingPage() {
               "Watermarked output",
             ].map((item) => (
               <li key={item} className="flex items-start gap-2.5">
-                <svg className="mt-0.5 h-4 w-4 shrink-0 text-[var(--muted-foreground)]/50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg className="mt-0.5 h-4 w-4 shrink-0 text-[var(--muted-fg-50)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                 </svg>
                 {item}
@@ -101,7 +101,7 @@ export default function PricingPage() {
         </div>
 
         {/* Pro - Featured */}
-        <div className="relative rounded-2xl border border-[var(--primary)]/40 bg-[var(--card)] p-7 shadow-lg shadow-[var(--primary)]/5">
+        <div className="relative rounded-2xl border border-[var(--primary-40)] bg-[var(--card)] p-7 shadow-lg shadow-[var(--primary-5)]">
           <div className="absolute -top-3 left-1/2 -translate-x-1/2">
             <span className="rounded-full bg-gradient-to-r from-[var(--primary)] to-[var(--accent)] px-4 py-1 text-xs font-semibold text-[var(--background)]">
               Most Popular
@@ -148,7 +148,7 @@ export default function PricingPage() {
         </div>
 
         {/* Premium */}
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-7 transition-all hover:border-[var(--muted-foreground)]/30">
+        <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-7 transition-all hover:border-[var(--muted-fg-30)]">
           <div className="mb-5">
             <h3 className="text-lg font-bold">{PLANS.premium.name}</h3>
             <p className="mt-0.5 text-xs text-[var(--muted-foreground)]">For power users</p>
@@ -168,7 +168,7 @@ export default function PricingPage() {
               "Commercial license",
             ].map((item) => (
               <li key={item} className="flex items-start gap-2.5">
-                <svg className="mt-0.5 h-4 w-4 shrink-0 text-[var(--muted-foreground)]/50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg className="mt-0.5 h-4 w-4 shrink-0 text-[var(--muted-fg-50)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                 </svg>
                 {item}
@@ -241,10 +241,10 @@ export default function PricingPage() {
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
-          {CREDIT_PACKS.map((pack, i) => (
+          {CREDIT_PACKS.map((pack) => (
             <div
               key={pack.id}
-              className="group rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 text-center transition-all hover:border-[var(--primary)]/30"
+              className="group rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 text-center transition-all hover:border-[var(--primary-30)]"
             >
               <h3 className="mb-1 text-base font-bold">{pack.name}</h3>
               <p className="mb-1 text-3xl font-bold tracking-tight">
@@ -256,7 +256,7 @@ export default function PricingPage() {
               <button
                 onClick={() => creditPackCheckout.mutate({ packId: pack.id })}
                 disabled={creditPackCheckout.isPending}
-                className="w-full rounded-xl border border-[var(--border)] bg-[var(--secondary)] py-2.5 text-sm font-medium transition-all hover:border-[var(--primary)]/40 hover:bg-[var(--primary)]/10 hover:text-[var(--primary)]"
+                className="w-full rounded-xl border border-[var(--border)] bg-[var(--secondary)] py-2.5 text-sm font-medium transition-all hover:border-[var(--primary-40)] hover:bg-[var(--primary-10)] hover:text-[var(--primary)]"
               >
                 Buy
               </button>

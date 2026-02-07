@@ -48,7 +48,7 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
     >
       <div className="relative w-full max-w-sm mx-4 animate-scale-in">
         {/* Gradient glow behind card */}
-        <div className="absolute -inset-px rounded-2xl bg-gradient-to-b from-[var(--primary)]/20 to-transparent" />
+        <div className="absolute -inset-px rounded-2xl bg-gradient-to-b from-[var(--primary-20)] to-transparent" />
 
         <div className="relative rounded-2xl border border-[var(--border)] bg-[var(--card)] p-7 shadow-2xl">
           {/* Close button */}
@@ -79,7 +79,7 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
           </div>
 
           {sent ? (
-            <div className="rounded-xl bg-[var(--primary)]/10 border border-[var(--primary)]/20 p-5 text-center">
+            <div className="rounded-xl bg-[var(--primary-10)] border border-[var(--primary-20)] p-5 text-center">
               <svg className="mx-auto mb-3 h-8 w-8 text-[var(--primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
               </svg>
@@ -145,7 +145,7 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
                 >
                   {loading ? (
                     <span className="flex items-center justify-center gap-2">
-                      <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[var(--background)]/30 border-t-[var(--background)]" />
+                      <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[var(--background-30)] border-t-[var(--background)]" />
                       Sending...
                     </span>
                   ) : (

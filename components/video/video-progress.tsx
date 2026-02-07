@@ -60,7 +60,7 @@ export function VideoProgress({
       </div>
 
       {video?.status === "failed" && (
-        <div className="rounded-lg bg-[var(--destructive)]/10 px-4 py-3 text-sm text-[var(--destructive)]">
+        <div className="rounded-lg bg-[var(--destructive-10)] px-4 py-3 text-sm text-[var(--destructive)]">
           Generation failed. Credits have been refunded.
         </div>
       )}

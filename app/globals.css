@@ -19,6 +19,22 @@
   --border: #1c1c22;
   --ring: #e8a838;
   --radius: 0.75rem;
+
+  /* Opacity variants */
+  --primary-5: rgba(232, 168, 56, 0.05);
+  --primary-10: rgba(232, 168, 56, 0.1);
+  --primary-15: rgba(232, 168, 56, 0.15);
+  --primary-20: rgba(232, 168, 56, 0.2);
+  --primary-30: rgba(232, 168, 56, 0.3);
+  --primary-40: rgba(232, 168, 56, 0.4);
+  --primary-50: rgba(232, 168, 56, 0.5);
+  --accent-5: rgba(240, 192, 96, 0.05);
+  --destructive-10: rgba(239, 68, 68, 0.1);
+  --muted-fg-30: rgba(122, 122, 134, 0.3);
+  --muted-fg-50: rgba(122, 122, 134, 0.5);
+  --muted-fg-60: rgba(122, 122, 134, 0.6);
+  --foreground-80: rgba(242, 240, 235, 0.8);
+  --background-30: rgba(5, 5, 5, 0.3);
 }
 
 * {

@@ -12,7 +12,7 @@ export default function AdsPage() {
     <div className="mx-auto max-w-4xl px-4 py-20">
       {/* Hero */}
       <div className="mb-20 text-center">
-        <div className="mb-4 inline-block rounded-full bg-[var(--primary)]/20 px-4 py-1 text-sm font-medium text-[var(--accent)]">
+        <div className="mb-4 inline-block rounded-full bg-[var(--primary-20)] px-4 py-1 text-sm font-medium text-[var(--accent)]">
           For Performance Marketers
         </div>
         <h1 className="mb-4 text-5xl font-bold leading-tight">
@@ -26,7 +26,7 @@ export default function AdsPage() {
         </p>
         <Link
           href="/"
-          className="inline-block rounded-xl bg-[var(--primary)] px-8 py-4 text-base font-semibold text-white hover:bg-[var(--accent)] transition-colors"
+          className="btn-primary inline-block rounded-xl px-8 py-4 text-base"
         >
           Start Creating Ads
         </Link>
@@ -85,7 +85,7 @@ export default function AdsPage() {
             },
           ].map((item) => (
             <div key={item.title} className="flex gap-4 rounded-xl bg-[var(--secondary)] p-5">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[var(--primary)]/20">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[var(--primary-20)]">
                 <svg
                   className="h-5 w-5 text-[var(--primary)]"
                   fill="none"

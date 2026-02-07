@@ -102,7 +102,7 @@ export function VideoGenerator({
           rows={3}
           className="w-full resize-none rounded-xl border border-[var(--border)] bg-[var(--secondary)] p-4 pr-12 text-sm transition-all placeholder:text-[var(--muted-foreground)]"
         />
-        <span className="absolute bottom-3 right-3 text-[10px] tabular-nums text-[var(--muted-foreground)]/50">
+        <span className="absolute bottom-3 right-3 text-[10px] tabular-nums text-[var(--muted-fg-50)]">
           {prompt.length}/1000
         </span>
       </div>
@@ -160,7 +160,7 @@ export function VideoGenerator({
       >
         {generateMutation.isPending ? (
           <span className="flex items-center justify-center gap-2">
-            <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--background)]/30 border-t-[var(--background)]" />
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--background-30)] border-t-[var(--background)]" />
             Starting...
           </span>
         ) : (
@@ -169,7 +169,7 @@ export function VideoGenerator({
       </button>
 
       {generateMutation.error && (
-        <div className="mt-4 rounded-lg bg-[var(--destructive)]/10 px-4 py-3 text-center text-sm text-[var(--destructive)]">
+        <div className="mt-4 rounded-lg bg-[var(--destructive-10)] px-4 py-3 text-center text-sm text-[var(--destructive)]">
           {generateMutation.error.message}
         </div>
       )}

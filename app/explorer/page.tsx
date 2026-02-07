@@ -51,7 +51,7 @@ export default function ExplorerPage() {
             <div className="mt-10 flex justify-center">
               <button
                 onClick={() => setOffset((o) => o + 20)}
-                className="rounded-xl border border-[var(--border)] bg-[var(--secondary)] px-8 py-3 text-sm font-medium transition-all hover:border-[var(--primary)]/30 hover:bg-[var(--primary)]/10 hover:text-[var(--primary)]"
+                className="rounded-xl border border-[var(--border)] bg-[var(--secondary)] px-8 py-3 text-sm font-medium transition-all hover:border-[var(--primary-30)] hover:bg-[var(--primary-10)] hover:text-[var(--primary)]"
               >
                 Load More
               </button>

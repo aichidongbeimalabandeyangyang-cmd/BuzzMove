@@ -29,7 +29,7 @@ export default function DashboardPage() {
             </span>
             <span className="text-xs text-[var(--muted-foreground)]">credits</span>
           </div>
-          <span className="rounded-full border border-[var(--primary)]/20 bg-[var(--primary)]/10 px-3 py-1.5 text-xs font-medium text-[var(--primary)] capitalize">
+          <span className="rounded-full border border-[var(--primary-20)] bg-[var(--primary-10)] px-3 py-1.5 text-xs font-medium text-[var(--primary)] capitalize">
             {creditData?.plan ?? "free"}
           </span>
           <Link
@@ -75,7 +75,7 @@ export default function DashboardPage() {
           {videosData?.videos.map((video) => (
             <div
               key={video.id}
-              className="group overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)] transition-all duration-300 hover:border-[var(--primary)]/30"
+              className="group overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)] transition-all duration-300 hover:border-[var(--primary-30)]"
             >
               {video.status === "completed" && video.output_video_url ? (
                 <div className="relative">
@@ -105,7 +105,7 @@ export default function DashboardPage() {
                       <span className="text-[10px] text-[var(--muted-foreground)]">Generating</span>
                     </div>
                   ) : video.status === "failed" ? (
-                    <span className="rounded-full bg-[var(--destructive)]/10 px-3 py-1 text-xs text-[var(--destructive)]">
+                    <span className="rounded-full bg-[var(--destructive-10)] px-3 py-1 text-xs text-[var(--destructive)]">
                       Failed
                     </span>
                   ) : (
@@ -116,7 +116,7 @@ export default function DashboardPage() {
                 </div>
               )}
               <div className="p-3">
-                <p className="line-clamp-1 text-xs text-[var(--foreground)]/80">
+                <p className="line-clamp-1 text-xs text-[var(--foreground-80)]">
                   {video.prompt || "No prompt"}
                 </p>
                 <div className="mt-1.5 flex items-center gap-1.5">
