@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function AdsPage() {
   return (
-    <div className="mx-auto max-w-4xl px-4 py-20">
+    <div className="mx-auto max-w-4xl px-5 py-20">
       {/* Hero */}
       <div className="mb-20 text-center">
         <div className="mb-4 inline-block rounded-full bg-[var(--primary-20)] px-4 py-1 text-sm font-medium text-[var(--accent)]">
@@ -18,23 +18,23 @@ export default function AdsPage() {
         <h1 className="mb-4 text-5xl font-bold leading-tight">
           Turn one image into
           <br />
-          <span className="text-[var(--primary)]">10 ad-ready videos</span>
+          <span className="text-gradient">10 ad-ready videos</span>
         </h1>
-        <p className="mx-auto mb-8 max-w-xl text-lg text-[var(--muted-foreground)]">
+        <p className="mx-auto mb-8 max-w-xl text-lg text-[var(--muted-foreground)] leading-relaxed">
           Generate scroll-stopping video ads from a single product image.
           Designed for ROAS. Minutes, not days.
         </p>
         <Link
           href="/"
           className="inline-block rounded-xl px-8 py-4 text-base font-semibold text-[var(--background)] transition-all hover:brightness-110 active:scale-[0.98]"
-          style={{ background: "linear-gradient(135deg, var(--primary), #d4942e)" }}
+          style={{ background: "linear-gradient(135deg, #e8a838, #d4942e)", boxShadow: "0 2px 16px rgba(232,168,56,0.25)" }}
         >
           Start Creating Ads
         </Link>
       </div>
 
       {/* Use cases */}
-      <div className="mb-20 grid gap-8 md:grid-cols-3">
+      <div className="mb-20 grid gap-6 md:grid-cols-3">
         {[
           {
             title: "DTC Brands",
@@ -52,9 +52,10 @@ export default function AdsPage() {
           <div
             key={item.title}
             className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6"
+            style={{ boxShadow: "var(--card-shadow)" }}
           >
             <h3 className="mb-2 text-lg font-bold">{item.title}</h3>
-            <p className="text-sm text-[var(--muted-foreground)]">
+            <p className="text-sm text-[var(--muted-foreground)] leading-relaxed">
               {item.desc}
             </p>
           </div>
@@ -66,7 +67,7 @@ export default function AdsPage() {
         <h2 className="mb-8 text-center text-3xl font-bold">
           Built for Performance
         </h2>
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-5 md:grid-cols-2">
           {[
             {
               title: "Native Ad Formats",
@@ -86,7 +87,10 @@ export default function AdsPage() {
             },
           ].map((item) => (
             <div key={item.title} className="flex gap-4 rounded-xl bg-[var(--secondary)] p-5">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[var(--primary-20)]">
+              <div
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg"
+                style={{ background: "rgba(232,168,56,0.12)" }}
+              >
                 <svg
                   className="h-5 w-5 text-[var(--primary)]"
                   fill="none"
@@ -113,16 +117,19 @@ export default function AdsPage() {
       </div>
 
       {/* CTA */}
-      <div className="rounded-2xl bg-gradient-to-r from-[var(--primary)] to-[var(--accent)] p-12 text-center">
-        <h2 className="mb-3 text-3xl font-bold text-white">
+      <div
+        className="rounded-2xl p-12 text-center"
+        style={{ background: "linear-gradient(135deg, #e8a838, #f0c060)" }}
+      >
+        <h2 className="mb-3 text-3xl font-bold text-[#050505]">
           Ready to Scale Your Creatives?
         </h2>
-        <p className="mb-6 text-white/80">
+        <p className="mb-6 text-[#050505]/70">
           Start with free credits. No credit card required.
         </p>
         <Link
           href="/"
-          className="inline-block rounded-xl bg-white px-8 py-3 font-semibold text-[var(--primary)] hover:bg-gray-100 transition-colors"
+          className="inline-block rounded-xl bg-[#050505] px-8 py-3 font-semibold text-[var(--foreground)] transition-all hover:bg-[#111] active:scale-[0.98]"
         >
           Get Started Free
         </Link>

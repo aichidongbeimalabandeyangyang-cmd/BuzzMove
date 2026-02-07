@@ -45,7 +45,6 @@ export function VideoGenerator({
     });
   };
 
-  // Show video player when complete
   if (videoId && status === "completed") {
     return (
       <div className="flex flex-col items-center gap-5 animate-fade-up">
@@ -60,7 +59,6 @@ export function VideoGenerator({
     );
   }
 
-  // Show progress while generating
   if (videoId && (status === "generating" || status === "submitting")) {
     return (
       <VideoProgress
@@ -73,14 +71,16 @@ export function VideoGenerator({
 
   return (
     <div className="mx-auto w-full max-w-lg">
-      {/* Image preview with cinematic frame */}
-      <div className="relative mb-6 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)]">
+      {/* Image preview */}
+      <div
+        className="relative mb-6 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)]"
+        style={{ boxShadow: "var(--card-shadow)" }}
+      >
         <img
           src={imagePreview}
           alt="Upload preview"
           className="w-full object-contain max-h-80"
         />
-        {/* Subtle gradient overlay at bottom */}
         <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[var(--card)] to-transparent" />
         <button
           onClick={onReset}
@@ -100,9 +100,9 @@ export function VideoGenerator({
           placeholder="Describe the motion you want... (optional)"
           maxLength={1000}
           rows={3}
-          className="w-full resize-none rounded-xl border border-[var(--border)] bg-[var(--secondary)] p-4 pr-12 text-sm transition-all placeholder:text-[var(--muted-foreground)]"
+          className="w-full resize-none rounded-xl border border-[var(--border)] bg-[var(--secondary)] p-4 pr-12 text-sm leading-relaxed transition-all placeholder:text-[var(--muted-foreground)]"
         />
-        <span className="absolute bottom-3 right-3 text-[10px] tabular-nums text-[var(--muted-fg-50)]">
+        <span className="absolute bottom-3 right-3 text-[10px] tabular-nums text-[var(--muted-foreground)]">
           {prompt.length}/1000
         </span>
       </div>
@@ -120,9 +120,10 @@ export function VideoGenerator({
                 onClick={() => setDuration(d)}
                 className={`flex-1 rounded-lg py-2 text-sm font-medium transition-all ${
                   duration === d
-                    ? "bg-[var(--primary)] text-[var(--background)] shadow-sm"
+                    ? "text-[var(--background)]"
                     : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
                 }`}
+                style={duration === d ? { background: "linear-gradient(135deg, #e8a838, #d4942e)" } : undefined}
               >
                 {d}s
               </button>
@@ -141,9 +142,10 @@ export function VideoGenerator({
                 onClick={() => setMode(m)}
                 className={`flex-1 rounded-lg py-2 text-xs font-medium transition-all ${
                   mode === m
-                    ? "bg-[var(--primary)] text-[var(--background)] shadow-sm"
+                    ? "text-[var(--background)]"
                     : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
                 }`}
+                style={mode === m ? { background: "linear-gradient(135deg, #e8a838, #d4942e)" } : undefined}
               >
                 {m === "standard" ? "Standard" : "Pro"}
               </button>
@@ -157,7 +159,7 @@ export function VideoGenerator({
         onClick={handleGenerate}
         disabled={generateMutation.isPending}
         className="w-full rounded-xl py-4 text-base font-semibold text-[var(--background)] transition-all hover:brightness-110 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
-        style={{ background: "linear-gradient(135deg, var(--primary), #d4942e)" }}
+        style={{ background: "linear-gradient(135deg, #e8a838, #d4942e)", boxShadow: "0 2px 12px rgba(232,168,56,0.25)" }}
       >
         {generateMutation.isPending ? (
           <span className="flex items-center justify-center gap-2">

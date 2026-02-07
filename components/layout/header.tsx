@@ -19,13 +19,9 @@ export function Header() {
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => setUser(user));
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
     });
-
     return () => subscription.unsubscribe();
   }, []);
 
@@ -44,61 +40,45 @@ export function Header() {
     <>
       <header
         className={`sticky top-0 z-50 transition-all duration-300 border-b ${
-          scrolled
-            ? "glass border-[var(--border)]"
-            : "bg-[var(--background)] border-transparent"
+          scrolled ? "glass border-[var(--border)]" : "bg-[var(--background)] border-transparent"
         }`}
       >
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg"
-              style={{ background: "linear-gradient(135deg, var(--primary), var(--accent))" }}
+        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 sm:px-6">
+          <Link href="/" className="flex items-center gap-2">
+            <div
+              className="flex h-7 w-7 items-center justify-center rounded-md"
+              style={{ background: "linear-gradient(135deg, #e8a838, #f0c060)" }}
             >
-              <svg className="h-4 w-4" fill="var(--background)" viewBox="0 0 24 24">
+              <svg className="h-3.5 w-3.5" fill="#050505" viewBox="0 0 24 24">
                 <path d="M8 5v14l11-7z" />
               </svg>
             </div>
-            <span className="text-lg font-bold tracking-tight">
-              Buzz<span className="text-gradient">Move</span>
-            </span>
+            <span className="text-base font-bold tracking-tight">BuzzMove</span>
           </Link>
 
-          {/* Nav */}
-          <nav className="flex items-center gap-2">
-            <Link
-              href="/explorer"
-              className="rounded-lg px-3 py-2 text-sm text-[var(--muted-foreground)] transition-colors hover:text-[var(--foreground)] hover:bg-[var(--secondary)]"
-            >
+          <nav className="flex items-center gap-1">
+            <Link href="/explorer" className="px-3 py-1.5 text-[13px] text-[var(--muted-foreground)] transition-colors hover:text-[var(--foreground)]">
               Explore
             </Link>
-            <Link
-              href="/pricing"
-              className="rounded-lg px-3 py-2 text-sm text-[var(--muted-foreground)] transition-colors hover:text-[var(--foreground)] hover:bg-[var(--secondary)]"
-            >
+            <Link href="/pricing" className="px-3 py-1.5 text-[13px] text-[var(--muted-foreground)] transition-colors hover:text-[var(--foreground)]">
               Pricing
             </Link>
 
             {user ? (
               <>
-                <div className="ml-2 flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--secondary)] px-3 py-1.5">
+                <div className="ml-3 mr-1 flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--secondary)] px-3 py-1">
                   <div className="h-1.5 w-1.5 rounded-full bg-[var(--primary)]" />
-                  <span className="text-xs font-medium tabular-nums">
-                    {formatCredits(creditData?.balance ?? 0)}
-                  </span>
+                  <span className="text-xs font-medium tabular-nums">{formatCredits(creditData?.balance ?? 0)}</span>
                 </div>
-                <Link
-                  href="/dashboard"
-                  className="rounded-lg px-3 py-2 text-sm text-[var(--muted-foreground)] transition-colors hover:text-[var(--foreground)] hover:bg-[var(--secondary)]"
-                >
+                <Link href="/dashboard" className="px-3 py-1.5 text-[13px] text-[var(--muted-foreground)] transition-colors hover:text-[var(--foreground)]">
                   Dashboard
                 </Link>
               </>
             ) : (
               <button
                 onClick={() => setShowLogin(true)}
-                className="ml-3 rounded-lg px-5 py-2 text-sm font-semibold text-[var(--background)] transition-all hover:brightness-110 active:scale-[0.97]"
-                style={{ background: "linear-gradient(135deg, var(--primary), #d4942e)" }}
+                className="ml-4 rounded-lg px-4 py-2 text-[13px] font-semibold text-[var(--background)] transition-all hover:shadow-[var(--glow)] active:scale-[0.97]"
+                style={{ background: "linear-gradient(135deg, #e8a838, #d4942e)", boxShadow: "0 1px 8px rgba(232,168,56,0.2)" }}
               >
                 Get Started
               </button>

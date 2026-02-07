@@ -20,7 +20,10 @@ export default function SettingsPage() {
       </div>
 
       {/* Profile info */}
-      <div className="mb-6 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-7 animate-fade-up delay-100">
+      <div
+        className="mb-6 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-7 animate-fade-up delay-100"
+        style={{ boxShadow: "var(--card-shadow)" }}
+      >
         <h2 className="mb-5 text-base font-bold">Profile</h2>
         <div className="space-y-4">
           {[
@@ -51,13 +54,16 @@ export default function SettingsPage() {
       </div>
 
       {/* Billing */}
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-7 animate-fade-up delay-200">
+      <div
+        className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-7 animate-fade-up delay-200"
+        style={{ boxShadow: "var(--card-shadow)" }}
+      >
         <h2 className="mb-5 text-base font-bold">Billing</h2>
         {profile?.stripe_customer_id ? (
           <button
             onClick={() => portalMutation.mutate()}
             disabled={portalMutation.isPending}
-            className="rounded-xl border border-[var(--border)] bg-[var(--secondary)] px-5 py-3 text-sm font-medium transition-all hover:border-[var(--primary-30)] hover:bg-[var(--primary-10)] hover:text-[var(--primary)] disabled:opacity-50"
+            className="rounded-xl border border-[var(--border)] bg-[var(--secondary)] px-5 py-3 text-sm font-medium transition-all hover:border-[var(--primary-40)] hover:bg-[var(--primary-10)] hover:text-[var(--primary)] disabled:opacity-50"
           >
             {portalMutation.isPending ? "Loading..." : "Manage Subscription"}
           </button>

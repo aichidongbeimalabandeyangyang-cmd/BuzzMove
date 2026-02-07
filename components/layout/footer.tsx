@@ -3,14 +3,13 @@ import Link from "next/link";
 export function Footer() {
   return (
     <footer className="border-t border-[var(--border)] bg-[var(--background)]">
-      <div className="mx-auto flex max-w-6xl flex-col gap-6 px-5 py-10 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mx-auto flex max-w-5xl flex-col gap-6 px-5 py-10 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-[var(--primary)] to-[var(--accent)]">
-            <svg
-              className="h-3 w-3 text-[var(--background)]"
-              fill="currentColor"
-              viewBox="0 0 24 24"
-            >
+          <div
+            className="flex h-6 w-6 items-center justify-center rounded-md"
+            style={{ background: "linear-gradient(135deg, #e8a838, #f0c060)" }}
+          >
+            <svg className="h-3 w-3" fill="#050505" viewBox="0 0 24 24">
               <path d="M8 5v14l11-7z" />
             </svg>
           </div>

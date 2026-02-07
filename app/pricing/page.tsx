@@ -43,9 +43,10 @@ export default function PricingPage() {
             onClick={() => setBillingPeriod("monthly")}
             className={`rounded-lg px-5 py-2.5 text-sm font-medium transition-all ${
               billingPeriod === "monthly"
-                ? "bg-[var(--primary)] text-[var(--background)] shadow-sm"
+                ? "text-[var(--background)]"
                 : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
             }`}
+            style={billingPeriod === "monthly" ? { background: "linear-gradient(135deg, #e8a838, #d4942e)" } : undefined}
           >
             Monthly
           </button>
@@ -53,9 +54,10 @@ export default function PricingPage() {
             onClick={() => setBillingPeriod("yearly")}
             className={`rounded-lg px-5 py-2.5 text-sm font-medium transition-all flex items-center gap-2 ${
               billingPeriod === "yearly"
-                ? "bg-[var(--primary)] text-[var(--background)] shadow-sm"
+                ? "text-[var(--background)]"
                 : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
             }`}
+            style={billingPeriod === "yearly" ? { background: "linear-gradient(135deg, #e8a838, #d4942e)" } : undefined}
           >
             Yearly
             <span className="rounded-md bg-emerald-900 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-400">
@@ -68,7 +70,10 @@ export default function PricingPage() {
       {/* Subscription plans */}
       <div className="mb-20 grid gap-5 md:grid-cols-3 animate-fade-up delay-200">
         {/* Free */}
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-7">
+        <div
+          className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-7"
+          style={{ boxShadow: "var(--card-shadow)" }}
+        >
           <div className="mb-5">
             <h3 className="text-lg font-bold">{PLANS.free.name}</h3>
             <p className="mt-0.5 text-xs text-[var(--muted-foreground)]">For trying things out</p>
@@ -85,7 +90,7 @@ export default function PricingPage() {
               "Watermarked output",
             ].map((item) => (
               <li key={item} className="flex items-start gap-2.5">
-                <svg className="mt-0.5 h-4 w-4 shrink-0 text-[var(--muted-fg-50)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg className="mt-0.5 h-4 w-4 shrink-0 text-[var(--muted-foreground)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                 </svg>
                 {item}
@@ -101,11 +106,14 @@ export default function PricingPage() {
         </div>
 
         {/* Pro - Featured */}
-        <div className="relative rounded-2xl border-2 border-[var(--primary-40)] bg-[var(--card)] p-7 pt-10">
+        <div
+          className="relative rounded-2xl border-2 border-[var(--primary-40)] bg-[var(--card)] p-7 pt-10"
+          style={{ boxShadow: "0 0 30px rgba(232,168,56,0.08), var(--card-shadow)" }}
+        >
           <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10">
             <span
               className="rounded-full px-4 py-1.5 text-xs font-semibold text-[var(--background)] whitespace-nowrap"
-              style={{ background: "linear-gradient(135deg, var(--primary), var(--accent))" }}
+              style={{ background: "linear-gradient(135deg, #e8a838, #f0c060)", boxShadow: "0 2px 8px rgba(232,168,56,0.3)" }}
             >
               Most Popular
             </span>
@@ -144,14 +152,17 @@ export default function PricingPage() {
             }
             disabled={subscriptionCheckout.isPending}
             className="w-full rounded-xl py-3 text-sm font-semibold text-[var(--background)] transition-all hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
-            style={{ background: "linear-gradient(135deg, var(--primary), #d4942e)" }}
+            style={{ background: "linear-gradient(135deg, #e8a838, #d4942e)", boxShadow: "0 2px 12px rgba(232,168,56,0.25)" }}
           >
             Get Pro
           </button>
         </div>
 
         {/* Premium */}
-        <div className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-7">
+        <div
+          className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-7"
+          style={{ boxShadow: "var(--card-shadow)" }}
+        >
           <div className="mb-5">
             <h3 className="text-lg font-bold">{PLANS.premium.name}</h3>
             <p className="mt-0.5 text-xs text-[var(--muted-foreground)]">For power users</p>
@@ -173,7 +184,7 @@ export default function PricingPage() {
               "Commercial license",
             ].map((item) => (
               <li key={item} className="flex items-start gap-2.5">
-                <svg className="mt-0.5 h-4 w-4 shrink-0 text-[var(--muted-fg-50)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <svg className="mt-0.5 h-4 w-4 shrink-0 text-[var(--muted-foreground)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                 </svg>
                 {item}
@@ -185,7 +196,7 @@ export default function PricingPage() {
               subscriptionCheckout.mutate({ plan: "premium", billingPeriod })
             }
             disabled={subscriptionCheckout.isPending}
-            className="w-full rounded-xl border border-[var(--border)] bg-[var(--secondary)] py-3 text-sm font-medium transition-all hover:bg-[var(--border)] disabled:opacity-50"
+            className="w-full rounded-xl border border-[var(--border)] bg-[var(--secondary)] py-3 text-sm font-medium transition-all hover:border-[var(--primary-40)] hover:bg-[var(--primary-10)] hover:text-[var(--primary)] disabled:opacity-50"
           >
             Get Premium
           </button>
@@ -194,7 +205,10 @@ export default function PricingPage() {
 
       {/* Creator Weekly */}
       <div className="mb-20 flex justify-center animate-fade-up delay-300">
-        <div className="w-full max-w-md overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)]">
+        <div
+          className="w-full max-w-md overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)]"
+          style={{ boxShadow: "var(--card-shadow)" }}
+        >
           <div className="px-7 py-2.5 text-center" style={{ background: "linear-gradient(90deg, rgba(249,115,22,0.1), rgba(245,158,11,0.1))" }}>
             <span className="text-xs font-semibold text-orange-400">
               LIMITED OFFER &mdash; 50% OFF
@@ -216,7 +230,7 @@ export default function PricingPage() {
               }
               disabled={subscriptionCheckout.isPending}
               className="rounded-xl px-10 py-3 text-sm font-semibold text-[var(--background)] transition-all hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
-              style={{ background: "linear-gradient(135deg, var(--primary), #d4942e)" }}
+              style={{ background: "linear-gradient(135deg, #e8a838, #d4942e)", boxShadow: "0 1px 8px rgba(232,168,56,0.2)" }}
             >
               Start for $4.99/week
             </button>
@@ -241,6 +255,7 @@ export default function PricingPage() {
             <div
               key={pack.id}
               className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 text-center transition-all hover:border-[var(--primary-30)]"
+              style={{ boxShadow: "var(--card-shadow)" }}
             >
               <h3 className="mb-1 text-base font-bold">{pack.name}</h3>
               <p className="mb-1 text-3xl font-bold tracking-tight">

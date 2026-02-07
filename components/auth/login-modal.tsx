@@ -46,7 +46,10 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
       className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-md animate-fade-in"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="relative w-full max-w-sm mx-4 animate-scale-in rounded-2xl border border-[var(--border)] bg-[var(--card)] p-8 shadow-2xl">
+      <div
+        className="relative w-full max-w-[380px] mx-4 animate-scale-in rounded-2xl border border-[var(--border)] bg-[var(--card)] p-8"
+        style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.5), 0 0 80px rgba(232,168,56,0.06)" }}
+      >
         {/* Close button */}
         <button
           onClick={onClose}
@@ -58,12 +61,12 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
         </button>
 
         {/* Header */}
-        <div className="mb-6">
+        <div className="mb-7">
           <div
             className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl"
-            style={{ background: "linear-gradient(135deg, var(--primary), var(--accent))" }}
+            style={{ background: "linear-gradient(135deg, #e8a838, #f0c060)", boxShadow: "0 2px 12px rgba(232,168,56,0.25)" }}
           >
-            <svg className="h-5 w-5" fill="var(--background)" viewBox="0 0 24 24">
+            <svg className="h-5 w-5" fill="#050505" viewBox="0 0 24 24">
               <path d="M8 5v14l11-7z" />
             </svg>
           </div>
@@ -88,7 +91,8 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
             {/* Google button */}
             <button
               onClick={handleGoogleLogin}
-              className="mb-4 flex w-full items-center justify-center gap-2.5 rounded-xl border border-[var(--border)] bg-white px-4 py-3 text-sm font-medium text-black transition-all hover:bg-gray-50 active:scale-[0.98]"
+              className="mb-4 flex w-full items-center justify-center gap-2.5 rounded-xl border border-[var(--border)] bg-white px-4 py-3 text-sm font-medium text-gray-800 transition-all hover:bg-gray-50 active:scale-[0.98]"
+              style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.2)" }}
             >
               <svg className="h-4 w-4" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
@@ -119,13 +123,13 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@email.com"
                 required
-                className="mb-3 w-full rounded-xl border border-[var(--border)] bg-[var(--secondary)] px-4 py-3 text-sm transition-all"
+                className="mb-3 w-full rounded-xl border border-[var(--border)] bg-[var(--secondary)] px-4 py-3 text-sm transition-all placeholder:text-[var(--muted-foreground)]"
               />
               <button
                 type="submit"
                 disabled={loading}
                 className="w-full rounded-xl py-3 text-sm font-semibold text-[var(--background)] transition-all hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
-                style={{ background: "linear-gradient(135deg, var(--primary), #d4942e)" }}
+                style={{ background: "linear-gradient(135deg, #e8a838, #d4942e)", boxShadow: "0 1px 8px rgba(232,168,56,0.2)" }}
               >
                 {loading ? "Sending..." : "Continue with Email"}
               </button>

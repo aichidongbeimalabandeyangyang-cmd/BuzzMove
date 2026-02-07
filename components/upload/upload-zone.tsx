@@ -47,10 +47,10 @@ export function UploadZone({ onFileSelected, disabled }: UploadZoneProps) {
 
   return (
     <div
-      className={`group relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-14 transition-all duration-300 cursor-pointer active:scale-[0.98] ${
+      className={`group relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-12 transition-all duration-300 cursor-pointer active:scale-[0.99] ${
         isDragging
-          ? "border-[var(--primary)] bg-[var(--primary-5)] shadow-[0_0_40px_var(--primary-10)]"
-          : "border-[var(--border)] hover:border-[var(--primary-50)] hover:bg-[var(--card)]"
+          ? "border-[var(--primary)] bg-[var(--primary-5)]"
+          : "border-[var(--border)] hover:border-[var(--primary-40)] hover:bg-[var(--card)]"
       } ${disabled ? "opacity-50 pointer-events-none" : ""}`}
       onDragOver={(e) => {
         e.preventDefault();
@@ -71,11 +71,14 @@ export function UploadZone({ onFileSelected, disabled }: UploadZoneProps) {
         }}
       />
 
-      {/* Upload icon with glow effect */}
+      {/* Upload icon */}
       <div className="relative mb-5">
-        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--primary-10)] to-[var(--accent-5)] transition-transform duration-300 group-hover:scale-110">
+        <div
+          className="flex h-14 w-14 items-center justify-center rounded-2xl transition-transform duration-300 group-hover:scale-110"
+          style={{ background: "linear-gradient(135deg, rgba(232,168,56,0.12), rgba(240,192,96,0.06))" }}
+        >
           <svg
-            className="h-7 w-7 text-[var(--primary)] transition-transform duration-300 group-hover:-translate-y-0.5"
+            className="h-6 w-6 text-[var(--primary)] transition-transform duration-300 group-hover:-translate-y-0.5"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
@@ -90,13 +93,13 @@ export function UploadZone({ onFileSelected, disabled }: UploadZoneProps) {
         </div>
       </div>
 
-      <p className="mb-1 text-lg font-semibold">
+      <p className="mb-1 text-base font-semibold">
         Drop your image here
       </p>
       <p className="text-sm text-[var(--muted-foreground)]">
         or <span className="text-[var(--primary)] font-medium">browse files</span>
       </p>
-      <p className="mt-3 text-xs text-[var(--muted-fg-60)]">
+      <p className="mt-3 text-xs text-[var(--muted-foreground)]">
         JPG, PNG, WebP &middot; Up to 10 MB
       </p>
 
