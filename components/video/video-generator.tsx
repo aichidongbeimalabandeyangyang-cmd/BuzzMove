@@ -53,7 +53,7 @@ export function VideoGenerator({
         <VideoPlayer videoId={videoId} />
         <button
           onClick={onReset}
-          className="rounded-xl border border-[var(--border)] px-6 py-2.5 text-sm font-medium transition-all hover:bg-[var(--secondary)] hover:border-[var(--muted-foreground)]"
+          className="rounded-xl border border-[var(--border)] px-6 py-3 text-sm font-medium transition-all hover:bg-[var(--secondary)] hover:border-[var(--muted-foreground)]"
         >
           Create Another
         </button>
@@ -120,7 +120,7 @@ export function VideoGenerator({
               <button
                 key={d}
                 onClick={() => setDuration(d)}
-                className={`flex-1 rounded-lg py-2 text-sm font-medium transition-all ${
+                className={`flex-1 rounded-lg py-2.5 text-sm font-medium transition-all ${
                   duration === d
                     ? "text-[var(--background)]"
                     : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
@@ -142,7 +142,7 @@ export function VideoGenerator({
               <button
                 key={m}
                 onClick={() => setMode(m)}
-                className={`flex-1 rounded-lg py-2 text-xs font-medium transition-all ${
+                className={`flex-1 rounded-lg py-2.5 text-xs font-medium transition-all ${
                   mode === m
                     ? "text-[var(--background)]"
                     : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"

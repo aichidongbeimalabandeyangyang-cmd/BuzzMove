@@ -41,7 +41,7 @@ export default function PricingPage() {
         <div className="inline-flex rounded-xl border border-[var(--border)] bg-[var(--secondary)] p-1 gap-1">
           <button
             onClick={() => setBillingPeriod("monthly")}
-            className={`rounded-lg px-5 py-2.5 text-sm font-medium transition-all ${
+            className={`rounded-lg px-5 py-3 text-sm font-medium transition-all ${
               billingPeriod === "monthly"
                 ? "text-[var(--background)]"
                 : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
@@ -52,7 +52,7 @@ export default function PricingPage() {
           </button>
           <button
             onClick={() => setBillingPeriod("yearly")}
-            className={`rounded-lg px-5 py-2.5 text-sm font-medium transition-all flex items-center gap-2 ${
+            className={`rounded-lg px-5 py-3 text-sm font-medium transition-all flex items-center gap-2 ${
               billingPeriod === "yearly"
                 ? "text-[var(--background)]"
                 : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
@@ -99,7 +99,7 @@ export default function PricingPage() {
           </ul>
           <button
             disabled
-            className="w-full rounded-xl border border-[var(--border)] py-3 text-sm font-medium text-[var(--muted-foreground)] cursor-default"
+            className="w-full rounded-xl border border-[var(--border)] py-3.5 text-sm font-medium text-[var(--muted-foreground)] cursor-default"
           >
             Current Plan
           </button>
@@ -151,7 +151,7 @@ export default function PricingPage() {
               subscriptionCheckout.mutate({ plan: "pro", billingPeriod })
             }
             disabled={subscriptionCheckout.isPending}
-            className="w-full rounded-xl py-3 text-sm font-semibold text-[var(--background)] transition-all hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
+            className="w-full rounded-xl py-3.5 text-sm font-semibold text-[var(--background)] transition-all hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
             style={{ background: "linear-gradient(135deg, #e8a838, #d4942e)", boxShadow: "0 2px 12px rgba(232,168,56,0.25)" }}
           >
             Get Pro
@@ -196,7 +196,7 @@ export default function PricingPage() {
               subscriptionCheckout.mutate({ plan: "premium", billingPeriod })
             }
             disabled={subscriptionCheckout.isPending}
-            className="w-full rounded-xl border border-[var(--border)] bg-[var(--secondary)] py-3 text-sm font-medium transition-all hover:border-[var(--primary-40)] hover:bg-[var(--primary-10)] hover:text-[var(--primary)] disabled:opacity-50"
+            className="w-full rounded-xl border border-[var(--border)] bg-[var(--secondary)] py-3.5 text-sm font-medium transition-all hover:border-[var(--primary-40)] hover:bg-[var(--primary-10)] hover:text-[var(--primary)] disabled:opacity-50"
           >
             Get Premium
           </button>
@@ -229,7 +229,7 @@ export default function PricingPage() {
                 subscriptionCheckout.mutate({ plan: "creator", billingPeriod: "weekly" })
               }
               disabled={subscriptionCheckout.isPending}
-              className="rounded-xl px-10 py-3 text-sm font-semibold text-[var(--background)] transition-all hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
+              className="rounded-xl px-10 py-3.5 text-sm font-semibold text-[var(--background)] transition-all hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
               style={{ background: "linear-gradient(135deg, #e8a838, #d4942e)", boxShadow: "0 1px 8px rgba(232,168,56,0.2)" }}
             >
               Start for $4.99/week
@@ -267,7 +267,7 @@ export default function PricingPage() {
               <button
                 onClick={() => creditPackCheckout.mutate({ packId: pack.id })}
                 disabled={creditPackCheckout.isPending}
-                className="w-full rounded-xl border border-[var(--border)] bg-[var(--secondary)] py-2.5 text-sm font-medium transition-all hover:border-[var(--primary-40)] hover:bg-[var(--primary-10)] hover:text-[var(--primary)] disabled:opacity-50"
+                className="w-full rounded-xl border border-[var(--border)] bg-[var(--secondary)] py-3 text-sm font-medium transition-all hover:border-[var(--primary-40)] hover:bg-[var(--primary-10)] hover:text-[var(--primary)] disabled:opacity-50"
               >
                 Buy
               </button>

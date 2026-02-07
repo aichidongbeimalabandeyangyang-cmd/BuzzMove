@@ -77,7 +77,7 @@ export function Header() {
             ) : (
               <button
                 onClick={() => setShowLogin(true)}
-                className="ml-2 sm:ml-4 rounded-lg px-3 sm:px-4 py-1.5 sm:py-2 text-[13px] font-semibold text-[var(--background)] transition-all hover:shadow-[var(--glow)] active:scale-[0.97]"
+                className="ml-2 sm:ml-4 rounded-lg px-4 sm:px-5 py-2 sm:py-2.5 text-[13px] font-semibold text-[var(--background)] transition-all hover:shadow-[var(--glow)] active:scale-[0.97]"
                 style={{ background: "linear-gradient(135deg, #e8a838, #d4942e)", boxShadow: "0 1px 8px rgba(232,168,56,0.2)" }}
               >
                 Get Started

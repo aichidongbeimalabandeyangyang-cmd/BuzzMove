@@ -34,7 +34,7 @@ export default function DashboardPage() {
           </span>
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 rounded-xl font-semibold text-[var(--background)] hover:brightness-110 active:scale-[0.98] px-4 py-2 text-sm transition-all"
+            className="inline-flex items-center gap-1.5 rounded-xl font-semibold text-[var(--background)] hover:brightness-110 active:scale-[0.98] px-4 py-2.5 text-sm transition-all"
             style={{ background: "linear-gradient(135deg, #e8a838, #d4942e)", boxShadow: "0 1px 8px rgba(232,168,56,0.2)" }}
           >
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

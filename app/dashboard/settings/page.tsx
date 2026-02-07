@@ -63,7 +63,7 @@ export default function SettingsPage() {
           <button
             onClick={() => portalMutation.mutate()}
             disabled={portalMutation.isPending}
-            className="rounded-xl border border-[var(--border)] bg-[var(--secondary)] px-5 py-3 text-sm font-medium transition-all hover:border-[var(--primary-40)] hover:bg-[var(--primary-10)] hover:text-[var(--primary)] disabled:opacity-50"
+            className="rounded-xl border border-[var(--border)] bg-[var(--secondary)] px-5 py-3.5 text-sm font-medium transition-all hover:border-[var(--primary-40)] hover:bg-[var(--primary-10)] hover:text-[var(--primary)] disabled:opacity-50"
           >
             {portalMutation.isPending ? "Loading..." : "Manage Subscription"}
           </button>
