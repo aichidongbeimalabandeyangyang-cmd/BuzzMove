@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/server/supabase/client";
 import { trpc } from "@/lib/trpc";
 import { formatCredits } from "@/lib/utils";
@@ -9,14 +10,13 @@ import { LoginModal } from "@/components/auth/login-modal";
 import { BottomNav } from "./bottom-nav";
 
 export function Header() {
+  const pathname = usePathname();
+  const router = useRouter();
   const [user, setUser] = useState<any>(null);
   const [showLogin, setShowLogin] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const supabase = createSupabaseBrowserClient();
 
-  const { data: creditData } = trpc.credit.getBalance.useQuery(undefined, {
-    enabled: !!user,
-  });
+  const { data: creditData } = trpc.credit.getBalance.useQuery(undefined, { enabled: !!user });
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => setUser(user));
@@ -32,78 +32,81 @@ export function Header() {
   }, []);
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 10);
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  // Listen for custom open-login event from other components
-  useEffect(() => {
     const handler = () => setShowLogin(true);
     window.addEventListener("open-login", handler);
     return () => window.removeEventListener("open-login", handler);
   }, []);
 
+  // Determine header style based on route
+  const isHome = pathname === "/";
+  const isGenerator = false; // Generator is inline in the page
+  const isAssets = pathname === "/dashboard" || pathname === "/dashboard/";
+  const isProfile = pathname === "/dashboard/profile";
+  const isSettings = pathname === "/dashboard/settings";
+  const isPricing = pathname === "/pricing";
+
+  // Pages with back arrow
+  const hasBackArrow = isSettings || isPricing;
+  // Pages that show "BuzzMove" text as title
+  const showBuzzMoveLogo = isHome || isProfile;
+  // Pages with credit badge
+  const showCredits = isAssets && user;
+
+  const backHref = isSettings ? "/dashboard/profile" : isPricing ? "/dashboard/profile" : "/";
+
+  // Title for back-arrow pages
+  const pageTitle = isSettings ? "Settings" : isPricing ? "Pricing & Plans" : isAssets ? "Assets" : "";
+
   return (
     <>
-      <header
-        className={`sticky top-0 z-50 transition-all duration-300 border-b ${
-          scrolled ? "glass border-[var(--border)]" : "bg-[var(--background)] border-transparent"
-        }`}
-      >
-        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 sm:px-6">
-          <Link href="/" className="flex items-center gap-2 shrink-0" aria-label="BuzzMove home">
-            <div
-              className="flex h-7 w-7 items-center justify-center rounded-md"
-              style={{ background: "linear-gradient(135deg, #e8a838, #f0c060)" }}
-            >
-              <svg className="h-3.5 w-3.5" fill="#050505" viewBox="0 0 24 24">
-                <path d="M8 5v14l11-7z" />
+      <header className="sticky top-0 z-50 bg-[#0B0B0E]">
+        <div className="mx-auto flex h-14 max-w-[390px] items-center justify-between px-5">
+          {/* Left side */}
+          {hasBackArrow ? (
+            <button onClick={() => router.back()} className="flex items-center gap-2">
+              <svg className="h-[22px] w-[22px] text-[var(--foreground)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
               </svg>
-            </div>
-            <span className="text-base font-bold tracking-tight">BuzzMove</span>
-          </Link>
+              <span className="text-[17px] font-bold text-[var(--foreground)]">{pageTitle}</span>
+            </button>
+          ) : showBuzzMoveLogo ? (
+            <Link href="/" className="flex items-center gap-2">
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg" style={{ background: "linear-gradient(135deg, #E8A838, #F0C060)" }}>
+                <svg className="h-3.5 w-3.5" fill="#0B0B0E" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+              </div>
+              <span className="text-[17px] font-bold text-[var(--foreground)]">BuzzMove</span>
+            </Link>
+          ) : (
+            <span className="text-xl font-bold text-[var(--foreground)]">{pageTitle}</span>
+          )}
 
-          <nav className="flex items-center gap-1 sm:gap-2">
+          {/* Right side */}
+          <div className="flex items-center gap-2.5">
+            {showCredits && creditData && (
+              <div className="flex items-center gap-1.5 rounded-full bg-[#16161A] px-3 py-1.5">
+                <div className="h-1.5 w-1.5 rounded-full bg-[var(--primary)]" />
+                <span className="text-[13px] font-semibold text-[var(--foreground)]">{formatCredits(creditData.balance)}</span>
+              </div>
+            )}
+            {/* Avatar */}
             {user ? (
-              <>
-                {/* Credit badge */}
-                <div className="ml-1 sm:ml-3 mr-1 sm:mr-2 flex items-center gap-1.5 rounded-full bg-[var(--secondary)] px-3 py-1.5">
-                  <div className="h-1.5 w-1.5 rounded-full bg-[var(--primary)]" />
-                  <span className="text-xs font-medium tabular-nums">{formatCredits(creditData?.balance ?? 0)}</span>
-                </div>
-                {/* Desktop nav links */}
-                <Link href="/dashboard" className="hidden sm:block px-3 py-2 text-sm text-[var(--muted-foreground)] transition-colors hover:text-[var(--foreground)] rounded-lg">
-                  Assets
-                </Link>
-                <Link href="/pricing" className="hidden sm:block px-3 py-2 text-sm text-[var(--muted-foreground)] transition-colors hover:text-[var(--foreground)] rounded-lg">
-                  Pricing
-                </Link>
-                {/* Avatar */}
-                <Link
-                  href="/dashboard/profile"
-                  className="ml-1 flex h-8 w-8 items-center justify-center rounded-full bg-[var(--secondary)] transition-colors hover:bg-[var(--primary-10)]"
-                  aria-label="My Profile"
-                >
-                  <svg className="h-[18px] w-[18px] text-[var(--muted-foreground)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                  </svg>
-                </Link>
-              </>
+              <Link href="/dashboard/profile" className="flex h-8 w-8 items-center justify-center rounded-full bg-[#1E1E22]">
+                <svg className="h-[18px] w-[18px] text-[#9898A4]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                </svg>
+              </Link>
             ) : (
-              <button
-                onClick={() => setShowLogin(true)}
-                className="ml-2 flex h-8 w-8 items-center justify-center rounded-full bg-[var(--secondary)] transition-colors hover:bg-[var(--primary-10)]"
-                aria-label="Sign in"
-              >
-                <svg className="h-[18px] w-[18px] text-[var(--muted-foreground)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <button onClick={() => setShowLogin(true)} className="flex h-8 w-8 items-center justify-center rounded-full bg-[#1E1E22]">
+                <svg className="h-[18px] w-[18px] text-[#9898A4]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                 </svg>
               </button>
             )}
-          </nav>
+          </div>
         </div>
       </header>
+
+      {/* Tab separator line */}
 
       {/* Mobile bottom navigation */}
       <BottomNav isLoggedIn={!!user} onLoginClick={() => setShowLogin(true)} />

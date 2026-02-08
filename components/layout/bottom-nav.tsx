@@ -23,8 +23,10 @@ export function BottomNav({ isLoggedIn, onLoginClick }: BottomNavProps) {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 sm:hidden border-t border-[var(--border)] bg-[rgba(5,5,5,0.95)] backdrop-blur-lg pb-[env(safe-area-inset-bottom)]">
-      <div className="flex items-center justify-around px-4 pt-2 pb-2">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 sm:hidden bg-[#0B0B0E] pb-[env(safe-area-inset-bottom)]">
+      {/* Separator line */}
+      <div className="h-px w-full bg-[#1A1A1E]" />
+      <div className="mx-auto flex h-16 max-w-[390px] items-center justify-around pt-1.5 pb-3.5">
         {tabs.map((tab) => {
           const isActive =
             tab.href === "/"

@@ -20,12 +20,7 @@ const PROGRESS_STAGES = [
   { label: "Almost there...", threshold: 100 },
 ];
 
-export function VideoProgress({
-  videoId,
-  imagePreview,
-  onComplete,
-  onError,
-}: VideoProgressProps) {
+export function VideoProgress({ videoId, imagePreview, onComplete, onError }: VideoProgressProps) {
   const [progress, setProgress] = useState(0);
 
   const { data: video } = trpc.video.getStatus.useQuery(
@@ -44,87 +39,75 @@ export function VideoProgress({
     if (video?.status === "failed") onError();
   }, [video?.status]);
 
-  // Simulated progress through stages
   useEffect(() => {
     const interval = setInterval(() => {
       setProgress((prev) => {
         const next = prev + 1.2;
-        if (next >= 92) {
-          clearInterval(interval);
-          return 92;
-        }
+        if (next >= 92) { clearInterval(interval); return 92; }
         return next;
       });
     }, 600);
-
     return () => clearInterval(interval);
   }, []);
 
   const currentStage = PROGRESS_STAGES.find((s) => progress < s.threshold) ?? PROGRESS_STAGES[PROGRESS_STAGES.length - 1];
-  const progressPercent = Math.round(Math.min(progress, 99));
+  const pct = Math.round(Math.min(progress, 99));
 
   return (
-    <div className="flex flex-col items-center gap-6 py-8 sm:py-12 animate-fade-up" role="status" aria-label="Generating video">
-      {/* Image preview with processing overlay */}
-      {imagePreview && (
-        <div className="relative w-48 h-48 sm:w-56 sm:h-56 rounded-2xl overflow-hidden">
-          <Image
-            src={imagePreview}
-            alt="Processing"
-            fill
-            className="object-cover"
-            unoptimized
-          />
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="flex items-center gap-2 rounded-full bg-black/60 backdrop-blur-md px-4 py-2">
-              <svg className="h-4 w-4 text-[var(--primary)] animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
-              </svg>
-              <span className="text-sm font-medium text-white">Processing...</span>
+    <div className="mx-auto flex w-full max-w-[390px] flex-1 flex-col" role="status" aria-label="Generating video">
+      {/* Content — centered vertically */}
+      <div className="flex flex-1 flex-col items-center justify-center gap-6 px-5">
+        {/* Processing image — 280px, rounded-[20px] */}
+        {imagePreview && (
+          <div className="relative w-full overflow-hidden rounded-[20px]" style={{ height: 280 }}>
+            <Image src={imagePreview} alt="Processing" fill className="object-cover" unoptimized />
+            {/* Processing badge */}
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+              <div className="flex items-center gap-2 rounded-full bg-[#0B0B0ECC] px-4 py-2 backdrop-blur-sm">
+                <span className="text-sm font-semibold text-[var(--foreground)]">✨ Processing...</span>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Horizontal progress bar */}
-      <div className="w-full max-w-xs space-y-3">
-        <div className="flex items-center justify-between text-sm">
-          <span className="font-medium text-[var(--foreground)]">Creating your video</span>
-          <span className="font-semibold tabular-nums text-[var(--primary)]">{progressPercent}%</span>
+        {/* Progress section */}
+        <div className="w-full space-y-2.5">
+          <div className="flex items-center justify-between">
+            <span className="text-base font-bold text-[var(--primary)]">{pct}%</span>
+            <span className="text-[13px] text-[#6B6B70]">{currentStage.label}</span>
+          </div>
+          <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#1A1A1E]">
+            <div
+              className="h-full rounded-full transition-all duration-500 ease-out"
+              style={{ width: `${pct}%`, background: "linear-gradient(90deg, #F0C060, #E8A838)" }}
+            />
+          </div>
         </div>
-        <div className="h-2 w-full rounded-full bg-[var(--secondary)] overflow-hidden">
-          <div
-            className="h-full rounded-full transition-all duration-500 ease-out"
-            style={{
-              width: `${progressPercent}%`,
-              background: "linear-gradient(90deg, #e8a838, #f0c060)",
-            }}
-          />
+
+        {/* Info text */}
+        <div className="w-full space-y-2 text-center">
+          <p className="text-lg font-bold text-[var(--foreground)]">Creating your video...</p>
+          <p className="text-[13px] leading-[1.6] text-[#6B6B70]">
+            This usually takes 30–60 seconds.{"\n"}You can keep browsing while we work.
+          </p>
         </div>
-        <p className="text-sm text-[var(--muted-foreground)] text-center h-5 transition-all">
-          {currentStage.label}
-        </p>
+
+        {/* Back to Move button */}
+        <Link
+          href="/"
+          className="flex h-12 w-full items-center justify-center gap-2 rounded-[14px] text-[15px] font-semibold text-[var(--foreground)] transition-all active:scale-[0.98]"
+          style={{ border: "1.5px solid #252530" }}
+        >
+          <svg className="h-[18px] w-[18px] text-[var(--primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.047 8.287 8.287 0 009 9.601a8.983 8.983 0 013.361-6.867 8.21 8.21 0 003 2.48z" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 18a3.75 3.75 0 00.495-7.468 5.99 5.99 0 00-1.925 3.547 5.975 5.975 0 01-2.133-1.001A3.75 3.75 0 0012 18z" />
+          </svg>
+          Back to Move
+        </Link>
       </div>
 
-      <p className="text-xs text-[var(--muted-foreground)] text-center">
-        Usually takes 30–60 seconds. You can keep browsing while we work.
-      </p>
-
-      {/* Back to Move button */}
-      <Link
-        href="/"
-        className="flex items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--secondary)] px-5 py-3 text-sm font-medium text-[var(--foreground)] transition-all hover:border-[var(--primary-40)] hover:bg-[var(--primary-10)] hover:text-[var(--primary)] active:scale-[0.98]"
-      >
-        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.047 8.287 8.287 0 009 9.601a8.983 8.983 0 013.361-6.867 8.21 8.21 0 003 2.48z" />
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 18a3.75 3.75 0 00.495-7.468 5.99 5.99 0 00-1.925 3.547 5.975 5.975 0 01-2.133-1.001A3.75 3.75 0 0012 18z" />
-        </svg>
-        Back to Move
-      </Link>
-
       {video?.status === "failed" && (
-        <div role="alert" className="rounded-xl bg-[var(--destructive-10)] px-4 py-3 text-sm text-[var(--destructive)]">
+        <div role="alert" className="mx-5 mb-4 rounded-xl bg-[var(--destructive-10)] px-4 py-3 text-center text-sm text-[var(--destructive)]">
           Generation failed. Credits have been refunded.
         </div>
       )}

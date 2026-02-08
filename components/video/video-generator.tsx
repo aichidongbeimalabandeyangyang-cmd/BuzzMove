@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { trpc } from "@/lib/trpc";
 import { createSupabaseBrowserClient } from "@/server/supabase/client";
 import { getDeviceKey } from "@/components/tracking/device-key-ensurer";
@@ -29,12 +30,9 @@ export function VideoGenerator({
   const [status, setStatus] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
 
-  // Check auth state
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setIsLoggedIn(!!user);
-    });
+    supabase.auth.getUser().then(({ data: { user } }) => setIsLoggedIn(!!user));
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setIsLoggedIn(!!session?.user);
     });
@@ -42,184 +40,132 @@ export function VideoGenerator({
   }, []);
 
   const generateMutation = trpc.video.generate.useMutation({
-    onSuccess(data) {
-      setVideoId(data.videoId);
-      setStatus("generating");
-    },
-    onError(error) {
-      setStatus("error");
-    },
+    onSuccess(data) { setVideoId(data.videoId); setStatus("generating"); },
+    onError() { setStatus("error"); },
   });
 
   const handleGenerate = () => {
-    if (!isLoggedIn) {
-      window.dispatchEvent(new CustomEvent("open-login"));
-      return;
-    }
+    if (!isLoggedIn) { window.dispatchEvent(new CustomEvent("open-login")); return; }
     setStatus("submitting");
-    generateMutation.mutate({
-      imageUrl,
-      prompt: prompt || undefined,
-      duration,
-      mode,
-      deviceKey: getDeviceKey() || undefined,
-    });
+    generateMutation.mutate({ imageUrl, prompt: prompt || undefined, duration, mode, deviceKey: getDeviceKey() || undefined });
   };
 
-  // Credit cost for current config
   const creditCost = CREDIT_COSTS[mode][parseInt(duration) as 5 | 10];
 
   if (videoId && status === "completed") {
-    return (
-      <div className="flex flex-col items-center gap-5 animate-fade-up">
-        <VideoPlayer videoId={videoId} onReset={onReset} creditCost={creditCost} />
-      </div>
-    );
+    return <VideoPlayer videoId={videoId} onReset={onReset} creditCost={creditCost} />;
   }
 
   if (videoId && (status === "generating" || status === "submitting")) {
-    return (
-      <VideoProgress
-        videoId={videoId}
-        imagePreview={imagePreview}
-        onComplete={() => setStatus("completed")}
-        onError={() => setStatus("error")}
-      />
-    );
+    return <VideoProgress videoId={videoId} imagePreview={imagePreview} onComplete={() => setStatus("completed")} onError={() => setStatus("error")} />;
   }
 
   return (
-    <div className="mx-auto w-full max-w-lg">
-      {/* Image preview */}
-      <div className="relative mb-5 overflow-hidden rounded-2xl bg-[var(--card)]">
-        <Image
-          src={imagePreview}
-          alt="Upload preview"
-          width={512}
-          height={640}
-          className="w-full object-contain max-h-72 sm:max-h-96"
-          unoptimized
-        />
-        <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-[var(--card)] to-transparent" />
-        <button
-          type="button"
-          onClick={onReset}
-          aria-label="Remove image"
-          className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-black/40 text-white/80 backdrop-blur-sm transition-all hover:bg-black/60 hover:text-white active:scale-95"
-        >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
+    <div className="mx-auto flex w-full max-w-[390px] flex-1 flex-col">
+      {/* Content area */}
+      <div className="flex flex-1 flex-col gap-4 px-5 pb-6 pt-2">
+        {/* Image preview — 280px, rounded-[20px] */}
+        <div className="relative w-full shrink-0 overflow-hidden rounded-[20px] bg-[var(--card)]" style={{ height: 280 }}>
+          <Image src={imagePreview} alt="Upload preview" fill className="object-cover" unoptimized />
+          <button
+            type="button"
+            onClick={onReset}
+            aria-label="Remove image"
+            className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-black/40 text-white transition-all hover:bg-black/60 active:scale-95"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
 
-      {/* Prompt input */}
-      <div className="relative mb-4">
-        <label htmlFor="motion-prompt" className="sr-only">Describe the motion you want</label>
-        <textarea
-          id="motion-prompt"
-          value={prompt}
-          onChange={(e) => setPrompt(e.target.value)}
-          placeholder="Describe the motion you want... (optional)"
-          maxLength={1000}
-          rows={2}
-          className="w-full resize-none rounded-xl border border-[var(--border)] bg-[var(--secondary)] p-4 pr-12 text-sm leading-relaxed transition-all placeholder:text-[var(--muted-foreground)]"
-        />
-        <span className="absolute bottom-3 right-3 text-xs tabular-nums text-[var(--muted-foreground)]" aria-hidden="true">
-          {prompt.length}/1000
-        </span>
-      </div>
+        {/* Prompt input */}
+        <div className="rounded-2xl bg-[#16161A] p-4">
+          <textarea
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            placeholder="Describe the motion you want..."
+            maxLength={1000}
+            rows={2}
+            className="w-full resize-none bg-transparent text-sm leading-[1.4] text-[var(--foreground)] placeholder:text-[#6B6B70] outline-none"
+          />
+          <p className="mt-1 text-right text-xs text-[#4A4A50]">{prompt.length}/1000</p>
+        </div>
 
-      {/* Options row */}
-      <div className="mb-5 flex gap-3">
-        <div className="flex-1">
-          <label className="mb-1.5 block text-xs font-medium text-[var(--muted-foreground)]">
-            Duration
-          </label>
-          <div className="flex rounded-xl bg-[var(--secondary)] p-1" role="radiogroup" aria-label="Duration">
-            {(["5", "10"] as const).map((d) => (
-              <button
-                key={d}
-                type="button"
-                role="radio"
-                aria-checked={duration === d}
-                onClick={() => setDuration(d)}
-                className={`flex-1 rounded-lg py-3 text-sm font-medium transition-all ${
-                  duration === d
-                    ? "bg-[var(--primary)] text-[var(--background)]"
-                    : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
-                }`}
-              >
-                {d}s
-              </button>
-            ))}
+        {/* Options row */}
+        <div className="flex gap-3">
+          <div className="flex-1">
+            <p className="mb-1.5 text-xs font-medium text-[#6B6B70]">Duration</p>
+            <div className="flex h-11 rounded-xl bg-[#16161A] p-1">
+              {(["5", "10"] as const).map((d) => (
+                <button
+                  key={d}
+                  type="button"
+                  onClick={() => setDuration(d)}
+                  className={`flex-1 rounded-lg text-sm font-medium transition-all ${
+                    duration === d
+                      ? "bg-[var(--primary)] text-[#0B0B0E]"
+                      : "text-[#6B6B70] hover:text-[var(--foreground)]"
+                  }`}
+                >
+                  {d}s
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="flex-1">
+            <p className="mb-1.5 text-xs font-medium text-[#6B6B70]">Quality</p>
+            <div className="flex h-11 rounded-xl bg-[#16161A] p-1">
+              {(["standard", "professional"] as const).map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => setMode(m)}
+                  className={`flex-1 rounded-lg text-sm font-medium transition-all ${
+                    mode === m
+                      ? "bg-[var(--primary)] text-[#0B0B0E]"
+                      : "text-[#6B6B70] hover:text-[var(--foreground)]"
+                  }`}
+                >
+                  {m === "standard" ? "Std" : "Pro"}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
-        <div className="flex-1">
-          <label className="mb-1.5 block text-xs font-medium text-[var(--muted-foreground)]">
-            Quality
-          </label>
-          <div className="flex rounded-xl bg-[var(--secondary)] p-1" role="radiogroup" aria-label="Quality">
-            {(["standard", "professional"] as const).map((m) => (
-              <button
-                key={m}
-                type="button"
-                role="radio"
-                aria-checked={mode === m}
-                onClick={() => setMode(m)}
-                className={`flex-1 rounded-lg py-3 text-sm font-medium transition-all ${
-                  mode === m
-                    ? "bg-[var(--primary)] text-[var(--background)]"
-                    : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
-                }`}
-              >
-                {m === "standard" ? "Std" : "Pro"}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
+        {/* Spacer */}
+        <div className="flex-1" />
 
-      {/* Generate button with credit cost */}
-      <div className="pb-4 sm:pb-0">
+        {/* Generate button — h-[56px], fontSize 17 */}
         <button
           type="button"
           onClick={handleGenerate}
           disabled={generateMutation.isPending}
-          aria-busy={generateMutation.isPending}
-          className="w-full rounded-xl py-4 text-base font-semibold text-[var(--background)] transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
-          style={{ background: "linear-gradient(135deg, #e8a838, #d4942e)", boxShadow: "0 2px 16px rgba(232,168,56,0.2)" }}
+          className="flex h-14 w-full shrink-0 items-center justify-center rounded-[14px] text-[17px] font-bold text-[#0B0B0E] transition-all active:scale-[0.98] disabled:opacity-50"
+          style={{
+            background: "linear-gradient(135deg, #F0C060, #E8A838)",
+            boxShadow: "0 4px 20px rgba(232,168,56,0.25)",
+          }}
         >
           {generateMutation.isPending ? (
-            <span className="flex items-center justify-center gap-2">
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--background-30)] border-t-[var(--background)]" aria-hidden="true" />
+            <span className="flex items-center gap-2">
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#0B0B0E30] border-t-[#0B0B0E]" />
               Starting...
             </span>
           ) : isLoggedIn === false ? (
             "Sign in to Generate"
           ) : (
-            <span className="flex items-center justify-center gap-2">
-              Generate Video
-              <span className="inline-flex items-center rounded-md bg-black/15 px-2 py-0.5 text-xs font-medium">
-                {creditCost} credits
-              </span>
-            </span>
+            `Generate Video · ${creditCost} credits`
           )}
         </button>
 
-        {isLoggedIn === false && (
-          <p className="mt-2 text-center text-xs text-[var(--muted-foreground)]">
-            Free account includes 9,000 credits to get started
-          </p>
+        {generateMutation.error && (
+          <div role="alert" className="rounded-xl bg-[var(--destructive-10)] px-4 py-3 text-center text-sm text-[var(--destructive)]">
+            {generateMutation.error.message}
+          </div>
         )}
       </div>
-
-      {generateMutation.error && (
-        <div role="alert" className="mt-4 rounded-xl bg-[var(--destructive-10)] px-4 py-3 text-center text-sm text-[var(--destructive)]">
-          {generateMutation.error.message}
-        </div>
-      )}
     </div>
   );
 }
