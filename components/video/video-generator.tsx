@@ -31,13 +31,27 @@ export function VideoGenerator({ imageUrl, imagePreview, onReset, initialPrompt 
     else setHomeView("generator");
   }, [videoId, status, setHomeView]);
 
+  const utils = trpc.useUtils();
   const generateMutation = trpc.video.generate.useMutation({
-    onSuccess(data) { setVideoId(data.videoId); setStatus("generating"); },
-    onError() { setStatus("error"); },
+    onSuccess(data) {
+      setVideoId(data.videoId);
+      setStatus("generating");
+      // Sync with actual backend balance
+      utils.credit.getBalance.invalidate();
+    },
+    onError() {
+      setStatus("error");
+      // Roll back optimistic credit deduction
+      utils.credit.getBalance.invalidate();
+    },
   });
 
   const handleGenerate = () => {
     if (!user) { openLogin(); return; }
+    // Optimistic: deduct credits in UI immediately
+    utils.credit.getBalance.setData(undefined, (prev) =>
+      prev ? { ...prev, balance: Math.max(0, prev.balance - creditCost) } : prev
+    );
     setStatus("submitting");
     generateMutation.mutate({
       imageUrl, prompt: prompt || undefined, duration, mode,

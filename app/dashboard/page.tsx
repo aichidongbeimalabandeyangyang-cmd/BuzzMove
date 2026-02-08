@@ -5,6 +5,88 @@ import Image from "next/image";
 import { ArrowLeft, Download, Share2 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 
+// ---- VIDEO DETAIL (uses getStatus to poll & resolve video URL) ----
+function VideoDetail({ videoId, onBack }: { videoId: string; onBack: () => void }) {
+  const { data: video, isLoading } = trpc.video.getStatus.useQuery(
+    { videoId },
+    {
+      refetchInterval: (query) => {
+        const st = query.state.data?.status;
+        if (st === "completed" || st === "failed") return false;
+        return 5000; // poll every 5s if still generating
+      },
+    }
+  );
+
+  const videoUrl = video?.output_video_url;
+
+  const handleShare = async () => {
+    if (!videoUrl) return;
+    if (navigator.share) {
+      try { await navigator.share({ title: "Check out my AI video!", url: videoUrl }); } catch {}
+    } else {
+      await navigator.clipboard.writeText(videoUrl);
+    }
+  };
+
+  return (
+    <div className="flex w-full flex-1 flex-col">
+      <button onClick={onBack} className="flex items-center" style={{ gap: 8, padding: "0 20px", height: 44 }}>
+        <ArrowLeft style={{ width: 22, height: 22, color: "#FAFAF9" }} strokeWidth={1.5} />
+        <span style={{ fontSize: 17, fontWeight: 700, color: "#FAFAF9" }}>Result</span>
+      </button>
+
+      <div className="flex flex-1 flex-col" style={{ gap: 20, padding: "8px 20px 20px 20px" }}>
+        {videoUrl ? (
+          <div className="relative w-full overflow-hidden" style={{ height: 440, borderRadius: 20, flexShrink: 0 }}>
+            <video src={videoUrl} controls autoPlay loop playsInline className="h-full w-full object-cover" />
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center" style={{ height: 440, borderRadius: 20, backgroundColor: "#16161A", gap: 12 }}>
+            {isLoading || video?.status === "generating" ? (
+              <>
+                <div className="relative" style={{ width: 48, height: 48 }}>
+                  <div className="absolute inset-0 rounded-full" style={{ border: "2px solid #252530" }} />
+                  <div className="absolute inset-0 animate-spin-slow rounded-full" style={{ border: "2px solid transparent", borderTopColor: "#E8A838" }} />
+                </div>
+                <p style={{ fontSize: 14, color: "#6B6B70" }}>
+                  {video?.status === "generating" ? "Video is still processing..." : "Loading..."}
+                </p>
+              </>
+            ) : (
+              <p style={{ fontSize: 14, color: "#6B6B70" }}>
+                {video?.status === "failed" ? "Generation failed" : "Video not available"}
+              </p>
+            )}
+          </div>
+        )}
+
+        {videoUrl && (
+          <div className="flex" style={{ gap: 10 }}>
+            <a
+              href={videoUrl}
+              download
+              className="flex flex-1 items-center justify-center transition-all active:scale-[0.98]"
+              style={{ height: 48, borderRadius: 14, gap: 8, background: "linear-gradient(135deg, #F0C060, #E8A838)", boxShadow: "0 4px 20px #E8A83840" }}
+            >
+              <Download style={{ width: 20, height: 20, color: "#0B0B0E" }} strokeWidth={1.5} />
+              <span style={{ fontSize: 15, fontWeight: 700, color: "#0B0B0E" }}>Download</span>
+            </a>
+            <button
+              onClick={handleShare}
+              className="flex flex-1 items-center justify-center transition-all active:scale-[0.98]"
+              style={{ height: 48, borderRadius: 14, border: "1.5px solid #252530", gap: 8 }}
+            >
+              <Share2 style={{ width: 20, height: 20, color: "#FAFAF9" }} strokeWidth={1.5} />
+              <span style={{ fontSize: 15, fontWeight: 600, color: "#FAFAF9" }}>Share</span>
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function AssetsPage() {
   const [tab, setTab] = useState<"videos" | "photos">("videos");
   const [selectedVideoId, setSelectedVideoId] = useState<string | null>(null);
@@ -13,67 +95,11 @@ export default function AssetsPage() {
 
   // ---- VIDEO DETAIL VIEW ----
   if (selectedVideoId) {
-    const video = videos?.find((v) => v.id === selectedVideoId);
-    const videoUrl = video?.output_video_url;
-
-    const handleShare = async () => {
-      if (!videoUrl) return;
-      if (navigator.share) {
-        try { await navigator.share({ title: "Check out my AI video!", url: videoUrl }); } catch {}
-      } else {
-        await navigator.clipboard.writeText(videoUrl);
-      }
-    };
-
     return (
-      <div className="flex w-full flex-1 flex-col">
-        {/* Back header: gap 8, padding [0,20], h44 */}
-        <button
-          onClick={() => setSelectedVideoId(null)}
-          className="flex items-center"
-          style={{ gap: 8, padding: "0 20px", height: 44 }}
-        >
-          <ArrowLeft style={{ width: 22, height: 22, color: "#FAFAF9" }} strokeWidth={1.5} />
-          <span style={{ fontSize: 17, fontWeight: 700, color: "#FAFAF9" }}>Result</span>
-        </button>
-
-        {/* Result Body: gap 20, padding [8,20,20,20] */}
-        <div className="flex flex-1 flex-col" style={{ gap: 20, padding: "8px 20px 20px 20px" }}>
-          {/* Video Player: h440, cornerRadius 20 */}
-          {videoUrl ? (
-            <div className="relative w-full overflow-hidden" style={{ height: 440, borderRadius: 20, flexShrink: 0 }}>
-              <video src={videoUrl} controls autoPlay loop playsInline className="h-full w-full object-cover" />
-            </div>
-          ) : (
-            <div className="flex items-center justify-center" style={{ height: 440, borderRadius: 20, backgroundColor: "#16161A" }}>
-              <p style={{ fontSize: 14, color: "#6B6B70" }}>Video not available</p>
-            </div>
-          )}
-
-          {/* Action Row: gap 10 */}
-          {videoUrl && (
-            <div className="flex" style={{ gap: 10 }}>
-              <a
-                href={videoUrl}
-                download
-                className="flex flex-1 items-center justify-center transition-all active:scale-[0.98]"
-                style={{ height: 48, borderRadius: 14, gap: 8, background: "linear-gradient(135deg, #F0C060, #E8A838)", boxShadow: "0 4px 20px #E8A83840" }}
-              >
-                <Download style={{ width: 20, height: 20, color: "#0B0B0E" }} strokeWidth={1.5} />
-                <span style={{ fontSize: 15, fontWeight: 700, color: "#0B0B0E" }}>Download</span>
-              </a>
-              <button
-                onClick={handleShare}
-                className="flex flex-1 items-center justify-center transition-all active:scale-[0.98]"
-                style={{ height: 48, borderRadius: 14, border: "1.5px solid #252530", gap: 8 }}
-              >
-                <Share2 style={{ width: 20, height: 20, color: "#FAFAF9" }} strokeWidth={1.5} />
-                <span style={{ fontSize: 15, fontWeight: 600, color: "#FAFAF9" }}>Share</span>
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
+      <VideoDetail
+        videoId={selectedVideoId}
+        onBack={() => setSelectedVideoId(null)}
+      />
     );
   }
 

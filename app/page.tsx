@@ -1,29 +1,40 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Download, Share2, Plus } from "lucide-react";
 import { useApp } from "@/components/layout/app-shell";
 import { UploadZone, saveRecentUpload } from "@/components/upload/upload-zone";
 import { VideoGenerator } from "@/components/video/video-generator";
-import { HERO_EXAMPLES } from "@/lib/constants";
+
+const SHOWCASE = {
+  image: "/examples/showcase.png",
+  video: "/examples/showcase.mp4",
+  prompt: "Blowing a kiss, flirty expression, charming smile.",
+};
 
 export default function HomePage() {
+  const { homeView, setHomeView, user, openLogin } = useApp();
+
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [initialPrompt, setInitialPrompt] = useState("");
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
-  const { homeView, setHomeView } = useApp();
 
-  const showUpload = homeView === "upload";
+  // Showcase (guest only): idle → loading → playing
+  const [showcase, setShowcase] = useState<"idle" | "loading" | "playing">("idle");
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  const isLoggedIn = !!user;
 
   useEffect(() => {
-    if (!imageUrl && !imagePreview && homeView !== "upload") {
+    if (!imageUrl && !imagePreview && showcase === "idle" && homeView !== "upload") {
       setHomeView("home");
     }
-  }, [imageUrl, imagePreview]);
+  }, [imageUrl, imagePreview, showcase]);
 
+  // ---- File upload handler (logged-in only) ----
   const handleFileSelected = async (file: File) => {
     const preview = URL.createObjectURL(file);
     setImagePreview(preview);
@@ -55,17 +66,12 @@ export default function HomePage() {
     setHomeView("upload");
   };
 
-  const currentExample = HERO_EXAMPLES[0];
+  // =============================================
+  // LOGGED-IN FLOWS
+  // =============================================
 
-  const handleExampleClick = () => {
-    const fullUrl = `${window.location.origin}${currentExample.image}`;
-    setImageUrl(fullUrl);
-    setImagePreview(currentExample.image);
-    setInitialPrompt(currentExample.prompt);
-  };
-
-  // ---- VIDEO GENERATOR ----
-  if (imageUrl && imagePreview) {
+  // ---- Video Generator (logged-in, has image) ----
+  if (isLoggedIn && imageUrl && imagePreview) {
     return (
       <VideoGenerator
         imageUrl={imageUrl}
@@ -76,8 +82,8 @@ export default function HomePage() {
     );
   }
 
-  // ---- UPLOAD PHOTO ----
-  if (showUpload) {
+  // ---- Upload Photo (logged-in, explicit upload view) ----
+  if (isLoggedIn && homeView === "upload") {
     return (
       <div className="flex w-full flex-1 flex-col" style={{ padding: "16px 16px 12px 16px" }}>
         {uploading ? (
@@ -100,60 +106,197 @@ export default function HomePage() {
     );
   }
 
-  // ---- DEFAULT HOMEPAGE ----
+  // ---- Logged-in Default: Upload-centric homepage ----
+  if (isLoggedIn) {
+    return (
+      <div className="flex w-full flex-1 flex-col">
+        {/* Upload hero area */}
+        <div className="flex flex-1 flex-col items-center justify-center" style={{ gap: 24, padding: "40px 20px" }}>
+          {/* Upload button */}
+          <button
+            onClick={() => setHomeView("upload")}
+            className="flex flex-col items-center justify-center transition-all active:scale-[0.98]"
+            style={{
+              width: "100%",
+              maxWidth: 340,
+              height: 280,
+              borderRadius: 24,
+              border: "2px dashed #252530",
+              backgroundColor: "#16161A",
+              gap: 16,
+            }}
+          >
+            <div
+              className="flex items-center justify-center"
+              style={{ width: 64, height: 64, borderRadius: 100, backgroundColor: "#E8A83815" }}
+            >
+              <Plus style={{ width: 28, height: 28, color: "#E8A838" }} strokeWidth={1.5} />
+            </div>
+            <div className="flex flex-col items-center" style={{ gap: 6 }}>
+              <span style={{ fontSize: 17, fontWeight: 700, color: "#FAFAF9" }}>Upload a photo</span>
+              <span style={{ fontSize: 13, fontWeight: 400, color: "#6B6B70" }}>JPG, PNG up to 10 MB</span>
+            </div>
+          </button>
+
+          {/* Subtitle */}
+          <p style={{ fontSize: 14, fontWeight: 400, color: "#6B6B70", textAlign: "center" }}>
+            Upload a photo and turn it into a short AI video
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // =============================================
+  // GUEST (NOT LOGGED IN) FLOWS
+  // =============================================
+
+  // ---- Showcase: Loading (fake progress) ----
+  if (showcase === "loading") {
+    return (
+      <div className="flex w-full flex-1 flex-col">
+        <div className="flex flex-1 flex-col items-center justify-center" style={{ gap: 20, padding: "0 40px" }}>
+          <div className="relative w-full overflow-hidden" style={{ height: 280, borderRadius: 20, backgroundColor: "#16161A" }}>
+            <Image src={SHOWCASE.image} alt="Showcase" fill className="object-cover" sizes="100vw" />
+            <div className="absolute inset-0" style={{ backgroundColor: "rgba(0,0,0,0.3)" }} />
+          </div>
+          <div className="flex flex-col items-center" style={{ gap: 16, width: "100%" }}>
+            <div className="relative" style={{ width: 48, height: 48 }}>
+              <div className="absolute inset-0 rounded-full" style={{ border: "2px solid #252530" }} />
+              <div className="absolute inset-0 animate-spin-slow rounded-full" style={{ border: "2px solid transparent", borderTopColor: "#E8A838" }} />
+            </div>
+            <p style={{ fontSize: 15, fontWeight: 600, color: "#FAFAF9" }}>Generating your video...</p>
+            <div className="w-full overflow-hidden" style={{ height: 6, borderRadius: 100, backgroundColor: "#1A1A1E" }}>
+              <div
+                className="transition-all duration-[2000ms] ease-out"
+                style={{ height: "100%", width: "100%", borderRadius: 100, background: "linear-gradient(90deg, #F0C060, #E8A838)" }}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ---- Showcase: Playing (video result → CTA to sign up) ----
+  if (showcase === "playing") {
+    const handleShare = async () => {
+      const url = `${window.location.origin}${SHOWCASE.video}`;
+      if (navigator.share) {
+        try { await navigator.share({ title: "Check out this AI video!", url }); } catch {}
+      } else {
+        await navigator.clipboard.writeText(url);
+      }
+    };
+
+    return (
+      <div className="flex w-full flex-1 flex-col">
+        <div className="flex flex-1 flex-col" style={{ gap: 20, padding: "8px 20px 20px 20px" }}>
+          <div className="relative w-full overflow-hidden" style={{ height: 440, borderRadius: 20, flexShrink: 0 }}>
+            <video
+              ref={videoRef}
+              src={SHOWCASE.video}
+              controls
+              autoPlay
+              loop
+              playsInline
+              className="h-full w-full object-cover"
+            />
+          </div>
+
+          {/* Action Row */}
+          <div className="flex" style={{ gap: 10 }}>
+            <a
+              href={SHOWCASE.video}
+              download="buzzmove-showcase.mp4"
+              className="flex flex-1 items-center justify-center transition-all active:scale-[0.98]"
+              style={{ height: 48, borderRadius: 14, gap: 8, background: "linear-gradient(135deg, #F0C060, #E8A838)", boxShadow: "0 4px 20px #E8A83840" }}
+            >
+              <Download style={{ width: 20, height: 20, color: "#0B0B0E" }} strokeWidth={1.5} />
+              <span style={{ fontSize: 15, fontWeight: 700, color: "#0B0B0E" }}>Download</span>
+            </a>
+            <button
+              onClick={handleShare}
+              className="flex flex-1 items-center justify-center transition-all active:scale-[0.98]"
+              style={{ height: 48, borderRadius: 14, border: "1.5px solid #252530", gap: 8 }}
+            >
+              <Share2 style={{ width: 20, height: 20, color: "#FAFAF9" }} strokeWidth={1.5} />
+              <span style={{ fontSize: 15, fontWeight: 600, color: "#FAFAF9" }}>Share</span>
+            </button>
+          </div>
+
+          {/* CTA: Try your own → opens login */}
+          <button
+            onClick={() => {
+              setShowcase("idle");
+              setHomeView("home");
+              openLogin();
+            }}
+            className="flex w-full items-center justify-center transition-all active:scale-[0.98]"
+            style={{
+              height: 52,
+              borderRadius: 14,
+              background: "linear-gradient(135deg, #F0C060, #E8A838)",
+              boxShadow: "0 4px 20px #E8A83840",
+            }}
+          >
+            <span style={{ fontSize: 16, fontWeight: 700, color: "#0B0B0E" }}>Try with your own photo</span>
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // ---- Guest Default Homepage (showcase) ----
   return (
     <div className="flex w-full flex-1 flex-col">
-      {/* Hero Photo: height 460 FIXED, width fill, clip, layout none */}
-      <div
-        className="relative w-full overflow-hidden"
-        style={{ height: 460, flexShrink: 0 }}
-        onClick={() => setHomeView("upload")}
-      >
+      {/* Hero Photo: showcase image */}
+      <div className="relative w-full overflow-hidden" style={{ height: 460, flexShrink: 0 }}>
         <Image
-          src={currentExample.image}
-          alt={currentExample.label}
+          src={SHOWCASE.image}
+          alt="Showcase"
           fill
           className="object-cover"
           sizes="100vw"
           priority
         />
-        {/* Label Badge: x16 y16, cornerRadius 100, fill #00000099, padding [6,14] */}
+        {/* Label Badge */}
         <div
           className="absolute"
           style={{ left: 16, top: 16, zIndex: 10, borderRadius: 100, backgroundColor: "#00000099", padding: "6px 14px" }}
         >
           <span style={{ fontSize: 12, fontWeight: 500, color: "#FFFFFFCC", whiteSpace: "nowrap" }}>
-            Example photo · Tap to upload your own
+            Example photo · Sign up to create your own
           </span>
         </div>
-        {/* Gradient Overlay: bottom, h160, gradient 180deg (#0B0B0E00 → #0B0B0E) */}
+        {/* Gradient Overlay */}
         <div
           className="absolute inset-x-0 bottom-0"
           style={{ height: 160, background: "linear-gradient(180deg, #0B0B0E00, #0B0B0E)" }}
         />
       </div>
 
-      {/* Bottom Content: h-fill, vertical, gap 12, justifyContent end, padding [0,20,24,20] */}
+      {/* Bottom Content */}
       <div
         className="flex w-full flex-col"
         style={{ flex: "1 1 0%", gap: 12, justifyContent: "flex-end", padding: "0 20px 24px 20px" }}
       >
-        {/* Prompt Label: gap 6, horizontal, center */}
+        {/* Prompt Label */}
         <div className="flex items-center" style={{ gap: 6 }}>
           <Sparkles style={{ width: 16, height: 16, color: "#E8A838" }} strokeWidth={1.5} />
           <span style={{ fontSize: 13, fontWeight: 600, color: "#E8A838" }}>Motion Prompt</span>
         </div>
 
-        {/* Prompt Card: cornerRadius 16, fill #16161A, padding 16, width fill */}
+        {/* Prompt Card */}
         <div style={{ borderRadius: 16, backgroundColor: "#16161A", padding: 16, width: "100%" }}>
           <p style={{ fontSize: 15, lineHeight: 1.4, color: "#FAFAF9" }}>
-            {currentExample.prompt}
+            {SHOWCASE.prompt}
           </p>
         </div>
 
-        {/* Primary CTA: h52, cornerRadius 14, gradient + shadow, width fill */}
+        {/* Primary CTA: showcase demo (free, no login needed) */}
         <button
-          onClick={handleExampleClick}
+          onClick={handleShowcase}
           className="flex w-full items-center justify-center transition-all active:scale-[0.98]"
           style={{
             height: 52,
@@ -165,15 +308,25 @@ export default function HomePage() {
           <span style={{ fontSize: 16, fontWeight: 700, color: "#0B0B0E" }}>Make It Move · Free</span>
         </button>
 
-        {/* Secondary CTA: h48, cornerRadius 14, stroke 1.5px #2A2A2E, width fill */}
+        {/* Secondary CTA: upload → login */}
         <button
-          onClick={() => setHomeView("upload")}
+          onClick={openLogin}
           className="flex w-full items-center justify-center transition-all active:scale-[0.98]"
           style={{ height: 48, borderRadius: 14, border: "1.5px solid #2A2A2E" }}
         >
-          <span style={{ fontSize: 15, fontWeight: 500, color: "#FAFAF9" }}>Or upload your own photo</span>
+          <span style={{ fontSize: 15, fontWeight: 500, color: "#FAFAF9" }}>Upload your own photo</span>
         </button>
       </div>
     </div>
   );
+
+  // Showcase trigger
+  function handleShowcase() {
+    setShowcase("loading");
+    setHomeView("progress");
+    setTimeout(() => {
+      setShowcase("playing");
+      setHomeView("result");
+    }, 2000);
+  }
 }
