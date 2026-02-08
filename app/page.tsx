@@ -17,36 +17,84 @@ const TAGLINES = [
   "Turn around slowly",
 ];
 
+const ROW_H = 30;
+const VISIBLE_ROWS = 3; // top + center + bottom
+
 function RotatingTaglines() {
-  const [index, setIndex] = useState(0);
-  const [visible, setVisible] = useState(true);
+  const [active, setActive] = useState(0);
+  const [animate, setAnimate] = useState(true);
+  const count = TAGLINES.length;
+
+  // Build extended list: [...items, item0, item1] for seamless loop
+  const extended = [...TAGLINES, ...TAGLINES.slice(0, 2)];
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setVisible(false);
-      setTimeout(() => {
-        setIndex((i) => (i + 1) % TAGLINES.length);
-        setVisible(true);
-      }, 400); // fade out duration
-    }, 3000); // show each for 3s
+      setActive((prev) => prev + 1);
+    }, 3000);
     return () => clearInterval(interval);
   }, []);
 
+  // Seamless reset: when we reach the clone boundary, snap back
+  useEffect(() => {
+    if (active === count) {
+      const timer = setTimeout(() => {
+        setAnimate(false);
+        setActive(0);
+        // Re-enable animation on next frame
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => setAnimate(true));
+        });
+      }, 500); // wait for the transition to finish
+      return () => clearTimeout(timer);
+    }
+  }, [active, count]);
+
+  // The track shifts so that `active` aligns to the center row
+  const offset = -(active * ROW_H);
+
   return (
-    <div style={{ height: 28, overflow: "hidden", textAlign: "center" }}>
-      <p
+    <div
+      style={{
+        height: ROW_H * VISIBLE_ROWS,
+        overflow: "hidden",
+        width: "100%",
+        position: "relative",
+      }}
+    >
+      <div
         style={{
-          fontSize: 15,
-          fontWeight: 500,
-          color: "#E8A838",
-          letterSpacing: 0.5,
-          opacity: visible ? 1 : 0,
-          transform: visible ? "translateY(0)" : "translateY(8px)",
-          transition: "opacity 0.4s ease, transform 0.4s ease",
+          transform: `translateY(${offset + ROW_H}px)`, // +ROW_H so active sits in center
+          transition: animate ? "transform 0.5s ease-in-out" : "none",
         }}
       >
-        &ldquo;{TAGLINES[index]}&rdquo;
-      </p>
+        {extended.map((text, i) => {
+          const dist = i - active; // -1 = top, 0 = center, 1 = bottom
+          const isCenter = dist === 0;
+          const isNear = dist === -1 || dist === 1;
+          return (
+            <div
+              key={`${text}-${i}`}
+              style={{
+                height: ROW_H,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: isCenter ? 16 : 13,
+                fontWeight: isCenter ? 600 : 400,
+                color: isCenter ? "#E8A838" : "#6B6B70",
+                opacity: isCenter ? 1 : isNear ? 0.4 : 0,
+                transition: animate
+                  ? "font-size 0.5s ease, font-weight 0.5s ease, color 0.5s ease, opacity 0.5s ease"
+                  : "none",
+                letterSpacing: 0.3,
+              }}
+            >
+              &ldquo;{text}&rdquo;
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -267,6 +315,9 @@ export default function HomePage() {
           >
             <span style={{ fontSize: 16, fontWeight: 700, color: "#0B0B0E" }}>Try with your own photo</span>
           </button>
+
+          {/* Rotating taglines to reinforce CTA */}
+          <RotatingTaglines />
         </div>
       </div>
     );
