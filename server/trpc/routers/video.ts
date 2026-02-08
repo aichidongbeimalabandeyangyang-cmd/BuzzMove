@@ -37,13 +37,6 @@ export const videoRouter = router({
       const creditCost =
         CREDIT_COSTS[input.mode][duration];
 
-      if (profile.credits_balance < creditCost) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Insufficient credits",
-        });
-      }
-
       // 2. Resolve content policy
       const contentPolicy = await resolveContentPolicy({
         userId: ctx.user.id,
@@ -51,13 +44,18 @@ export const videoRouter = router({
         countryCode: profile.country_code,
       });
 
-      // 3. Deduct credits
-      await ctx.supabase
-        .from("profiles")
-        .update({
-          credits_balance: profile.credits_balance - creditCost,
-        })
-        .eq("id", ctx.user.id);
+      // 3. Atomic credit deduction (checks balance + deducts in one operation)
+      const { error: deductError } = await ctx.adminSupabase.rpc(
+        "deduct_credits",
+        { p_user_id: ctx.user.id, p_amount: creditCost }
+      );
+
+      if (deductError) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Insufficient credits",
+        });
+      }
 
       // 4. Create video record
       const { data: video, error: videoError } = await ctx.supabase
@@ -76,13 +74,11 @@ export const videoRouter = router({
         .single();
 
       if (videoError || !video) {
-        // Refund credits
-        await ctx.supabase
-          .from("profiles")
-          .update({
-            credits_balance: profile.credits_balance,
-          })
-          .eq("id", ctx.user.id);
+        // Refund credits atomically
+        await ctx.adminSupabase.rpc("refund_credits", {
+          p_user_id: ctx.user.id,
+          p_amount: creditCost,
+        });
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to create video record",
@@ -123,18 +119,16 @@ export const videoRouter = router({
           status: "generating",
         };
       } catch (err) {
-        // Mark as failed, refund credits
+        // Mark as failed, refund credits atomically
         await ctx.supabase
           .from("videos")
           .update({ status: "failed" })
           .eq("id", video.id);
 
-        await ctx.supabase
-          .from("profiles")
-          .update({
-            credits_balance: profile.credits_balance,
-          })
-          .eq("id", ctx.user.id);
+        await ctx.adminSupabase.rpc("refund_credits", {
+          p_user_id: ctx.user.id,
+          p_amount: creditCost,
+        });
 
         await ctx.supabase
           .from("credit_transactions")

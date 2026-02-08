@@ -1,14 +1,18 @@
 import { initTRPC, TRPCError } from "@trpc/server";
 import { ZodError } from "zod";
-import { createSupabaseServerClient } from "@/server/supabase/server";
+import {
+  createSupabaseServerClient,
+  createSupabaseAdminClient,
+} from "@/server/supabase/server";
 
 export const createTRPCContext = async () => {
   const supabase = await createSupabaseServerClient();
+  const adminSupabase = createSupabaseAdminClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  return { supabase, user };
+  return { supabase, adminSupabase, user };
 };
 
 const t = initTRPC.context<typeof createTRPCContext>().create({
