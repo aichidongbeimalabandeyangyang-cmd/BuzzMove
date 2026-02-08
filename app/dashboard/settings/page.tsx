@@ -1,6 +1,7 @@
 "use client";
 
 import { trpc } from "@/lib/trpc";
+import Link from "next/link";
 
 export default function SettingsPage() {
   const { data: profile } = trpc.user.getProfile.useQuery();
@@ -51,7 +52,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Billing */}
-      <div className="rounded-2xl bg-[var(--card)] p-5 sm:p-7">
+      <div className="mb-4 sm:mb-6 rounded-2xl bg-[var(--card)] p-5 sm:p-7">
         <h2 className="mb-5 text-base font-bold">Billing</h2>
         {profile?.stripe_customer_id ? (
           <button
@@ -64,14 +65,38 @@ export default function SettingsPage() {
         ) : (
           <p className="text-sm text-[var(--muted-foreground)]">
             No active subscription.{" "}
-            <a
+            <Link
               href="/pricing"
               className="font-medium text-[var(--primary)] transition-colors hover:text-[var(--accent)]"
             >
               View plans
-            </a>
+            </Link>
           </p>
         )}
+      </div>
+
+      {/* Quick links */}
+      <div className="rounded-2xl bg-[var(--card)] p-5 sm:p-7">
+        <h2 className="mb-5 text-base font-bold">Help & Legal</h2>
+        <div className="space-y-1">
+          {[
+            { href: "/support", label: "Support" },
+            { href: "/terms", label: "Terms of Service" },
+            { href: "/privacy", label: "Privacy Policy" },
+            { href: "/refund-policy", label: "Refund Policy" },
+          ].map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="flex items-center justify-between rounded-xl px-3 py-3 text-sm text-[var(--muted-foreground)] transition-colors hover:bg-[var(--secondary)] hover:text-[var(--foreground)]"
+            >
+              {link.label}
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+              </svg>
+            </Link>
+          ))}
+        </div>
       </div>
     </div>
   );

@@ -35,12 +35,12 @@ export function VideoPlayer({ videoId }: VideoPlayerProps) {
         />
       </div>
 
-      <div className="mt-4 flex items-center justify-between">
+      <div className="mt-4 flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <span className="rounded-lg bg-[var(--secondary)] px-2.5 py-1 text-xs font-medium text-[var(--muted-foreground)]">
+          <span className="rounded-lg bg-[var(--secondary)] px-2.5 py-1.5 text-xs font-medium text-[var(--muted-foreground)]">
             {video.duration}s
           </span>
-          <span className="rounded-lg bg-[var(--secondary)] px-2.5 py-1 text-xs font-medium text-[var(--muted-foreground)] capitalize">
+          <span className="rounded-lg bg-[var(--secondary)] px-2.5 py-1.5 text-xs font-medium text-[var(--muted-foreground)] capitalize">
             {video.mode}
           </span>
         </div>

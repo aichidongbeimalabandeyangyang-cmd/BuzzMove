@@ -41,7 +41,7 @@ export default function PricingPage() {
         <div className="inline-flex rounded-xl bg-[var(--secondary)] p-1 gap-1">
           <button
             onClick={() => setBillingPeriod("monthly")}
-            className={`rounded-lg px-5 py-2.5 text-sm font-medium transition-all ${
+            className={`rounded-lg px-5 py-3 text-sm font-medium transition-all ${
               billingPeriod === "monthly"
                 ? "bg-[var(--primary)] text-[var(--background)]"
                 : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
@@ -51,14 +51,14 @@ export default function PricingPage() {
           </button>
           <button
             onClick={() => setBillingPeriod("yearly")}
-            className={`rounded-lg px-5 py-2.5 text-sm font-medium transition-all flex items-center gap-2 ${
+            className={`rounded-lg px-5 py-3 text-sm font-medium transition-all flex items-center gap-2 ${
               billingPeriod === "yearly"
                 ? "bg-[var(--primary)] text-[var(--background)]"
                 : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
             }`}
           >
             Yearly
-            <span className="rounded-md bg-emerald-900 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-400">
+            <span className="rounded-md bg-emerald-900 px-1.5 py-0.5 text-[11px] font-semibold text-emerald-400">
               -20%
             </span>
           </button>
@@ -71,7 +71,7 @@ export default function PricingPage() {
         <div className="rounded-2xl bg-[var(--card)] p-6 sm:p-7">
           <div className="mb-5">
             <h3 className="text-lg font-bold">{PLANS.free.name}</h3>
-            <p className="mt-0.5 text-xs text-[var(--muted-foreground)]">For trying things out</p>
+            <p className="mt-0.5 text-sm text-[var(--muted-foreground)]">For trying things out</p>
           </div>
           <p className="mb-6">
             <span className="text-4xl font-bold tracking-tight">$0</span>
@@ -112,7 +112,7 @@ export default function PricingPage() {
           </div>
           <div className="mb-5">
             <h3 className="text-lg font-bold">{PLANS.pro.name}</h3>
-            <p className="mt-0.5 text-xs text-[var(--muted-foreground)]">For regular creators</p>
+            <p className="mt-0.5 text-sm text-[var(--muted-foreground)]">For regular creators</p>
           </div>
           <p className="mb-6">
             <span className="text-4xl font-bold tracking-tight">
@@ -154,7 +154,7 @@ export default function PricingPage() {
         <div className="rounded-2xl bg-[var(--card)] p-6 sm:p-7">
           <div className="mb-5">
             <h3 className="text-lg font-bold">{PLANS.premium.name}</h3>
-            <p className="mt-0.5 text-xs text-[var(--muted-foreground)]">For power users</p>
+            <p className="mt-0.5 text-sm text-[var(--muted-foreground)]">For power users</p>
           </div>
           <p className="mb-6">
             <span className="text-4xl font-bold tracking-tight">
@@ -195,7 +195,7 @@ export default function PricingPage() {
       {/* Creator Weekly */}
       <div className="mb-12 sm:mb-20 flex justify-center">
         <div className="w-full max-w-md overflow-hidden rounded-2xl bg-[var(--card)]">
-          <div className="px-7 py-2.5 text-center" style={{ background: "linear-gradient(90deg, rgba(249,115,22,0.1), rgba(245,158,11,0.1))" }}>
+          <div className="px-7 py-3 text-center" style={{ background: "linear-gradient(90deg, rgba(249,115,22,0.1), rgba(245,158,11,0.1))" }}>
             <span className="text-xs font-semibold text-orange-400">
               LIMITED OFFER &mdash; 50% OFF
             </span>

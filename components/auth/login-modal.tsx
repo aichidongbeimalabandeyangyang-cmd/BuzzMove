@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createSupabaseBrowserClient } from "@/server/supabase/client";
 
 interface LoginModalProps {
@@ -20,7 +20,6 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
   useEffect(() => {
     if (open) {
       previousFocusRef.current = document.activeElement as HTMLElement;
-      // Focus the dialog after animation
       requestAnimationFrame(() => {
         dialogRef.current?.focus();
       });
@@ -57,6 +56,16 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [open, onClose]);
 
+  // Lock body scroll when open
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [open]);
+
   if (!open) return null;
 
   const handleEmailLogin = async (e: React.FormEvent) => {
@@ -86,7 +95,7 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-md animate-fade-in"
+      className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-md animate-fade-in"
       role="dialog"
       aria-modal="true"
       aria-labelledby="login-modal-title"
@@ -95,14 +104,14 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
       <div
         ref={dialogRef}
         tabIndex={-1}
-        className="relative w-full max-w-[380px] mx-4 animate-scale-in rounded-2xl border border-[var(--border)] bg-[var(--card)] p-8 outline-none"
+        className="relative w-full max-w-[420px] mx-0 sm:mx-4 animate-scale-in rounded-t-2xl sm:rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 sm:p-8 pb-[calc(1.5rem+env(safe-area-inset-bottom))] sm:pb-8 outline-none"
         style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.5), 0 0 80px rgba(232,168,56,0.06)" }}
       >
         {/* Close button */}
         <button
           onClick={onClose}
           aria-label="Close"
-          className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full text-[var(--muted-foreground)] transition-colors hover:text-[var(--foreground)] hover:bg-[var(--secondary)]"
+          className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full text-[var(--muted-foreground)] transition-colors hover:text-[var(--foreground)] hover:bg-[var(--secondary)] active:scale-95"
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -112,7 +121,7 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
         {/* Header */}
         <div className="mb-7">
           <div
-            className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl"
+            className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl"
             style={{ background: "linear-gradient(135deg, #e8a838, #f0c060)", boxShadow: "0 2px 12px rgba(232,168,56,0.25)" }}
           >
             <svg className="h-5 w-5" fill="#050505" viewBox="0 0 24 24">
@@ -131,7 +140,7 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
               <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
             </svg>
             <p className="text-sm font-medium">Check your email</p>
-            <p className="mt-1 text-xs text-[var(--muted-foreground)]">
+            <p className="mt-1 text-sm text-[var(--muted-foreground)]">
               We sent a sign-in link to {email}
             </p>
           </div>
@@ -140,10 +149,10 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
             {/* Google button */}
             <button
               onClick={handleGoogleLogin}
-              className="mb-4 flex w-full items-center justify-center gap-2.5 rounded-xl border border-[var(--border)] bg-white px-4 py-3 text-sm font-medium text-gray-800 transition-all hover:bg-gray-50 active:scale-[0.98]"
+              className="mb-4 flex w-full items-center justify-center gap-2.5 rounded-xl border border-[var(--border)] bg-white px-4 py-3.5 text-sm font-medium text-gray-800 transition-all hover:bg-gray-50 active:scale-[0.98]"
               style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.2)" }}
             >
-              <svg className="h-4 w-4" viewBox="0 0 24 24">
+              <svg className="h-4.5 w-4.5" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
                 <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
                 <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
@@ -174,13 +183,13 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@email.com"
                 required
-                className="mb-3 w-full rounded-xl border border-[var(--border)] bg-[var(--secondary)] px-4 py-3 text-sm transition-all placeholder:text-[var(--muted-foreground)]"
+                className="mb-3 w-full rounded-xl border border-[var(--border)] bg-[var(--secondary)] px-4 py-3.5 text-sm transition-all placeholder:text-[var(--muted-foreground)]"
               />
               <button
                 type="submit"
                 disabled={loading}
                 aria-busy={loading}
-                className="w-full rounded-xl py-3 text-sm font-semibold text-[var(--background)] transition-all hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
+                className="w-full rounded-xl py-3.5 text-sm font-semibold text-[var(--background)] transition-all hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
                 style={{ background: "linear-gradient(135deg, #e8a838, #d4942e)", boxShadow: "0 1px 8px rgba(232,168,56,0.2)" }}
               >
                 {loading ? "Sending..." : "Continue with Email"}

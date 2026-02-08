@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { trpc } from "@/lib/trpc";
+import { createSupabaseBrowserClient } from "@/server/supabase/client";
 import { getDeviceKey } from "@/components/tracking/device-key-ensurer";
 import { VideoProgress } from "./video-progress";
 import { VideoPlayer } from "./video-player";
@@ -25,6 +26,19 @@ export function VideoGenerator({
   const [mode, setMode] = useState<"standard" | "professional">("standard");
   const [videoId, setVideoId] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+
+  // Check auth state
+  useEffect(() => {
+    const supabase = createSupabaseBrowserClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setIsLoggedIn(!!user);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsLoggedIn(!!session?.user);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   const generateMutation = trpc.video.generate.useMutation({
     onSuccess(data) {
@@ -37,6 +51,10 @@ export function VideoGenerator({
   });
 
   const handleGenerate = () => {
+    if (!isLoggedIn) {
+      window.dispatchEvent(new CustomEvent("open-login"));
+      return;
+    }
     setStatus("submitting");
     generateMutation.mutate({
       imageUrl,
@@ -54,7 +72,7 @@ export function VideoGenerator({
         <button
           type="button"
           onClick={onReset}
-          className="rounded-xl bg-[var(--secondary)] px-6 py-3 text-sm font-medium transition-all active:scale-[0.98] hover:bg-[var(--primary-10)] hover:text-[var(--primary)]"
+          className="rounded-xl bg-[var(--secondary)] px-6 py-3.5 text-sm font-medium transition-all active:scale-[0.98] hover:bg-[var(--primary-10)] hover:text-[var(--primary)]"
         >
           Create Another
         </button>
@@ -73,7 +91,7 @@ export function VideoGenerator({
   }
 
   return (
-    <div className="mx-auto w-full max-w-lg pb-24 sm:pb-0">
+    <div className="mx-auto w-full max-w-lg">
       {/* Image preview */}
       <div className="relative mb-5 overflow-hidden rounded-2xl bg-[var(--card)]">
         <Image
@@ -89,7 +107,7 @@ export function VideoGenerator({
           type="button"
           onClick={onReset}
           aria-label="Remove image"
-          className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-black/40 text-white/80 backdrop-blur-sm transition-all hover:bg-black/60 hover:text-white"
+          className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-black/40 text-white/80 backdrop-blur-sm transition-all hover:bg-black/60 hover:text-white active:scale-95"
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -107,9 +125,9 @@ export function VideoGenerator({
           placeholder="Describe the motion you want... (optional)"
           maxLength={1000}
           rows={2}
-          className="w-full resize-none rounded-xl border border-[var(--border)] bg-[var(--secondary)] p-3.5 pr-12 text-sm leading-relaxed transition-all placeholder:text-[var(--muted-foreground)]"
+          className="w-full resize-none rounded-xl border border-[var(--border)] bg-[var(--secondary)] p-4 pr-12 text-sm leading-relaxed transition-all placeholder:text-[var(--muted-foreground)]"
         />
-        <span className="absolute bottom-2.5 right-3 text-[10px] tabular-nums text-[var(--muted-foreground)]" aria-hidden="true">
+        <span className="absolute bottom-3 right-3 text-xs tabular-nums text-[var(--muted-foreground)]" aria-hidden="true">
           {prompt.length}/1000
         </span>
       </div>
@@ -128,7 +146,7 @@ export function VideoGenerator({
                 role="radio"
                 aria-checked={duration === d}
                 onClick={() => setDuration(d)}
-                className={`flex-1 rounded-lg py-2.5 text-sm font-medium transition-all ${
+                className={`flex-1 rounded-lg py-3 text-sm font-medium transition-all ${
                   duration === d
                     ? "bg-[var(--primary)] text-[var(--background)]"
                     : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
@@ -152,38 +170,46 @@ export function VideoGenerator({
                 role="radio"
                 aria-checked={mode === m}
                 onClick={() => setMode(m)}
-                className={`flex-1 rounded-lg py-2.5 text-xs font-medium transition-all ${
+                className={`flex-1 rounded-lg py-3 text-sm font-medium transition-all ${
                   mode === m
                     ? "bg-[var(--primary)] text-[var(--background)]"
                     : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
                 }`}
               >
-                {m === "standard" ? "Standard" : "Pro"}
+                {m === "standard" ? "Std" : "Pro"}
               </button>
             ))}
           </div>
         </div>
       </div>
 
-      {/* Generate button — sticky on mobile */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] bg-gradient-to-t from-[var(--background)] via-[var(--background)] to-transparent sm:static sm:p-0 sm:bg-none">
+      {/* Generate button — inline, no more fixed overlap */}
+      <div className="pb-4 sm:pb-0">
         <button
           type="button"
           onClick={handleGenerate}
           disabled={generateMutation.isPending}
           aria-busy={generateMutation.isPending}
           className="w-full rounded-xl py-4 text-base font-semibold text-[var(--background)] transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
-          style={{ background: "linear-gradient(135deg, #e8a838, #d4942e)" }}
+          style={{ background: "linear-gradient(135deg, #e8a838, #d4942e)", boxShadow: "0 2px 16px rgba(232,168,56,0.2)" }}
         >
           {generateMutation.isPending ? (
             <span className="flex items-center justify-center gap-2">
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--background-30)] border-t-[var(--background)]" aria-hidden="true" />
               Starting...
             </span>
+          ) : isLoggedIn === false ? (
+            "Sign in to Generate"
           ) : (
             "Generate Video"
           )}
         </button>
+
+        {isLoggedIn === false && (
+          <p className="mt-2 text-center text-xs text-[var(--muted-foreground)]">
+            Free account includes 9,000 credits to get started
+          </p>
+        )}
       </div>
 
       {generateMutation.error && (

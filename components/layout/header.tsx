@@ -37,6 +37,13 @@ export function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Listen for custom open-login event from other components
+  useEffect(() => {
+    const handler = () => setShowLogin(true);
+    window.addEventListener("open-login", handler);
+    return () => window.removeEventListener("open-login", handler);
+  }, []);
+
   return (
     <>
       <header
@@ -44,7 +51,7 @@ export function Header() {
           scrolled ? "glass border-[var(--border)]" : "bg-[var(--background)] border-transparent"
         }`}
       >
-        <div className="mx-auto flex h-12 sm:h-14 max-w-5xl items-center justify-between px-4 sm:px-6">
+        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 sm:px-6">
           <Link href="/" className="flex items-center gap-2 shrink-0" aria-label="BuzzMove home">
             <div
               className="flex h-7 w-7 items-center justify-center rounded-md"
@@ -57,34 +64,31 @@ export function Header() {
             <span className="text-base font-bold tracking-tight">BuzzMove</span>
           </Link>
 
-          <nav className="flex items-center gap-0.5 sm:gap-1">
+          <nav className="flex items-center gap-1 sm:gap-2">
             {/* Desktop-only nav links */}
-            <Link href="/explorer" className="hidden sm:block px-3 py-1.5 text-xs text-[var(--muted-foreground)] transition-colors hover:text-[var(--foreground)]">
-              Explore
-            </Link>
             {!user && (
-              <Link href="/pricing" className="hidden sm:block px-3 py-1.5 text-xs text-[var(--muted-foreground)] transition-colors hover:text-[var(--foreground)]">
+              <Link href="/pricing" className="hidden sm:block px-3 py-2 text-sm text-[var(--muted-foreground)] transition-colors hover:text-[var(--foreground)] rounded-lg">
                 Pricing
               </Link>
             )}
 
             {user ? (
               <>
-                <div className="ml-1 sm:ml-3 mr-0.5 sm:mr-1 flex items-center gap-1.5 rounded-full bg-[var(--secondary)] px-2.5 sm:px-3 py-1">
+                <div className="ml-1 sm:ml-3 mr-1 sm:mr-2 flex items-center gap-1.5 rounded-full bg-[var(--secondary)] px-3 py-1.5">
                   <div className="h-1.5 w-1.5 rounded-full bg-[var(--primary)]" />
                   <span className="text-xs font-medium tabular-nums">{formatCredits(creditData?.balance ?? 0)}</span>
                 </div>
-                <Link href="/dashboard" className="hidden sm:block px-3 py-1.5 text-xs text-[var(--muted-foreground)] transition-colors hover:text-[var(--foreground)]">
-                  Dashboard
+                <Link href="/dashboard" className="hidden sm:block px-3 py-2 text-sm text-[var(--muted-foreground)] transition-colors hover:text-[var(--foreground)] rounded-lg">
+                  My Videos
                 </Link>
-                <Link href="/dashboard/settings" className="hidden sm:block px-3 py-1.5 text-xs text-[var(--muted-foreground)] transition-colors hover:text-[var(--foreground)]">
+                <Link href="/dashboard/settings" className="hidden sm:block px-3 py-2 text-sm text-[var(--muted-foreground)] transition-colors hover:text-[var(--foreground)] rounded-lg">
                   Settings
                 </Link>
               </>
             ) : (
               <button
                 onClick={() => setShowLogin(true)}
-                className="ml-2 sm:ml-4 rounded-lg px-4 sm:px-5 py-2 sm:py-2.5 text-xs font-semibold text-[var(--background)] transition-all active:scale-[0.97]"
+                className="ml-2 sm:ml-4 rounded-lg px-4 sm:px-5 py-2.5 text-sm font-semibold text-[var(--background)] transition-all active:scale-[0.97]"
                 style={{ background: "linear-gradient(135deg, #e8a838, #d4942e)" }}
               >
                 Get Started

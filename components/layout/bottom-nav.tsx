@@ -13,20 +13,19 @@ export function BottomNav({ isLoggedIn, onLoginClick }: BottomNavProps) {
 
   const tabs = isLoggedIn
     ? [
-        { href: "/explorer", label: "Explore", icon: CompassIcon },
         { href: "/dashboard", label: "My Videos", icon: FilmIcon },
         { href: "/", label: "Create", icon: PlusIcon, primary: true },
         { href: "/dashboard/settings", label: "Settings", icon: GearIcon },
       ]
     : [
-        { href: "/explorer", label: "Explore", icon: CompassIcon },
-        { href: "/", label: "Create", icon: PlusIcon, primary: true },
         { href: "/pricing", label: "Pricing", icon: TagIcon },
+        { href: "/", label: "Create", icon: PlusIcon, primary: true },
+        { href: "#login", label: "Sign In", icon: UserIcon, action: onLoginClick },
       ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 sm:hidden border-t border-[var(--border)] bg-[var(--background)]/95 backdrop-blur-lg pb-[env(safe-area-inset-bottom)]">
-      <div className="flex items-end justify-around px-2 pt-1.5 pb-1.5">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 sm:hidden border-t border-[var(--border)] bg-[rgba(5,5,5,0.95)] backdrop-blur-lg pb-[env(safe-area-inset-bottom)]">
+      <div className="flex items-end justify-around px-4 pt-2 pb-2">
         {tabs.map((tab) => {
           const isActive = tab.href === "/" ? pathname === "/" : pathname.startsWith(tab.href);
           const Icon = tab.icon;
@@ -44,8 +43,24 @@ export function BottomNav({ isLoggedIn, onLoginClick }: BottomNavProps) {
                 >
                   <Icon className="h-5 w-5" />
                 </div>
-                <span className="text-[10px] font-medium text-[var(--primary)]">{tab.label}</span>
+                <span className="text-[11px] font-medium text-[var(--primary)]">{tab.label}</span>
               </Link>
+            );
+          }
+
+          if ("action" in tab && tab.action) {
+            return (
+              <button
+                key={tab.href}
+                type="button"
+                onClick={tab.action}
+                className={`flex flex-col items-center gap-0.5 min-w-[60px] min-h-[44px] justify-center transition-colors ${
+                  isActive ? "text-[var(--foreground)]" : "text-[var(--muted-foreground)]"
+                }`}
+              >
+                <Icon className="h-5 w-5" />
+                <span className="text-[11px] font-medium">{tab.label}</span>
+              </button>
             );
           }
 
@@ -53,26 +68,17 @@ export function BottomNav({ isLoggedIn, onLoginClick }: BottomNavProps) {
             <Link
               key={tab.href}
               href={tab.href}
-              className={`flex flex-col items-center gap-0.5 px-3 py-1 transition-colors ${
+              className={`flex flex-col items-center gap-0.5 min-w-[60px] min-h-[44px] justify-center transition-colors ${
                 isActive ? "text-[var(--foreground)]" : "text-[var(--muted-foreground)]"
               }`}
             >
               <Icon className="h-5 w-5" />
-              <span className="text-[10px] font-medium">{tab.label}</span>
+              <span className="text-[11px] font-medium">{tab.label}</span>
             </Link>
           );
         })}
       </div>
     </nav>
-  );
-}
-
-function CompassIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9 9 0 100-18 9 9 0 000 18z" />
-      <path strokeLinecap="round" strokeLinejoin="round" d="M16.24 7.76l-2.12 6.36-6.36 2.12 2.12-6.36 6.36-2.12z" />
-    </svg>
   );
 }
 
@@ -106,6 +112,14 @@ function TagIcon({ className }: { className?: string }) {
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
       <path strokeLinecap="round" strokeLinejoin="round" d="M6 6h.008v.008H6V6z" />
+    </svg>
+  );
+}
+
+function UserIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
     </svg>
   );
 }
