@@ -88,10 +88,10 @@ export default function RootLayout({
           />
         )}
       </head>
-      <body className="min-h-screen antialiased">
+      <body className="flex min-h-screen flex-col antialiased">
         <Providers>
           <Header />
-          <main className="min-h-[calc(100vh-4rem-5rem)]">{children}</main>
+          <main className="flex-1">{children}</main>
           <Footer />
         </Providers>
       </body>

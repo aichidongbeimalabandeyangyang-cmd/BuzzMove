@@ -62,7 +62,7 @@ export default function HomePage() {
   // Show VideoGenerator when image is ready
   if (imageUrl && imagePreview) {
     return (
-      <div className="relative flex min-h-[calc(100vh-3.5rem)] flex-col items-center justify-center px-4 py-8">
+      <div className="relative flex flex-1 flex-col items-center justify-center px-4 py-8">
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div className="absolute left-1/4 top-1/4 h-[300px] w-[300px] sm:h-[500px] sm:w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--primary)] opacity-[0.03] blur-[120px]" />
         </div>
@@ -81,7 +81,7 @@ export default function HomePage() {
   // Show upload zone
   if (showUpload) {
     return (
-      <div className="relative flex min-h-[calc(100vh-3.5rem)] flex-col items-center justify-center px-4 py-8">
+      <div className="relative flex flex-1 flex-col items-center justify-center px-4 py-8">
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <div className="absolute left-1/4 top-1/4 h-[300px] w-[300px] sm:h-[500px] sm:w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--primary)] opacity-[0.03] blur-[120px]" />
         </div>
@@ -128,7 +128,7 @@ export default function HomePage() {
 
   // Default: Hero example view — compact, everything above the fold
   return (
-    <div className="relative mx-auto flex min-h-[calc(100vh-3.5rem)] max-w-md flex-col px-4 py-4 sm:py-6">
+    <div className="relative mx-auto flex flex-1 max-w-md flex-col px-4 py-4 sm:py-6">
       {/* Background */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute left-1/4 top-1/4 h-[300px] w-[300px] sm:h-[500px] sm:w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--primary)] opacity-[0.03] blur-[120px]" />
