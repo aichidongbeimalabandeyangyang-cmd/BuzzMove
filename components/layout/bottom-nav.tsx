@@ -9,40 +9,38 @@ interface BottomNavProps {
   onLoginClick: () => void;
 }
 
+const TABS = [
+  { href: "/", label: "Move", icon: Flame, match: (p: string) => p === "/" },
+  { href: "/dashboard", label: "Assets", icon: Layers, match: (p: string) => p === "/dashboard" || p === "/dashboard/" },
+  { href: "/dashboard/profile", label: "My Profile", icon: CircleUser, match: (p: string) => p.startsWith("/dashboard/profile") || p.startsWith("/dashboard/settings") || p.startsWith("/pricing") },
+] as const;
+
 export function BottomNav({ isLoggedIn, onLoginClick }: BottomNavProps) {
   const pathname = usePathname();
 
-  const tabs = [
-    { href: "/", label: "Move", icon: Flame },
-    { href: "/dashboard", label: "Assets", icon: Layers },
-    {
-      href: isLoggedIn ? "/dashboard/profile" : "#login",
-      label: "My Profile",
-      icon: CircleUser,
-      action: !isLoggedIn ? onLoginClick : undefined,
-    },
-  ];
-
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 sm:hidden bg-[#0B0B0E] pb-[env(safe-area-inset-bottom)]">
+    <nav className="fixed inset-x-0 bottom-0 z-50 sm:hidden bg-[#0B0B0E] pb-[env(safe-area-inset-bottom)]">
+      {/* Tab separator: 1px #1A1A1E */}
       <div className="h-px w-full bg-[#1A1A1E]" />
+      {/* BottomTab: h64, justify-around, padding [6,0,14,0] */}
       <div className="flex h-16 items-center justify-around pt-1.5 pb-3.5">
-        {tabs.map((tab) => {
-          const isActive = tab.href === "/" ? pathname === "/" : pathname.startsWith(tab.href);
+        {TABS.map((tab) => {
+          const isActive = tab.match(pathname);
           const Icon = tab.icon;
+          const colorClass = isActive ? "text-[#E8A838]" : "text-[#6B6B70]";
+          const weightClass = isActive ? "font-semibold" : "font-medium";
 
-          if ("action" in tab && tab.action) {
+          // Profile tab: if not logged in, show button that opens login
+          if (tab.label === "My Profile" && !isLoggedIn) {
             return (
               <button
                 key={tab.label}
                 type="button"
-                onClick={tab.action}
-                className={`flex flex-col items-center gap-[3px] min-w-[64px] min-h-[44px] justify-center transition-colors ${
-                  isActive ? "text-[var(--primary)]" : "text-[#6B6B70]"
-                }`}
+                onClick={onLoginClick}
+                className={`flex flex-col items-center gap-[3px] min-w-[64px] min-h-[44px] justify-center ${colorClass}`}
               >
                 <Icon className="h-[22px] w-[22px]" strokeWidth={1.5} />
-                <span className={`text-[11px] ${isActive ? "font-semibold" : "font-medium"}`}>{tab.label}</span>
+                <span className={`text-[11px] ${weightClass}`}>{tab.label}</span>
               </button>
             );
           }
@@ -51,12 +49,10 @@ export function BottomNav({ isLoggedIn, onLoginClick }: BottomNavProps) {
             <Link
               key={tab.label}
               href={tab.href}
-              className={`flex flex-col items-center gap-[3px] min-w-[64px] min-h-[44px] justify-center transition-colors ${
-                isActive ? "text-[var(--primary)]" : "text-[#6B6B70]"
-              }`}
+              className={`flex flex-col items-center gap-[3px] min-w-[64px] min-h-[44px] justify-center ${colorClass}`}
             >
               <Icon className="h-[22px] w-[22px]" strokeWidth={1.5} />
-              <span className={`text-[11px] ${isActive ? "font-semibold" : "font-medium"}`}>{tab.label}</span>
+              <span className={`text-[11px] ${weightClass}`}>{tab.label}</span>
             </Link>
           );
         })}

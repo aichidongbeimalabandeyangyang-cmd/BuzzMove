@@ -1,21 +1,14 @@
 import type { Metadata, Viewport } from "next";
-import { DM_Sans, Sora } from "next/font/google";
+import { DM_Sans } from "next/font/google";
 import { Providers } from "@/components/providers";
-import { Header } from "@/components/layout/header";
+import { AppShell } from "@/components/layout/app-shell";
 import { Footer } from "@/components/layout/footer";
 import "./globals.css";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
   variable: "--font-dm-sans",
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
-});
-
-const sora = Sora({
-  subsets: ["latin"],
-  variable: "--font-sora",
-  weight: ["500", "600", "700"],
+  weight: ["400", "500", "600", "700", "800"],
   display: "swap",
 });
 
@@ -37,10 +30,7 @@ export const metadata: Metadata = {
     description:
       "Turn your photos into stunning AI videos. Create cinematic motion from any image in seconds.",
   },
-  robots: {
-    index: true,
-    follow: true,
-  },
+  robots: { index: true, follow: true },
 };
 
 export const viewport: Viewport = {
@@ -55,9 +45,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`dark ${dmSans.variable} ${sora.variable}`}>
+    <html lang="en" className={`dark ${dmSans.variable}`}>
       <head>
-        {/* Google Ads Pixel */}
         {process.env.NEXT_PUBLIC_GOOGLE_ADS_ID && (
           <>
             <script
@@ -76,8 +65,6 @@ export default function RootLayout({
             />
           </>
         )}
-
-        {/* Twitter/X Pixel */}
         {process.env.NEXT_PUBLIC_TWITTER_PIXEL_ID && (
           <script
             dangerouslySetInnerHTML={{
@@ -93,8 +80,7 @@ export default function RootLayout({
       </head>
       <body className="flex min-h-screen flex-col antialiased">
         <Providers>
-          <Header />
-          <main className="flex flex-1 flex-col pb-16 sm:pb-0">{children}</main>
+          <AppShell>{children}</AppShell>
           <Footer />
         </Providers>
       </body>

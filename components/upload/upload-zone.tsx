@@ -1,128 +1,146 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useRef } from "react";
 import Image from "next/image";
+import { Plus } from "lucide-react";
 import { SUPPORTED_FORMATS, MAX_FILE_SIZE } from "@/lib/constants";
 
 interface UploadZoneProps {
   onFileSelected: (file: File) => void;
-  disabled?: boolean;
 }
+
+// Persist recent uploads in localStorage
+const STORAGE_KEY = "buzzmove_recent_uploads";
 
 interface RecentUpload {
-  id: string;
   url: string;
   name: string;
-  uploadedAt: number;
+  timestamp: number;
 }
 
-const RECENT_UPLOADS_KEY = "buzzmove_recent_uploads";
-const MAX_RECENT = 8;
-
-function getRecentUploads(): RecentUpload[] {
+export function saveRecentUpload(url: string, name: string) {
   try {
-    const stored = localStorage.getItem(RECENT_UPLOADS_KEY);
-    return stored ? JSON.parse(stored) : [];
-  } catch { return []; }
-}
-
-function saveRecentUpload(url: string, name: string) {
-  try {
-    const uploads = getRecentUploads();
-    const newUpload: RecentUpload = { id: `${Date.now()}-${Math.random().toString(36).slice(2)}`, url, name, uploadedAt: Date.now() };
-    const updated = [newUpload, ...uploads.filter(u => u.url !== url)].slice(0, MAX_RECENT);
-    localStorage.setItem(RECENT_UPLOADS_KEY, JSON.stringify(updated));
+    const existing: RecentUpload[] = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    const updated = [{ url, name, timestamp: Date.now() }, ...existing.filter((u) => u.url !== url)].slice(0, 8);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
   } catch {}
 }
 
-export { saveRecentUpload };
+function getRecentUploads(): RecentUpload[] {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+  } catch {
+    return [];
+  }
+}
 
-export function UploadZone({ onFileSelected, disabled }: UploadZoneProps) {
-  const [error, setError] = useState<string | null>(null);
-  const [recentUploads, setRecentUploads] = useState<RecentUpload[]>([]);
+export function UploadZone({ onFileSelected }: UploadZoneProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const recents = getRecentUploads();
 
-  useEffect(() => { setRecentUploads(getRecentUploads()); }, []);
-
-  const validateFile = (file: File): boolean => {
-    if (!SUPPORTED_FORMATS.includes(file.type)) { setError("Please upload a JPG, PNG, or WebP image"); return false; }
-    if (file.size > MAX_FILE_SIZE) { setError("File size must be under 10MB"); return false; }
-    setError(null);
-    return true;
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!SUPPORTED_FORMATS.includes(file.type)) {
+      alert("Please upload a JPEG, PNG, or WebP image.");
+      return;
+    }
+    if (file.size > MAX_FILE_SIZE) {
+      alert("File too large. Max 10MB.");
+      return;
+    }
+    onFileSelected(file);
   };
 
-  const handleFile = useCallback((file: File) => {
-    if (validateFile(file)) onFileSelected(file);
-  }, [onFileSelected]);
-
-  const handleRecentClick = (upload: RecentUpload) => {
-    setError(null);
-    fetch(upload.url)
-      .then(res => res.blob())
-      .then(blob => {
-        const file = new File([blob], upload.name, { type: blob.type || "image/jpeg" });
-        onFileSelected(file);
-      })
-      .catch(() => setError("Failed to load this image. Try uploading again."));
+  const handleRecentClick = async (url: string) => {
+    try {
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const file = new File([blob], "recent-upload.jpg", { type: blob.type });
+      onFileSelected(file);
+    } catch {
+      alert("Could not load this image. Please upload a new one.");
+    }
   };
 
   return (
-    <div className={`flex flex-1 flex-col gap-4 ${disabled ? "opacity-50 pointer-events-none" : ""}`}>
-      {/* Title */}
-      <div>
-        <h2 className="text-[22px] font-bold text-[var(--foreground)]">Choose a photo</h2>
-        <p className="mt-1 text-[13px] font-medium text-[#6B6B70]">Recent uploads</p>
-      </div>
-
-      {/* Photo grid — 3 columns, responsive using CSS grid */}
-      <div className="grid grid-cols-3 gap-2.5">
-        {/* Add New button */}
-        <button
-          type="button"
-          onClick={() => inputRef.current?.click()}
-          className="flex h-[150px] flex-col items-center justify-center gap-2 rounded-[14px] transition-all active:scale-[0.97]"
-          style={{ border: "1.5px solid #252530" }}
-          aria-label="Upload new photo"
-        >
-          <svg className="h-8 w-8 text-[var(--primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-          </svg>
-          <span className="text-xs font-medium text-[#6B6B70]">Add New</span>
-        </button>
-
-        {/* Recent photos */}
-        {recentUploads.slice(0, 8).map((upload) => (
-          <button
-            key={upload.id}
-            type="button"
-            onClick={() => handleRecentClick(upload)}
-            className="relative h-[150px] overflow-hidden rounded-[14px] bg-[var(--secondary)] transition-all active:scale-[0.97]"
-          >
-            <Image src={upload.url} alt={upload.name} fill className="object-cover" unoptimized />
-          </button>
-        ))}
-
-        {/* Empty placeholder cells to fill the grid */}
-        {Array.from({ length: Math.max(0, 8 - recentUploads.length) }).map((_, i) => (
-          <div key={`empty-${i}`} className="h-[150px] rounded-[14px] bg-[#16161A]" />
-        ))}
-      </div>
-
-      {/* Hidden file input */}
+    <div className="flex flex-1 flex-col gap-4">
       <input
         ref={inputRef}
         type="file"
-        accept={SUPPORTED_FORMATS.join(",")}
-        tabIndex={-1}
-        className="sr-only"
-        onChange={(e) => { const file = e.target.files?.[0]; if (file) handleFile(file); }}
+        accept="image/jpeg,image/png,image/webp"
+        onChange={handleFileChange}
+        className="hidden"
       />
 
-      {error && (
-        <div role="alert" className="rounded-xl bg-[var(--destructive-10)] px-4 py-2.5 text-center text-sm text-[var(--destructive)]">
-          {error}
+      {/* Title: 22/700 #FAFAF9 */}
+      <h1 className="text-[22px] font-bold text-[#FAFAF9]">Choose a photo</h1>
+
+      {/* Subtitle: 13/500 #6B6B70 */}
+      <p className="text-[13px] font-medium text-[#6B6B70]">Recent uploads</p>
+
+      {/* Photo Grid: gap 10, 3 columns */}
+      <div className="flex flex-col gap-2.5">
+        {/* Row 1 */}
+        <div className="grid grid-cols-3 gap-2.5">
+          {/* Add New Card: h150, cornerRadius 14, stroke 1.5px #252530, gap 8 */}
+          <button
+            onClick={() => inputRef.current?.click()}
+            className="flex h-[150px] flex-col items-center justify-center gap-2 rounded-[14px]"
+            style={{ border: "1.5px solid #252530" }}
+          >
+            <Plus className="h-8 w-8 text-[#E8A838]" strokeWidth={1.5} />
+            <span className="text-xs font-medium text-[#6B6B70]">Add New</span>
+          </button>
+
+          {/* Recent photos */}
+          {recents.slice(0, 2).map((item, i) => (
+            <button
+              key={i}
+              onClick={() => handleRecentClick(item.url)}
+              className="relative h-[150px] overflow-hidden rounded-[14px]"
+            >
+              <Image src={item.url} alt={item.name} fill className="object-cover" unoptimized />
+            </button>
+          ))}
+          {/* Empty placeholders if needed */}
+          {Array.from({ length: Math.max(0, 2 - recents.length) }).map((_, i) => (
+            <div key={`empty-${i}`} className="h-[150px] rounded-[14px] bg-[#16161A]" />
+          ))}
         </div>
-      )}
+
+        {/* Row 2 */}
+        <div className="grid grid-cols-3 gap-2.5">
+          {recents.slice(2, 5).map((item, i) => (
+            <button
+              key={i}
+              onClick={() => handleRecentClick(item.url)}
+              className="relative h-[150px] overflow-hidden rounded-[14px]"
+            >
+              <Image src={item.url} alt={item.name} fill className="object-cover" unoptimized />
+            </button>
+          ))}
+          {Array.from({ length: Math.max(0, 3 - recents.slice(2, 5).length) }).map((_, i) => (
+            <div key={`empty2-${i}`} className="h-[150px] rounded-[14px] bg-[#16161A]" />
+          ))}
+        </div>
+
+        {/* Row 3 */}
+        <div className="grid grid-cols-3 gap-2.5">
+          {recents.slice(5, 8).map((item, i) => (
+            <button
+              key={i}
+              onClick={() => handleRecentClick(item.url)}
+              className="relative h-[150px] overflow-hidden rounded-[14px]"
+            >
+              <Image src={item.url} alt={item.name} fill className="object-cover" unoptimized />
+            </button>
+          ))}
+          {Array.from({ length: Math.max(0, 3 - recents.slice(5, 8).length) }).map((_, i) => (
+            <div key={`empty3-${i}`} className="h-[150px] rounded-[14px] bg-[#16161A]" />
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
