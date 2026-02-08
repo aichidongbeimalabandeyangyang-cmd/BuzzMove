@@ -99,14 +99,66 @@ function RotatingTaglines() {
   );
 }
 
-const SHOWCASE = {
+// ---- Showcase content variants ----
+const SHOWCASE_DEFAULT = {
+  image: "/examples/showcase-default.png",
+  video: "/examples/showcase-default.mp4",
+  prompt: "Blowing a kiss, flirty expression, charming smile.",
+};
+
+const SHOWCASE_VARIANT = {
   image: "/examples/showcase.png",
   video: "/examples/showcase.mp4",
   prompt: "Blowing a kiss, flirty expression, charming smile.",
 };
 
+// Keywords in any URL param that trigger the variant showcase
+const VARIANT_KEYWORDS = ["uncensored"];
+
+const SHOWCASE_STORAGE_KEY = "buzzmove_showcase_variant";
+
+function useShowcase() {
+  const [showcase, setShowcase] = useState(SHOWCASE_DEFAULT);
+
+  useEffect(() => {
+    // Check sessionStorage first (persists across navigations in same session)
+    const cached = sessionStorage.getItem(SHOWCASE_STORAGE_KEY);
+    if (cached === "variant") {
+      setShowcase(SHOWCASE_VARIANT);
+      return;
+    }
+    if (cached === "default") return; // already resolved as default
+
+    // Read URL params and check for keyword matches
+    const params = new URLSearchParams(window.location.search);
+    const allValues = [
+      params.get("ref"),
+      params.get("utm_source"),
+      params.get("utm_medium"),
+      params.get("utm_campaign"),
+      params.get("utm_content"),
+    ]
+      .filter(Boolean)
+      .map((v) => v!.toLowerCase());
+
+    const matched = allValues.some((val) =>
+      VARIANT_KEYWORDS.some((kw) => val.includes(kw))
+    );
+
+    if (matched) {
+      setShowcase(SHOWCASE_VARIANT);
+      sessionStorage.setItem(SHOWCASE_STORAGE_KEY, "variant");
+    } else {
+      sessionStorage.setItem(SHOWCASE_STORAGE_KEY, "default");
+    }
+  }, []);
+
+  return showcase;
+}
+
 export default function HomePage() {
   const { homeView, setHomeView, user, openLogin } = useApp();
+  const SHOWCASE = useShowcase();
 
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
