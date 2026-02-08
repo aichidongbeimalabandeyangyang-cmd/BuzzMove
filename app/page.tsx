@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { UploadZone } from "@/components/upload/upload-zone";
 import { VideoGenerator } from "@/components/video/video-generator";
-import { createSupabaseBrowserClient } from "@/server/supabase/client";
 import { HERO_EXAMPLES } from "@/lib/constants";
 
 export default function HomePage() {
@@ -22,22 +21,15 @@ export default function HomePage() {
 
     setUploading(true);
     try {
-      const supabase = createSupabaseBrowserClient();
-      const fileName = `${Date.now()}-${file.name}`;
-      const { data, error } = await supabase.storage
-        .from("uploads")
-        .upload(`images/${fileName}`, file, {
-          cacheControl: "3600",
-          upsert: false,
-        });
+      const formData = new FormData();
+      formData.append("file", file);
 
-      if (error) throw error;
+      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      const data = await res.json();
 
-      const {
-        data: { publicUrl },
-      } = supabase.storage.from("uploads").getPublicUrl(data.path);
+      if (!res.ok) throw new Error(data.error);
 
-      setImageUrl(publicUrl);
+      setImageUrl(data.url);
     } catch (err) {
       console.error("Upload failed:", err);
       setSelectedFile(null);
