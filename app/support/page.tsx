@@ -4,11 +4,11 @@ export const metadata: Metadata = { title: "Support - BuzzMove" };
 
 export default function SupportPage() {
   return (
-    <div className="mx-auto max-w-3xl px-4 py-16">
-      <h1 className="mb-8 text-3xl font-bold">Support</h1>
+    <div className="mx-auto max-w-3xl px-4 py-6 sm:px-6 sm:py-16">
+      <h1 className="mb-6 sm:mb-8 text-2xl font-bold sm:text-3xl">Support</h1>
 
-      <div className="space-y-6">
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6">
+      <div className="space-y-4 sm:space-y-6">
+        <div className="rounded-2xl bg-[var(--card)] p-5 sm:p-6">
           <h2 className="mb-2 text-lg font-bold">Email Support</h2>
           <p className="text-sm text-[var(--muted-foreground)]">
             Reach us at{" "}
@@ -24,7 +24,7 @@ export default function SupportPage() {
           </p>
         </div>
 
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6">
+        <div className="rounded-2xl bg-[var(--card)] p-5 sm:p-6">
           <h2 className="mb-4 text-lg font-bold">FAQ</h2>
           <div className="space-y-4">
             {[

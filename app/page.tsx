@@ -137,8 +137,7 @@ export default function HomePage() {
       {/* Example image — constrained aspect ratio */}
       <div className="relative mb-4 animate-fade-up">
         <div
-          className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl border border-[var(--border)]"
-          style={{ boxShadow: "0 4px 32px rgba(0,0,0,0.4)" }}
+          className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl"
         >
           <Image
             src={currentExample.image}
@@ -188,7 +187,7 @@ export default function HomePage() {
           </svg>
           <span className="text-xs font-medium text-[var(--primary)]">Motion Prompt</span>
         </div>
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] px-3.5 py-2.5">
+        <div className="rounded-xl bg-[var(--card)] px-3.5 py-2.5">
           <p className="text-[13px] text-[var(--foreground-80)] leading-relaxed">
             {currentExample.prompt}
           </p>

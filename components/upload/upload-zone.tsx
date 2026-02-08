@@ -56,8 +56,8 @@ export function UploadZone({ onFileSelected, disabled }: UploadZoneProps) {
     <div
       role="button"
       tabIndex={0}
-      aria-label="Upload image — drop your image here or click to browse files. Accepts JPG, PNG, WebP up to 10 MB."
-      className={`group relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-12 transition-all duration-300 cursor-pointer active:scale-[0.99] ${
+      aria-label="Upload image"
+      className={`group relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-6 sm:p-12 transition-all duration-300 cursor-pointer active:scale-[0.99] ${
         isDragging
           ? "border-[var(--primary)] bg-[var(--primary-5)]"
           : "border-[var(--border)] hover:border-[var(--primary-40)] hover:bg-[var(--card)]"
@@ -75,6 +75,7 @@ export function UploadZone({ onFileSelected, disabled }: UploadZoneProps) {
         ref={inputRef}
         type="file"
         accept={SUPPORTED_FORMATS.join(",")}
+        capture="environment"
         tabIndex={-1}
         className="sr-only"
         onChange={(e) => {
@@ -84,7 +85,7 @@ export function UploadZone({ onFileSelected, disabled }: UploadZoneProps) {
       />
 
       {/* Upload icon */}
-      <div className="relative mb-5">
+      <div className="relative mb-4">
         <div
           className="flex h-14 w-14 items-center justify-center rounded-2xl transition-transform duration-300 group-hover:scale-110"
           style={{ background: "linear-gradient(135deg, rgba(232,168,56,0.12), rgba(240,192,96,0.06))" }}
@@ -100,24 +101,31 @@ export function UploadZone({ onFileSelected, disabled }: UploadZoneProps) {
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
-              d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
+              d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z"
             />
           </svg>
         </div>
       </div>
 
-      <p className="mb-1 text-base font-semibold">
-        Drop your image here
+      <p className="mb-0.5 text-base font-semibold">
+        <span className="sm:hidden">Choose a photo</span>
+        <span className="hidden sm:inline">Drop your image here</span>
       </p>
       <p className="text-sm text-[var(--muted-foreground)]">
-        or <span className="text-[var(--primary)] font-medium">browse files</span>
+        <span className="sm:hidden">or take a new one</span>
+        <span className="hidden sm:inline">or <span className="text-[var(--primary)] font-medium">browse files</span></span>
       </p>
-      <p className="mt-3 text-xs text-[var(--muted-foreground)]">
+      <p className="mt-2 text-xs text-[var(--muted-foreground)]">
         JPG, PNG, WebP &middot; Up to 10 MB
       </p>
 
       {error && (
-        <div role="alert" className="mt-4 rounded-lg bg-[var(--destructive-10)] px-3 py-2 text-sm text-[var(--destructive)]">
+        <div role="alert" className="mt-3 rounded-xl bg-[var(--destructive-10)] px-3 py-2 text-sm text-[var(--destructive)]">
           {error}
         </div>
       )}

@@ -25,39 +25,37 @@ export default function PricingPage() {
     });
 
   return (
-    <div className="mx-auto max-w-5xl px-5 py-20">
+    <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-20">
       {/* Header */}
-      <div className="mb-14 text-center animate-fade-up">
-        <h1 className="mb-3 text-4xl font-bold tracking-tight sm:text-5xl">
+      <div className="mb-10 sm:mb-14 text-center animate-fade-up">
+        <h1 className="mb-3 text-3xl font-bold tracking-tight sm:text-5xl">
           Simple, <span className="text-gradient">flexible</span> pricing
         </h1>
-        <p className="mx-auto max-w-md text-base text-[var(--muted-foreground)]">
+        <p className="mx-auto max-w-md text-sm text-[var(--muted-foreground)] sm:text-base">
           Start free with 9,000 credits. Upgrade when you need more.
         </p>
       </div>
 
       {/* Billing toggle */}
-      <div className="mb-12 flex items-center justify-center animate-fade-up delay-100">
-        <div className="inline-flex rounded-xl border border-[var(--border)] bg-[var(--secondary)] p-1 gap-1">
+      <div className="mb-8 sm:mb-12 flex items-center justify-center animate-fade-up delay-100">
+        <div className="inline-flex rounded-xl bg-[var(--secondary)] p-1 gap-1">
           <button
             onClick={() => setBillingPeriod("monthly")}
-            className={`rounded-lg px-5 py-3 text-sm font-medium transition-all ${
+            className={`rounded-lg px-5 py-2.5 text-sm font-medium transition-all ${
               billingPeriod === "monthly"
-                ? "text-[var(--background)]"
+                ? "bg-[var(--primary)] text-[var(--background)]"
                 : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
             }`}
-            style={billingPeriod === "monthly" ? { background: "linear-gradient(135deg, #e8a838, #d4942e)" } : undefined}
           >
             Monthly
           </button>
           <button
             onClick={() => setBillingPeriod("yearly")}
-            className={`rounded-lg px-5 py-3 text-sm font-medium transition-all flex items-center gap-2 ${
+            className={`rounded-lg px-5 py-2.5 text-sm font-medium transition-all flex items-center gap-2 ${
               billingPeriod === "yearly"
-                ? "text-[var(--background)]"
+                ? "bg-[var(--primary)] text-[var(--background)]"
                 : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
             }`}
-            style={billingPeriod === "yearly" ? { background: "linear-gradient(135deg, #e8a838, #d4942e)" } : undefined}
           >
             Yearly
             <span className="rounded-md bg-emerald-900 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-400">
@@ -68,12 +66,9 @@ export default function PricingPage() {
       </div>
 
       {/* Subscription plans */}
-      <div className="mb-20 grid gap-5 md:grid-cols-3 animate-fade-up delay-200">
+      <div className="mb-12 sm:mb-20 grid gap-4 sm:gap-5 md:grid-cols-3 animate-fade-up delay-200">
         {/* Free */}
-        <div
-          className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-7"
-          style={{ boxShadow: "var(--card-shadow)" }}
-        >
+        <div className="rounded-2xl bg-[var(--card)] p-6 sm:p-7">
           <div className="mb-5">
             <h3 className="text-lg font-bold">{PLANS.free.name}</h3>
             <p className="mt-0.5 text-xs text-[var(--muted-foreground)]">For trying things out</p>
@@ -99,21 +94,18 @@ export default function PricingPage() {
           </ul>
           <button
             disabled
-            className="w-full rounded-xl border border-[var(--border)] py-3.5 text-sm font-medium text-[var(--muted-foreground)] cursor-default"
+            className="w-full rounded-xl bg-[var(--secondary)] py-3.5 text-sm font-medium text-[var(--muted-foreground)] cursor-default"
           >
             Current Plan
           </button>
         </div>
 
         {/* Pro - Featured */}
-        <div
-          className="relative rounded-2xl border-2 border-[var(--primary-40)] bg-[var(--card)] p-7 pt-10"
-          style={{ boxShadow: "0 0 30px rgba(232,168,56,0.08), var(--card-shadow)" }}
-        >
+        <div className="relative rounded-2xl border-2 border-[var(--primary-40)] bg-[var(--card)] p-6 pt-9 sm:p-7 sm:pt-10">
           <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-10">
             <span
               className="rounded-full px-4 py-1.5 text-xs font-semibold text-[var(--background)] whitespace-nowrap"
-              style={{ background: "linear-gradient(135deg, #e8a838, #f0c060)", boxShadow: "0 2px 8px rgba(232,168,56,0.3)" }}
+              style={{ background: "linear-gradient(135deg, #e8a838, #f0c060)" }}
             >
               Most Popular
             </span>
@@ -151,18 +143,15 @@ export default function PricingPage() {
               subscriptionCheckout.mutate({ plan: "pro", billingPeriod })
             }
             disabled={subscriptionCheckout.isPending}
-            className="w-full rounded-xl py-3.5 text-sm font-semibold text-[var(--background)] transition-all hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
-            style={{ background: "linear-gradient(135deg, #e8a838, #d4942e)", boxShadow: "0 2px 12px rgba(232,168,56,0.25)" }}
+            className="w-full rounded-xl py-3.5 text-sm font-semibold text-[var(--background)] transition-all active:scale-[0.98] disabled:opacity-50"
+            style={{ background: "linear-gradient(135deg, #e8a838, #d4942e)" }}
           >
             Get Pro
           </button>
         </div>
 
         {/* Premium */}
-        <div
-          className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-7"
-          style={{ boxShadow: "var(--card-shadow)" }}
-        >
+        <div className="rounded-2xl bg-[var(--card)] p-6 sm:p-7">
           <div className="mb-5">
             <h3 className="text-lg font-bold">{PLANS.premium.name}</h3>
             <p className="mt-0.5 text-xs text-[var(--muted-foreground)]">For power users</p>
@@ -196,7 +185,7 @@ export default function PricingPage() {
               subscriptionCheckout.mutate({ plan: "premium", billingPeriod })
             }
             disabled={subscriptionCheckout.isPending}
-            className="w-full rounded-xl border border-[var(--border)] bg-[var(--secondary)] py-3.5 text-sm font-medium transition-all hover:border-[var(--primary-40)] hover:bg-[var(--primary-10)] hover:text-[var(--primary)] disabled:opacity-50"
+            className="w-full rounded-xl bg-[var(--secondary)] py-3.5 text-sm font-medium transition-all active:scale-[0.98] hover:bg-[var(--primary-10)] hover:text-[var(--primary)] disabled:opacity-50"
           >
             Get Premium
           </button>
@@ -204,17 +193,14 @@ export default function PricingPage() {
       </div>
 
       {/* Creator Weekly */}
-      <div className="mb-20 flex justify-center animate-fade-up delay-300">
-        <div
-          className="w-full max-w-md overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)]"
-          style={{ boxShadow: "var(--card-shadow)" }}
-        >
+      <div className="mb-12 sm:mb-20 flex justify-center animate-fade-up delay-300">
+        <div className="w-full max-w-md overflow-hidden rounded-2xl bg-[var(--card)]">
           <div className="px-7 py-2.5 text-center" style={{ background: "linear-gradient(90deg, rgba(249,115,22,0.1), rgba(245,158,11,0.1))" }}>
             <span className="text-xs font-semibold text-orange-400">
               LIMITED OFFER &mdash; 50% OFF
             </span>
           </div>
-          <div className="p-7 text-center">
+          <div className="p-6 sm:p-7 text-center">
             <h3 className="mb-2 text-xl font-bold">Creator Weekly</h3>
             <p className="mb-4">
               <span className="text-4xl font-bold tracking-tight">$4.99</span>
@@ -229,8 +215,8 @@ export default function PricingPage() {
                 subscriptionCheckout.mutate({ plan: "creator", billingPeriod: "weekly" })
               }
               disabled={subscriptionCheckout.isPending}
-              className="rounded-xl px-10 py-3.5 text-sm font-semibold text-[var(--background)] transition-all hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
-              style={{ background: "linear-gradient(135deg, #e8a838, #d4942e)", boxShadow: "0 1px 8px rgba(232,168,56,0.2)" }}
+              className="rounded-xl px-10 py-3.5 text-sm font-semibold text-[var(--background)] transition-all active:scale-[0.98] disabled:opacity-50"
+              style={{ background: "linear-gradient(135deg, #e8a838, #d4942e)" }}
             >
               Start for $4.99/week
             </button>
@@ -243,19 +229,18 @@ export default function PricingPage() {
 
       {/* Credit Packs */}
       <div className="animate-fade-up delay-400">
-        <div className="mb-10 text-center">
+        <div className="mb-8 sm:mb-10 text-center">
           <h2 className="mb-2 text-2xl font-bold tracking-tight">Credit Packs</h2>
           <p className="text-sm text-[var(--muted-foreground)]">
             One-time purchase. Credits never expire.
           </p>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
+        <div className="grid gap-3 sm:gap-4 grid-cols-2 md:grid-cols-4">
           {CREDIT_PACKS.map((pack) => (
             <div
               key={pack.id}
-              className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 text-center transition-all hover:border-[var(--primary-30)]"
-              style={{ boxShadow: "var(--card-shadow)" }}
+              className="rounded-2xl bg-[var(--card)] p-5 sm:p-6 text-center transition-all hover:ring-1 hover:ring-[var(--primary-30)]"
             >
               <h3 className="mb-1 text-base font-bold">{pack.name}</h3>
               <p className="mb-1 text-3xl font-bold tracking-tight">
@@ -267,7 +252,7 @@ export default function PricingPage() {
               <button
                 onClick={() => creditPackCheckout.mutate({ packId: pack.id })}
                 disabled={creditPackCheckout.isPending}
-                className="w-full rounded-xl border border-[var(--border)] bg-[var(--secondary)] py-3 text-sm font-medium transition-all hover:border-[var(--primary-40)] hover:bg-[var(--primary-10)] hover:text-[var(--primary)] disabled:opacity-50"
+                className="w-full rounded-xl bg-[var(--secondary)] py-3 text-sm font-medium transition-all active:scale-[0.98] hover:bg-[var(--primary-10)] hover:text-[var(--primary)] disabled:opacity-50"
               >
                 Buy
               </button>

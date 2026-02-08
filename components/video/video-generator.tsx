@@ -54,7 +54,7 @@ export function VideoGenerator({
         <button
           type="button"
           onClick={onReset}
-          className="rounded-xl border border-[var(--border)] px-6 py-3 text-sm font-medium transition-all hover:bg-[var(--secondary)] hover:border-[var(--muted-foreground)]"
+          className="rounded-xl bg-[var(--secondary)] px-6 py-3 text-sm font-medium transition-all active:scale-[0.98] hover:bg-[var(--primary-10)] hover:text-[var(--primary)]"
         >
           Create Another
         </button>
@@ -73,21 +73,18 @@ export function VideoGenerator({
   }
 
   return (
-    <div className="mx-auto w-full max-w-lg">
+    <div className="mx-auto w-full max-w-lg pb-24 sm:pb-0">
       {/* Image preview */}
-      <div
-        className="relative mb-6 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)]"
-        style={{ boxShadow: "var(--card-shadow)" }}
-      >
+      <div className="relative mb-5 overflow-hidden rounded-2xl bg-[var(--card)]">
         <Image
           src={imagePreview}
           alt="Upload preview"
           width={512}
           height={640}
-          className="w-full object-contain max-h-80 sm:max-h-96"
+          className="w-full object-contain max-h-72 sm:max-h-96"
           unoptimized
         />
-        <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-[var(--card)] to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-12 bg-gradient-to-t from-[var(--card)] to-transparent" />
         <button
           type="button"
           onClick={onReset}
@@ -101,7 +98,7 @@ export function VideoGenerator({
       </div>
 
       {/* Prompt input */}
-      <div className="relative mb-5">
+      <div className="relative mb-4">
         <label htmlFor="motion-prompt" className="sr-only">Describe the motion you want</label>
         <textarea
           id="motion-prompt"
@@ -109,21 +106,21 @@ export function VideoGenerator({
           onChange={(e) => setPrompt(e.target.value)}
           placeholder="Describe the motion you want... (optional)"
           maxLength={1000}
-          rows={3}
-          className="w-full resize-none rounded-xl border border-[var(--border)] bg-[var(--secondary)] p-4 pr-12 text-sm leading-relaxed transition-all placeholder:text-[var(--muted-foreground)]"
+          rows={2}
+          className="w-full resize-none rounded-xl border border-[var(--border)] bg-[var(--secondary)] p-3.5 pr-12 text-sm leading-relaxed transition-all placeholder:text-[var(--muted-foreground)]"
         />
-        <span className="absolute bottom-3 right-3 text-[10px] tabular-nums text-[var(--muted-foreground)]" aria-hidden="true">
+        <span className="absolute bottom-2.5 right-3 text-[10px] tabular-nums text-[var(--muted-foreground)]" aria-hidden="true">
           {prompt.length}/1000
         </span>
       </div>
 
       {/* Options row */}
-      <div className="mb-6 flex gap-3">
+      <div className="mb-5 flex gap-3">
         <div className="flex-1">
-          <label className="mb-2 block text-xs font-medium text-[var(--muted-foreground)]">
+          <label className="mb-1.5 block text-xs font-medium text-[var(--muted-foreground)]">
             Duration
           </label>
-          <div className="flex rounded-xl border border-[var(--border)] bg-[var(--secondary)] p-1" role="radiogroup" aria-label="Duration">
+          <div className="flex rounded-xl bg-[var(--secondary)] p-1" role="radiogroup" aria-label="Duration">
             {(["5", "10"] as const).map((d) => (
               <button
                 key={d}
@@ -133,10 +130,9 @@ export function VideoGenerator({
                 onClick={() => setDuration(d)}
                 className={`flex-1 rounded-lg py-2.5 text-sm font-medium transition-all ${
                   duration === d
-                    ? "text-[var(--background)]"
+                    ? "bg-[var(--primary)] text-[var(--background)]"
                     : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
                 }`}
-                style={duration === d ? { background: "linear-gradient(135deg, #e8a838, #d4942e)" } : undefined}
               >
                 {d}s
               </button>
@@ -145,10 +141,10 @@ export function VideoGenerator({
         </div>
 
         <div className="flex-1">
-          <label className="mb-2 block text-xs font-medium text-[var(--muted-foreground)]">
+          <label className="mb-1.5 block text-xs font-medium text-[var(--muted-foreground)]">
             Quality
           </label>
-          <div className="flex rounded-xl border border-[var(--border)] bg-[var(--secondary)] p-1" role="radiogroup" aria-label="Quality">
+          <div className="flex rounded-xl bg-[var(--secondary)] p-1" role="radiogroup" aria-label="Quality">
             {(["standard", "professional"] as const).map((m) => (
               <button
                 key={m}
@@ -158,10 +154,9 @@ export function VideoGenerator({
                 onClick={() => setMode(m)}
                 className={`flex-1 rounded-lg py-2.5 text-xs font-medium transition-all ${
                   mode === m
-                    ? "text-[var(--background)]"
+                    ? "bg-[var(--primary)] text-[var(--background)]"
                     : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
                 }`}
-                style={mode === m ? { background: "linear-gradient(135deg, #e8a838, #d4942e)" } : undefined}
               >
                 {m === "standard" ? "Standard" : "Pro"}
               </button>
@@ -170,27 +165,29 @@ export function VideoGenerator({
         </div>
       </div>
 
-      {/* Generate button */}
-      <button
-        type="button"
-        onClick={handleGenerate}
-        disabled={generateMutation.isPending}
-        aria-busy={generateMutation.isPending}
-        className="w-full rounded-xl py-4 text-base font-semibold text-[var(--background)] transition-all hover:brightness-110 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
-        style={{ background: "linear-gradient(135deg, #e8a838, #d4942e)", boxShadow: "0 2px 12px rgba(232,168,56,0.25)" }}
-      >
-        {generateMutation.isPending ? (
-          <span className="flex items-center justify-center gap-2">
-            <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--background-30)] border-t-[var(--background)]" aria-hidden="true" />
-            Starting...
-          </span>
-        ) : (
-          "Generate Video"
-        )}
-      </button>
+      {/* Generate button — sticky on mobile */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] bg-gradient-to-t from-[var(--background)] via-[var(--background)] to-transparent sm:static sm:p-0 sm:bg-none">
+        <button
+          type="button"
+          onClick={handleGenerate}
+          disabled={generateMutation.isPending}
+          aria-busy={generateMutation.isPending}
+          className="w-full rounded-xl py-4 text-base font-semibold text-[var(--background)] transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{ background: "linear-gradient(135deg, #e8a838, #d4942e)" }}
+        >
+          {generateMutation.isPending ? (
+            <span className="flex items-center justify-center gap-2">
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--background-30)] border-t-[var(--background)]" aria-hidden="true" />
+              Starting...
+            </span>
+          ) : (
+            "Generate Video"
+          )}
+        </button>
+      </div>
 
       {generateMutation.error && (
-        <div role="alert" className="mt-4 rounded-lg bg-[var(--destructive-10)] px-4 py-3 text-center text-sm text-[var(--destructive)]">
+        <div role="alert" className="mt-4 rounded-xl bg-[var(--destructive-10)] px-4 py-3 text-center text-sm text-[var(--destructive)]">
           {generateMutation.error.message}
         </div>
       )}

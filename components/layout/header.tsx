@@ -6,6 +6,7 @@ import { createSupabaseBrowserClient } from "@/server/supabase/client";
 import { trpc } from "@/lib/trpc";
 import { formatCredits } from "@/lib/utils";
 import { LoginModal } from "@/components/auth/login-modal";
+import { BottomNav } from "./bottom-nav";
 
 export function Header() {
   const [user, setUser] = useState<any>(null);
@@ -43,7 +44,7 @@ export function Header() {
           scrolled ? "glass border-[var(--border)]" : "bg-[var(--background)] border-transparent"
         }`}
       >
-        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 sm:px-6">
+        <div className="mx-auto flex h-12 sm:h-14 max-w-5xl items-center justify-between px-4 sm:px-6">
           <Link href="/" className="flex items-center gap-2 shrink-0" aria-label="BuzzMove home">
             <div
               className="flex h-7 w-7 items-center justify-center rounded-md"
@@ -57,28 +58,29 @@ export function Header() {
           </Link>
 
           <nav className="flex items-center gap-0.5 sm:gap-1">
+            {/* Desktop-only nav links */}
             <Link href="/explorer" className="hidden sm:block px-3 py-1.5 text-[13px] text-[var(--muted-foreground)] transition-colors hover:text-[var(--foreground)]">
               Explore
             </Link>
-            <Link href="/pricing" className="px-2.5 sm:px-3 py-1.5 text-[13px] text-[var(--muted-foreground)] transition-colors hover:text-[var(--foreground)]">
+            <Link href="/pricing" className="hidden sm:block px-3 py-1.5 text-[13px] text-[var(--muted-foreground)] transition-colors hover:text-[var(--foreground)]">
               Pricing
             </Link>
 
             {user ? (
               <>
-                <div className="ml-2 sm:ml-3 mr-0.5 sm:mr-1 flex items-center gap-1.5 rounded-full border border-[var(--border)] bg-[var(--secondary)] px-2.5 sm:px-3 py-1">
+                <div className="ml-1 sm:ml-3 mr-0.5 sm:mr-1 flex items-center gap-1.5 rounded-full bg-[var(--secondary)] px-2.5 sm:px-3 py-1">
                   <div className="h-1.5 w-1.5 rounded-full bg-[var(--primary)]" />
                   <span className="text-xs font-medium tabular-nums">{formatCredits(creditData?.balance ?? 0)}</span>
                 </div>
-                <Link href="/dashboard" className="px-2.5 sm:px-3 py-1.5 text-[13px] text-[var(--muted-foreground)] transition-colors hover:text-[var(--foreground)]">
+                <Link href="/dashboard" className="hidden sm:block px-3 py-1.5 text-[13px] text-[var(--muted-foreground)] transition-colors hover:text-[var(--foreground)]">
                   Dashboard
                 </Link>
               </>
             ) : (
               <button
                 onClick={() => setShowLogin(true)}
-                className="ml-2 sm:ml-4 rounded-lg px-4 sm:px-5 py-2 sm:py-2.5 text-[13px] font-semibold text-[var(--background)] transition-all hover:shadow-[var(--glow)] active:scale-[0.97]"
-                style={{ background: "linear-gradient(135deg, #e8a838, #d4942e)", boxShadow: "0 1px 8px rgba(232,168,56,0.2)" }}
+                className="ml-2 sm:ml-4 rounded-lg px-4 sm:px-5 py-2 sm:py-2.5 text-[13px] font-semibold text-[var(--background)] transition-all active:scale-[0.97]"
+                style={{ background: "linear-gradient(135deg, #e8a838, #d4942e)" }}
               >
                 Get Started
               </button>
@@ -86,6 +88,9 @@ export function Header() {
           </nav>
         </div>
       </header>
+
+      {/* Mobile bottom navigation */}
+      <BottomNav isLoggedIn={!!user} onLoginClick={() => setShowLogin(true)} />
 
       <LoginModal open={showLogin} onClose={() => setShowLogin(false)} />
     </>

@@ -91,7 +91,7 @@ export default function RootLayout({
       <body className="flex min-h-screen flex-col antialiased">
         <Providers>
           <Header />
-          <main className="flex-1">{children}</main>
+          <main className="flex-1 pb-16 sm:pb-0">{children}</main>
           <Footer />
         </Providers>
       </body>

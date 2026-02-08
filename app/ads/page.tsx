@@ -9,32 +9,32 @@ export const metadata: Metadata = {
 
 export default function AdsPage() {
   return (
-    <div className="mx-auto max-w-4xl px-5 py-20">
+    <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-20">
       {/* Hero */}
-      <div className="mb-20 text-center">
-        <div className="mb-4 inline-block rounded-full bg-[var(--primary-20)] px-4 py-1 text-sm font-medium text-[var(--accent)]">
+      <div className="mb-12 sm:mb-20 text-center">
+        <div className="mb-4 inline-block rounded-full bg-[var(--primary-10)] px-4 py-1 text-sm font-medium text-[var(--primary)]">
           For Performance Marketers
         </div>
-        <h1 className="mb-4 text-5xl font-bold leading-tight">
+        <h1 className="mb-4 text-3xl font-bold leading-tight sm:text-5xl">
           Turn one image into
           <br />
           <span className="text-gradient">10 ad-ready videos</span>
         </h1>
-        <p className="mx-auto mb-8 max-w-xl text-lg text-[var(--muted-foreground)] leading-relaxed">
+        <p className="mx-auto mb-8 max-w-xl text-base text-[var(--muted-foreground)] leading-relaxed sm:text-lg">
           Generate scroll-stopping video ads from a single product image.
           Designed for ROAS. Minutes, not days.
         </p>
         <Link
           href="/"
-          className="inline-block rounded-xl px-8 py-4 text-base font-semibold text-[var(--background)] transition-all hover:brightness-110 active:scale-[0.98]"
-          style={{ background: "linear-gradient(135deg, #e8a838, #d4942e)", boxShadow: "0 2px 16px rgba(232,168,56,0.25)" }}
+          className="inline-block rounded-xl px-8 py-4 text-base font-semibold text-[var(--background)] transition-all active:scale-[0.98]"
+          style={{ background: "linear-gradient(135deg, #e8a838, #d4942e)" }}
         >
           Start Creating Ads
         </Link>
       </div>
 
       {/* Use cases */}
-      <div className="mb-20 grid gap-6 md:grid-cols-3">
+      <div className="mb-12 sm:mb-20 grid gap-4 sm:gap-6 md:grid-cols-3">
         {[
           {
             title: "DTC Brands",
@@ -51,8 +51,7 @@ export default function AdsPage() {
         ].map((item) => (
           <div
             key={item.title}
-            className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6"
-            style={{ boxShadow: "var(--card-shadow)" }}
+            className="rounded-2xl bg-[var(--card)] p-5 sm:p-6"
           >
             <h3 className="mb-2 text-lg font-bold">{item.title}</h3>
             <p className="text-sm text-[var(--muted-foreground)] leading-relaxed">
@@ -63,11 +62,11 @@ export default function AdsPage() {
       </div>
 
       {/* Features */}
-      <div className="mb-20">
-        <h2 className="mb-8 text-center text-3xl font-bold">
+      <div className="mb-12 sm:mb-20">
+        <h2 className="mb-6 sm:mb-8 text-center text-2xl font-bold sm:text-3xl">
           Built for Performance
         </h2>
-        <div className="grid gap-5 md:grid-cols-2">
+        <div className="grid gap-3 sm:gap-5 md:grid-cols-2">
           {[
             {
               title: "Native Ad Formats",
@@ -86,9 +85,9 @@ export default function AdsPage() {
               desc: "From upload to ad-ready video in under 2 minutes.",
             },
           ].map((item) => (
-            <div key={item.title} className="flex gap-4 rounded-xl bg-[var(--secondary)] p-5">
+            <div key={item.title} className="flex gap-4 rounded-2xl bg-[var(--secondary)] p-4 sm:p-5">
               <div
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
                 style={{ background: "rgba(232,168,56,0.12)" }}
               >
                 <svg
@@ -118,10 +117,10 @@ export default function AdsPage() {
 
       {/* CTA */}
       <div
-        className="rounded-2xl p-12 text-center"
+        className="rounded-2xl p-8 sm:p-12 text-center"
         style={{ background: "linear-gradient(135deg, #e8a838, #f0c060)" }}
       >
-        <h2 className="mb-3 text-3xl font-bold text-[var(--background)]">
+        <h2 className="mb-3 text-2xl font-bold text-[var(--background)] sm:text-3xl">
           Ready to Scale Your Creatives?
         </h2>
         <p className="mb-6 text-[var(--background)]/70">

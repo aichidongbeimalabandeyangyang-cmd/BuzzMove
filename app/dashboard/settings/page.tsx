@@ -11,19 +11,16 @@ export default function SettingsPage() {
   });
 
   return (
-    <div className="mx-auto max-w-2xl px-5 py-12">
-      <div className="mb-10 animate-fade-up">
-        <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
-        <p className="mt-1 text-sm text-[var(--muted-foreground)]">
+    <div className="mx-auto max-w-2xl px-4 py-6 sm:px-6 sm:py-12">
+      <div className="mb-6 sm:mb-10 animate-fade-up">
+        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Settings</h1>
+        <p className="mt-0.5 text-sm text-[var(--muted-foreground)]">
           Manage your account and subscription
         </p>
       </div>
 
       {/* Profile info */}
-      <div
-        className="mb-6 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-7 animate-fade-up delay-100"
-        style={{ boxShadow: "var(--card-shadow)" }}
-      >
+      <div className="mb-4 sm:mb-6 rounded-2xl bg-[var(--card)] p-5 sm:p-7 animate-fade-up delay-100">
         <h2 className="mb-5 text-base font-bold">Profile</h2>
         <div className="space-y-4">
           {[
@@ -54,16 +51,13 @@ export default function SettingsPage() {
       </div>
 
       {/* Billing */}
-      <div
-        className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-7 animate-fade-up delay-200"
-        style={{ boxShadow: "var(--card-shadow)" }}
-      >
+      <div className="rounded-2xl bg-[var(--card)] p-5 sm:p-7 animate-fade-up delay-200">
         <h2 className="mb-5 text-base font-bold">Billing</h2>
         {profile?.stripe_customer_id ? (
           <button
             onClick={() => portalMutation.mutate()}
             disabled={portalMutation.isPending}
-            className="rounded-xl border border-[var(--border)] bg-[var(--secondary)] px-5 py-3.5 text-sm font-medium transition-all hover:border-[var(--primary-40)] hover:bg-[var(--primary-10)] hover:text-[var(--primary)] disabled:opacity-50"
+            className="rounded-xl bg-[var(--secondary)] px-5 py-3.5 text-sm font-medium transition-all active:scale-[0.98] hover:bg-[var(--primary-10)] hover:text-[var(--primary)] disabled:opacity-50"
           >
             {portalMutation.isPending ? "Loading..." : "Manage Subscription"}
           </button>
