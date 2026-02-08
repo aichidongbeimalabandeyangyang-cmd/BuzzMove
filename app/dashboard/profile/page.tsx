@@ -20,50 +20,79 @@ export default function ProfilePage() {
   };
 
   const displayName = profile?.email?.split("@")[0] || "User";
-  const planLabel = `${(profile?.subscription_plan || "free").charAt(0).toUpperCase() + (profile?.subscription_plan || "free").slice(1)} · ${formatCredits(creditData?.balance ?? 0)} credits`;
+  const planName = (profile?.subscription_plan || "free").charAt(0).toUpperCase() + (profile?.subscription_plan || "free").slice(1);
+  const planLabel = `${planName} · ${formatCredits(creditData?.balance ?? 0)} credits`;
 
   return (
     <div className="flex w-full flex-1 flex-col">
-      {/* profileContent: gap 24, padding [24,20,12,20], h-fill */}
-      <div className="flex flex-1 flex-col gap-6 px-5 pt-6 pb-3">
-        {/* userSection: vertical, gap 12, padding [8,0], center, w-fill */}
-        <div className="flex w-full flex-col items-center gap-3 py-2">
+      {/* profileContent: gap 24, padding [24,20,12,20], h-fill, width fill */}
+      <div className="flex w-full flex-1 flex-col" style={{ gap: 24, padding: "24px 20px 12px 20px" }}>
+
+        {/* userSection: vertical, gap 12, padding [8,0], center, width fill */}
+        <div className="flex w-full flex-col items-center" style={{ gap: 12, padding: "8px 0" }}>
           {/* Avatar: 72x72, cornerRadius 100, fill #1E1E22 */}
-          <div className="flex h-[72px] w-[72px] items-center justify-center rounded-full bg-[#1E1E22]">
-            {/* user icon 36x36 #9898A4 */}
-            <User className="h-9 w-9 text-[#9898A4]" strokeWidth={1.5} />
+          <div
+            className="flex items-center justify-center"
+            style={{ width: 72, height: 72, borderRadius: 100, backgroundColor: "#1E1E22" }}
+          >
+            <User style={{ width: 36, height: 36, color: "#9898A4" }} strokeWidth={1.5} />
           </div>
           {/* Name: 20/700 #FAFAF9 */}
-          <p className="text-xl font-bold text-[#FAFAF9]">{displayName}</p>
+          <p style={{ fontSize: 20, fontWeight: 700, color: "#FAFAF9" }}>{displayName}</p>
           {/* Email: 14/400 #6B6B70 */}
-          <p className="text-sm text-[#6B6B70]">{profile?.email || "Loading..."}</p>
-          {/* Plan Badge: cornerRadius 100, fill #E8A83820, padding [6,16] */}
-          <div className="rounded-full bg-[#E8A83820] px-4 py-1.5">
-            {/* 13/600 #E8A838 */}
-            <span className="text-[13px] font-semibold text-[#E8A838]">{planLabel}</span>
+          <p style={{ fontSize: 14, fontWeight: 400, color: "#6B6B70" }}>{profile?.email || "Loading..."}</p>
+          {/* Plan Badge: cornerRadius 100, fill #E8A83820, padding [6,16], center */}
+          <div
+            className="flex items-center justify-center"
+            style={{ borderRadius: 100, backgroundColor: "#E8A83820", padding: "6px 16px" }}
+          >
+            <span style={{ fontSize: 13, fontWeight: 600, color: "#E8A838" }}>{planLabel}</span>
           </div>
         </div>
 
-        {/* menuList: cornerRadius 16, fill #16161A, vertical */}
-        <div className="overflow-hidden rounded-2xl bg-[#16161A]">
-          {/* Item: gap 12, padding [14,16], center, w-fill */}
-          <Link href="/pricing" className="flex items-center gap-3 px-4 py-3.5 transition-colors hover:bg-[#1E1E22]">
-            <Crown className="h-5 w-5 text-[#E8A838]" strokeWidth={1.5} />
-            <span className="text-[15px] font-medium text-[#FAFAF9]">Pricing & Plans</span>
+        {/* menuList: cornerRadius 16, fill #16161A, vertical, width fill */}
+        <div className="flex w-full flex-col" style={{ borderRadius: 16, backgroundColor: "#16161A", overflow: "hidden" }}>
+          {/* m1: Pricing & Plans — gap 12, padding [14,16], icon 20x20 #E8A838, text 15/500 #FAFAF9 */}
+          <Link
+            href="/pricing"
+            className="flex w-full items-center"
+            style={{ gap: 12, padding: "14px 16px" }}
+          >
+            <Crown style={{ width: 20, height: 20, color: "#E8A838", flexShrink: 0 }} strokeWidth={1.5} />
+            <span style={{ fontSize: 15, fontWeight: 500, color: "#FAFAF9" }}>Pricing & Plans</span>
           </Link>
-          <Link href="/dashboard/settings" className="flex items-center gap-3 px-4 py-3.5 transition-colors hover:bg-[#1E1E22]">
-            <Settings className="h-5 w-5 text-[#9898A4]" strokeWidth={1.5} />
-            <span className="text-[15px] font-medium text-[#FAFAF9]">Settings</span>
+
+          {/* m2: Settings — gap 12, padding [14,16], icon 20x20 #9898A4, text 15/500 #FAFAF9 */}
+          <Link
+            href="/dashboard/settings"
+            className="flex w-full items-center"
+            style={{ gap: 12, padding: "14px 16px" }}
+          >
+            <Settings style={{ width: 20, height: 20, color: "#9898A4", flexShrink: 0 }} strokeWidth={1.5} />
+            <span style={{ fontSize: 15, fontWeight: 500, color: "#FAFAF9" }}>Settings</span>
           </Link>
-          <Link href="/support" className="flex items-center gap-3 px-4 py-3.5 transition-colors hover:bg-[#1E1E22]">
-            <LifeBuoy className="h-5 w-5 text-[#9898A4]" strokeWidth={1.5} />
-            <span className="text-[15px] font-medium text-[#FAFAF9]">Help & Support</span>
+
+          {/* m3: Help & Support — gap 12, padding [14,16], icon 20x20 #9898A4, text 15/500 #FAFAF9 */}
+          <Link
+            href="/support"
+            className="flex w-full items-center"
+            style={{ gap: 12, padding: "14px 16px" }}
+          >
+            <LifeBuoy style={{ width: 20, height: 20, color: "#9898A4", flexShrink: 0 }} strokeWidth={1.5} />
+            <span style={{ fontSize: 15, fontWeight: 500, color: "#FAFAF9" }}>Help & Support</span>
           </Link>
-          {/* Divider: 1px #252530 */}
-          <div className="h-px w-full bg-[#252530]" />
-          <button onClick={handleLogout} className="flex w-full items-center gap-3 px-4 py-3.5 transition-colors hover:bg-[#1E1E22]">
-            <LogOut className="h-5 w-5 text-[#EF4444]" strokeWidth={1.5} />
-            <span className="text-[15px] font-medium text-[#EF4444]">Log Out</span>
+
+          {/* Divider: 1px #252530, width fill */}
+          <div style={{ width: "100%", height: 1, backgroundColor: "#252530" }} />
+
+          {/* m4: Log Out — gap 12, padding [14,16], icon 20x20 #EF4444, text 15/500 #EF4444 */}
+          <button
+            onClick={handleLogout}
+            className="flex w-full items-center"
+            style={{ gap: 12, padding: "14px 16px" }}
+          >
+            <LogOut style={{ width: 20, height: 20, color: "#EF4444", flexShrink: 0 }} strokeWidth={1.5} />
+            <span style={{ fontSize: 15, fontWeight: 500, color: "#EF4444" }}>Log Out</span>
           </button>
         </div>
       </div>
