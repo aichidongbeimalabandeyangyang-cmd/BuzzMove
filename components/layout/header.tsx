@@ -7,6 +7,7 @@ import { createSupabaseBrowserClient } from "@/server/supabase/client";
 import { trpc } from "@/lib/trpc";
 import { formatCredits } from "@/lib/utils";
 import { useHomeView } from "@/lib/view-context";
+import { User } from "lucide-react";
 import { LoginModal } from "@/components/auth/login-modal";
 import { BottomNav } from "./bottom-nav";
 
@@ -99,15 +100,11 @@ export function Header() {
             )}
             {user ? (
               <Link href="/dashboard/profile" className="flex h-8 w-8 items-center justify-center rounded-full bg-[#1E1E22]">
-                <svg className="h-[18px] w-[18px] text-[#9898A4]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                </svg>
+                <User className="h-[18px] w-[18px] text-[#9898A4]" strokeWidth={1.5} />
               </Link>
             ) : (
               <button onClick={() => setShowLogin(true)} className="flex h-8 w-8 items-center justify-center rounded-full bg-[#1E1E22]">
-                <svg className="h-[18px] w-[18px] text-[#9898A4]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                </svg>
+                <User className="h-[18px] w-[18px] text-[#9898A4]" strokeWidth={1.5} />
               </button>
             )}
           </div>
