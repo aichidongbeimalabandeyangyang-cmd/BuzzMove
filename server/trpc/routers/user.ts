@@ -6,12 +6,17 @@ export const userRouter = router({
   getProfile: protectedProcedure.query(async ({ ctx }) => {
     const { data, error } = await ctx.supabase
       .from("profiles")
-      .select("*")
+      .select("id, email, display_name, avatar_url, subscription_plan, subscription_status, credits_balance, country_code, timezone, stripe_customer_id, created_at")
       .eq("id", ctx.user.id)
       .single();
 
     if (error) throw error;
-    return data;
+
+    // Don't leak full Stripe ID to client — just expose whether it exists
+    return {
+      ...data,
+      stripe_customer_id: data?.stripe_customer_id ? true : null,
+    };
   }),
 
   // Track UTM parameters (called on first visit)

@@ -10,43 +10,36 @@ export async function handleCheckoutCompleted(
   if (!userId) return;
 
   if (session.metadata?.type === "credit_pack") {
-    // One-time credit pack purchase
-    const credits = parseInt(session.metadata.credits || "0");
-    if (credits <= 0) return;
+    // Look up credits from server-side constants, NOT from metadata
+    const packId = session.metadata.pack_id;
+    const pack = CREDIT_PACKS.find((p) => p.id === packId);
+    if (!pack) return;
 
-    // Add credits
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("credits_balance")
-      .eq("id", userId)
-      .single();
-
-    if (!profile) return;
-
-    await supabase
-      .from("profiles")
-      .update({ credits_balance: profile.credits_balance + credits })
-      .eq("id", userId);
+    // Atomic credit addition
+    await supabase.rpc("refund_credits", {
+      p_user_id: userId,
+      p_amount: pack.credits,
+    });
 
     // Record transaction
     await supabase.from("credit_transactions").insert({
       user_id: userId,
-      amount: credits,
+      amount: pack.credits,
       type: "purchase",
-      description: `${session.metadata.pack_id} credit pack`,
+      description: `${pack.name} credit pack`,
       stripe_payment_id: session.payment_intent as string,
     });
   } else {
-    // Subscription
-    const plan = session.metadata?.plan;
+    // Subscription — validate plan from constants
+    const plan = session.metadata?.plan as keyof typeof PLANS;
     const billingPeriod = session.metadata?.billing_period;
-    if (!plan) return;
+    if (!plan || !(plan in PLANS) || plan === "free") return;
 
-    const planConfig = PLANS[plan as keyof typeof PLANS];
+    const planConfig = PLANS[plan];
     const creditsPerPeriod =
       "credits_per_month" in planConfig
         ? planConfig.credits_per_month
-        : (planConfig as any).credits_per_week;
+        : (planConfig as typeof PLANS["creator"]).credits_per_week;
 
     // Update profile
     await supabase
@@ -74,13 +67,12 @@ export async function handleCheckoutCompleted(
       user_id: userId,
       amount: creditsPerPeriod,
       type: "subscription",
-      description: `${plan} subscription activated`,
+      description: `${planConfig.name} subscription activated`,
     });
   }
 }
 
 export async function handleInvoicePaid(invoice: Stripe.Invoice) {
-  // Stripe v2026+: subscription info is under parent.subscription_details
   const subscriptionId =
     invoice.parent?.subscription_details?.subscription ?? null;
   if (!subscriptionId) return;
@@ -121,7 +113,6 @@ export async function handleSubscriptionDeleted(
 
   if (!sub) return;
 
-  // Downgrade to free
   await supabase
     .from("profiles")
     .update({

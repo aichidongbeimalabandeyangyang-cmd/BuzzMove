@@ -81,7 +81,7 @@ export const paymentRouter = router({
 
   // Create a Stripe Checkout session for credit pack purchase
   createCreditPackCheckout: protectedProcedure
-    .input(z.object({ packId: z.string() }))
+    .input(z.object({ packId: z.enum(["mini", "starter", "creator", "studio"]) }))
     .mutation(async ({ ctx, input }) => {
       const pack = CREDIT_PACKS.find((p) => p.id === input.packId);
       if (!pack) throw new TRPCError({ code: "NOT_FOUND" });

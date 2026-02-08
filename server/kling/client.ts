@@ -73,6 +73,9 @@ export async function createImageToVideo(params: {
 export async function getTaskStatus(
   taskId: string
 ): Promise<KlingTaskResult> {
+  if (!/^[a-zA-Z0-9_-]+$/.test(taskId)) {
+    throw new Error("Invalid task ID format");
+  }
   return klingFetch<KlingTaskResult>(
     `/v1/videos/image2video/${taskId}`
   );
