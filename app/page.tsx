@@ -52,7 +52,7 @@ export default function HomePage() {
     setImagePreview(null);
     setInitialPrompt("");
     setUploadError(null);
-    setHomeView("home");
+    setHomeView("upload");
   };
 
   const currentExample = HERO_EXAMPLES[0];
