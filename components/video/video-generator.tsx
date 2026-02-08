@@ -5,6 +5,7 @@ import Image from "next/image";
 import { trpc } from "@/lib/trpc";
 import { createSupabaseBrowserClient } from "@/server/supabase/client";
 import { getDeviceKey } from "@/components/tracking/device-key-ensurer";
+import { CREDIT_COSTS } from "@/lib/constants";
 import { VideoProgress } from "./video-progress";
 import { VideoPlayer } from "./video-player";
 
@@ -65,17 +66,13 @@ export function VideoGenerator({
     });
   };
 
+  // Credit cost for current config
+  const creditCost = CREDIT_COSTS[mode][parseInt(duration) as 5 | 10];
+
   if (videoId && status === "completed") {
     return (
       <div className="flex flex-col items-center gap-5 animate-fade-up">
-        <VideoPlayer videoId={videoId} />
-        <button
-          type="button"
-          onClick={onReset}
-          className="rounded-xl bg-[var(--secondary)] px-6 py-3.5 text-sm font-medium transition-all active:scale-[0.98] hover:bg-[var(--primary-10)] hover:text-[var(--primary)]"
-        >
-          Create Another
-        </button>
+        <VideoPlayer videoId={videoId} onReset={onReset} creditCost={creditCost} />
       </div>
     );
   }
@@ -84,6 +81,7 @@ export function VideoGenerator({
     return (
       <VideoProgress
         videoId={videoId}
+        imagePreview={imagePreview}
         onComplete={() => setStatus("completed")}
         onError={() => setStatus("error")}
       />
@@ -183,7 +181,7 @@ export function VideoGenerator({
         </div>
       </div>
 
-      {/* Generate button — inline, no more fixed overlap */}
+      {/* Generate button with credit cost */}
       <div className="pb-4 sm:pb-0">
         <button
           type="button"
@@ -201,7 +199,12 @@ export function VideoGenerator({
           ) : isLoggedIn === false ? (
             "Sign in to Generate"
           ) : (
-            "Generate Video"
+            <span className="flex items-center justify-center gap-2">
+              Generate Video
+              <span className="inline-flex items-center rounded-md bg-black/15 px-2 py-0.5 text-xs font-medium">
+                {creditCost} credits
+              </span>
+            </span>
           )}
         </button>
 

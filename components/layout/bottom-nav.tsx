@@ -11,54 +11,40 @@ interface BottomNavProps {
 export function BottomNav({ isLoggedIn, onLoginClick }: BottomNavProps) {
   const pathname = usePathname();
 
-  const tabs = isLoggedIn
-    ? [
-        { href: "/dashboard", label: "My Videos", icon: FilmIcon },
-        { href: "/", label: "Create", icon: PlusIcon, primary: true },
-        { href: "/dashboard/settings", label: "Settings", icon: GearIcon },
-      ]
-    : [
-        { href: "/pricing", label: "Pricing", icon: TagIcon },
-        { href: "/", label: "Create", icon: PlusIcon, primary: true },
-        { href: "#login", label: "Sign In", icon: UserIcon, action: onLoginClick },
-      ];
+  const tabs = [
+    { href: "/", label: "Move", icon: FlameIcon },
+    { href: "/dashboard", label: "Assets", icon: LayersIcon },
+    {
+      href: isLoggedIn ? "/dashboard/profile" : "#login",
+      label: "My Profile",
+      icon: UserCircleIcon,
+      action: !isLoggedIn ? onLoginClick : undefined,
+    },
+  ];
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 sm:hidden border-t border-[var(--border)] bg-[rgba(5,5,5,0.95)] backdrop-blur-lg pb-[env(safe-area-inset-bottom)]">
-      <div className="flex items-end justify-around px-4 pt-2 pb-2">
+      <div className="flex items-center justify-around px-4 pt-2 pb-2">
         {tabs.map((tab) => {
-          const isActive = tab.href === "/" ? pathname === "/" : pathname.startsWith(tab.href);
+          const isActive =
+            tab.href === "/"
+              ? pathname === "/"
+              : pathname.startsWith(tab.href);
           const Icon = tab.icon;
-
-          if (tab.primary) {
-            return (
-              <Link
-                key={tab.href}
-                href={tab.href}
-                className="flex flex-col items-center gap-0.5 -mt-3"
-              >
-                <div
-                  className="flex h-12 w-12 items-center justify-center rounded-full text-[var(--background)] shadow-lg"
-                  style={{ background: "linear-gradient(135deg, #e8a838, #d4942e)" }}
-                >
-                  <Icon className="h-5 w-5" />
-                </div>
-                <span className="text-[11px] font-medium text-[var(--primary)]">{tab.label}</span>
-              </Link>
-            );
-          }
 
           if ("action" in tab && tab.action) {
             return (
               <button
-                key={tab.href}
+                key={tab.label}
                 type="button"
                 onClick={tab.action}
-                className={`flex flex-col items-center gap-0.5 min-w-[60px] min-h-[44px] justify-center transition-colors ${
-                  isActive ? "text-[var(--foreground)]" : "text-[var(--muted-foreground)]"
+                className={`flex flex-col items-center gap-1 min-w-[64px] min-h-[44px] justify-center transition-colors ${
+                  isActive
+                    ? "text-[var(--primary)]"
+                    : "text-[var(--muted-foreground)]"
                 }`}
               >
-                <Icon className="h-5 w-5" />
+                <Icon className="h-[22px] w-[22px]" />
                 <span className="text-[11px] font-medium">{tab.label}</span>
               </button>
             );
@@ -66,13 +52,15 @@ export function BottomNav({ isLoggedIn, onLoginClick }: BottomNavProps) {
 
           return (
             <Link
-              key={tab.href}
+              key={tab.label}
               href={tab.href}
-              className={`flex flex-col items-center gap-0.5 min-w-[60px] min-h-[44px] justify-center transition-colors ${
-                isActive ? "text-[var(--foreground)]" : "text-[var(--muted-foreground)]"
+              className={`flex flex-col items-center gap-1 min-w-[64px] min-h-[44px] justify-center transition-colors ${
+                isActive
+                  ? "text-[var(--primary)]"
+                  : "text-[var(--muted-foreground)]"
               }`}
             >
-              <Icon className="h-5 w-5" />
+              <Icon className="h-[22px] w-[22px]" />
               <span className="text-[11px] font-medium">{tab.label}</span>
             </Link>
           );
@@ -82,44 +70,29 @@ export function BottomNav({ isLoggedIn, onLoginClick }: BottomNavProps) {
   );
 }
 
-function FilmIcon({ className }: { className?: string }) {
+/* ── Icons ─────────────────────────────────────── */
+
+function FlameIcon({ className }: { className?: string }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15.362 5.214A8.252 8.252 0 0112 21 8.25 8.25 0 016.038 7.047 8.287 8.287 0 009 9.601a8.983 8.983 0 013.361-6.867 8.21 8.21 0 003 2.48z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 18a3.75 3.75 0 00.495-7.468 5.99 5.99 0 00-1.925 3.547 5.975 5.975 0 01-2.133-1.001A3.75 3.75 0 0012 18z" />
     </svg>
   );
 }
 
-function PlusIcon({ className }: { className?: string }) {
+function LayersIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6.429 9.75L2.25 12l4.179 2.25m0-4.5l5.571 3 5.571-3m-11.142 0L2.25 7.5 12 2.25l9.75 5.25-4.179 2.25m0 0L12 12.75 6.429 9.75m11.142 0l4.179 2.25-9.75 5.25-9.75-5.25 4.179-2.25" />
     </svg>
   );
 }
 
-function GearIcon({ className }: { className?: string }) {
+function UserCircleIcon({ className }: { className?: string }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 010 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 010-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28z" />
-      <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-    </svg>
-  );
-}
-
-function TagIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z" />
-      <path strokeLinecap="round" strokeLinejoin="round" d="M6 6h.008v.008H6V6z" />
-    </svg>
-  );
-}
-
-function UserIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" />
     </svg>
   );
 }

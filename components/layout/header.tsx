@@ -65,33 +65,40 @@ export function Header() {
           </Link>
 
           <nav className="flex items-center gap-1 sm:gap-2">
-            {/* Desktop-only nav links */}
-            {!user && (
-              <Link href="/pricing" className="hidden sm:block px-3 py-2 text-sm text-[var(--muted-foreground)] transition-colors hover:text-[var(--foreground)] rounded-lg">
-                Pricing
-              </Link>
-            )}
-
             {user ? (
               <>
+                {/* Credit badge */}
                 <div className="ml-1 sm:ml-3 mr-1 sm:mr-2 flex items-center gap-1.5 rounded-full bg-[var(--secondary)] px-3 py-1.5">
                   <div className="h-1.5 w-1.5 rounded-full bg-[var(--primary)]" />
                   <span className="text-xs font-medium tabular-nums">{formatCredits(creditData?.balance ?? 0)}</span>
                 </div>
+                {/* Desktop nav links */}
                 <Link href="/dashboard" className="hidden sm:block px-3 py-2 text-sm text-[var(--muted-foreground)] transition-colors hover:text-[var(--foreground)] rounded-lg">
-                  My Videos
+                  Assets
                 </Link>
-                <Link href="/dashboard/settings" className="hidden sm:block px-3 py-2 text-sm text-[var(--muted-foreground)] transition-colors hover:text-[var(--foreground)] rounded-lg">
-                  Settings
+                <Link href="/pricing" className="hidden sm:block px-3 py-2 text-sm text-[var(--muted-foreground)] transition-colors hover:text-[var(--foreground)] rounded-lg">
+                  Pricing
+                </Link>
+                {/* Avatar */}
+                <Link
+                  href="/dashboard/profile"
+                  className="ml-1 flex h-8 w-8 items-center justify-center rounded-full bg-[var(--secondary)] transition-colors hover:bg-[var(--primary-10)]"
+                  aria-label="My Profile"
+                >
+                  <svg className="h-[18px] w-[18px] text-[var(--muted-foreground)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                  </svg>
                 </Link>
               </>
             ) : (
               <button
                 onClick={() => setShowLogin(true)}
-                className="ml-2 sm:ml-4 rounded-lg px-4 sm:px-5 py-2.5 text-sm font-semibold text-[var(--background)] transition-all active:scale-[0.97]"
-                style={{ background: "linear-gradient(135deg, #e8a838, #d4942e)" }}
+                className="ml-2 flex h-8 w-8 items-center justify-center rounded-full bg-[var(--secondary)] transition-colors hover:bg-[var(--primary-10)]"
+                aria-label="Sign in"
               >
-                Get Started
+                <svg className="h-[18px] w-[18px] text-[var(--muted-foreground)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                </svg>
               </button>
             )}
           </nav>

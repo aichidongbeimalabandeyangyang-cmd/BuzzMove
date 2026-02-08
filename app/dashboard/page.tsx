@@ -1,12 +1,16 @@
 "use client";
 
-import { useRef, useCallback } from "react";
+import { useState, useRef, useCallback } from "react";
 import { trpc } from "@/lib/trpc";
 import { formatCredits } from "@/lib/utils";
 import Link from "next/link";
+import Image from "next/image";
 import { GeneratingPoller } from "@/components/video/generating-poller";
 
+type Tab = "videos" | "photos";
+
 export default function DashboardPage() {
+  const [activeTab, setActiveTab] = useState<Tab>("videos");
   const { data: creditData } = trpc.credit.getBalance.useQuery();
   const { data: videosData, isLoading } = trpc.video.list.useQuery(
     { limit: 20, offset: 0 },
@@ -23,11 +27,11 @@ export default function DashboardPage() {
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-10">
       {/* Header bar */}
-      <div className="mb-6 sm:mb-10 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-6 sm:mb-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">My Videos</h1>
+          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Assets</h1>
           <p className="mt-0.5 text-sm text-[var(--muted-foreground)]">
-            Your generated videos and history
+            Your generated videos and uploaded photos
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
@@ -38,9 +42,6 @@ export default function DashboardPage() {
             </span>
             <span className="text-xs text-[var(--muted-foreground)]">cr</span>
           </div>
-          <span className="rounded-full bg-[var(--primary-10)] px-3 py-1.5 text-xs font-medium text-[var(--primary)] capitalize">
-            {creditData?.plan ?? "free"}
-          </span>
           <Link
             href="/"
             className="inline-flex items-center gap-1.5 rounded-xl font-semibold text-[var(--background)] active:scale-[0.98] px-4 py-3 text-sm transition-all"
@@ -54,43 +55,137 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Video grid */}
-      {isLoading ? (
-        <div className="flex justify-center py-20">
-          <div className="relative h-12 w-12">
-            <div className="absolute inset-0 rounded-full border border-[var(--border)]" />
-            <div className="absolute inset-0 animate-spin-slow rounded-full border-2 border-transparent border-t-[var(--primary)]" />
-          </div>
-        </div>
-      ) : videosData?.videos.length === 0 ? (
-        <div className="rounded-2xl bg-[var(--card)] py-20 text-center">
-          <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--secondary)]">
-            <svg className="h-6 w-6 text-[var(--muted-foreground)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
-            </svg>
-          </div>
-          <p className="mb-2 text-lg font-semibold">No videos yet</p>
-          <p className="mb-6 text-sm text-[var(--muted-foreground)]">
-            Upload an image to create your first AI video
-          </p>
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 rounded-xl font-semibold text-[var(--background)] active:scale-[0.98] px-6 py-3.5 text-sm transition-all"
-            style={{ background: "linear-gradient(135deg, #e8a838, #d4942e)" }}
-          >
-            Create Your First Video
-          </Link>
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-3 md:grid-cols-4">
-          {videosData?.videos.map((video) => (
-            <DashboardVideoCard key={video.id} video={video} />
-          ))}
-        </div>
+      {/* Tab switcher */}
+      <div className="mb-6 flex rounded-xl bg-[var(--secondary)] p-1 max-w-xs">
+        <button
+          onClick={() => setActiveTab("videos")}
+          className={`flex-1 rounded-lg py-2.5 text-sm font-medium transition-all ${
+            activeTab === "videos"
+              ? "bg-[var(--primary)] text-[var(--background)]"
+              : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+          }`}
+        >
+          Videos
+        </button>
+        <button
+          onClick={() => setActiveTab("photos")}
+          className={`flex-1 rounded-lg py-2.5 text-sm font-medium transition-all ${
+            activeTab === "photos"
+              ? "bg-[var(--primary)] text-[var(--background)]"
+              : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+          }`}
+        >
+          Photos
+        </button>
+      </div>
+
+      {/* Videos tab */}
+      {activeTab === "videos" && (
+        <>
+          {isLoading ? (
+            <div className="flex justify-center py-20">
+              <div className="relative h-12 w-12">
+                <div className="absolute inset-0 rounded-full border border-[var(--border)]" />
+                <div className="absolute inset-0 animate-spin-slow rounded-full border-2 border-transparent border-t-[var(--primary)]" />
+              </div>
+            </div>
+          ) : videosData?.videos.length === 0 ? (
+            <div className="rounded-2xl bg-[var(--card)] py-20 text-center">
+              <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--secondary)]">
+                <svg className="h-6 w-6 text-[var(--muted-foreground)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
+                </svg>
+              </div>
+              <p className="mb-2 text-lg font-semibold">No videos yet</p>
+              <p className="mb-6 text-sm text-[var(--muted-foreground)]">
+                Upload an image to create your first AI video
+              </p>
+              <Link
+                href="/"
+                className="inline-flex items-center gap-2 rounded-xl font-semibold text-[var(--background)] active:scale-[0.98] px-6 py-3.5 text-sm transition-all"
+                style={{ background: "linear-gradient(135deg, #e8a838, #d4942e)" }}
+              >
+                Create Your First Video
+              </Link>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-3 md:grid-cols-4">
+              {videosData?.videos.map((video) => (
+                <DashboardVideoCard key={video.id} video={video} />
+              ))}
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Photos tab */}
+      {activeTab === "photos" && (
+        <PhotosTab />
       )}
     </div>
   );
 }
+
+/* ── Photos Tab ────────────────────── */
+
+function PhotosTab() {
+  const [photos, setPhotos] = useState<Array<{id: string; url: string; name: string}>>([]);
+
+  // Load from localStorage
+  useState(() => {
+    try {
+      const stored = localStorage.getItem("buzzmove_recent_uploads");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        setPhotos(parsed);
+      }
+    } catch {}
+  });
+
+  if (photos.length === 0) {
+    return (
+      <div className="rounded-2xl bg-[var(--card)] py-20 text-center">
+        <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--secondary)]">
+          <svg className="h-6 w-6 text-[var(--muted-foreground)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z" />
+          </svg>
+        </div>
+        <p className="mb-2 text-lg font-semibold">No photos uploaded</p>
+        <p className="mb-6 text-sm text-[var(--muted-foreground)]">
+          Photos you upload will appear here for easy reuse
+        </p>
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 rounded-xl font-semibold text-[var(--background)] active:scale-[0.98] px-6 py-3.5 text-sm transition-all"
+          style={{ background: "linear-gradient(135deg, #e8a838, #d4942e)" }}
+        >
+          Upload a Photo
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-3 gap-3 sm:gap-4 sm:grid-cols-4 md:grid-cols-5">
+      {photos.map((photo) => (
+        <div
+          key={photo.id}
+          className="group relative aspect-square overflow-hidden rounded-2xl bg-[var(--secondary)]"
+        >
+          <Image
+            src={photo.url}
+            alt={photo.name}
+            fill
+            className="object-cover"
+            unoptimized
+          />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ── Video Card ────────────────────── */
 
 function DashboardVideoCard({ video }: { video: any }) {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -135,7 +230,7 @@ function DashboardVideoCard({ video }: { video: any }) {
             playsInline
             preload="none"
           />
-          {/* Play button overlay — always visible when paused */}
+          {/* Play button overlay */}
           <div className="absolute inset-0 flex items-center justify-center bg-black/10 opacity-100 transition-opacity duration-200 group-hover:bg-black/20">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-black/40 backdrop-blur-sm transition-transform group-hover:scale-110">
               <svg className="h-4 w-4 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">

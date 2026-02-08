@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { PLANS, CREDIT_PACKS } from "@/lib/constants";
 import { formatPrice } from "@/lib/utils";
 import { trpc } from "@/lib/trpc";
@@ -27,6 +28,18 @@ export default function PricingPage() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-12">
       {/* Header */}
+      <div className="mb-6 sm:mb-8 flex items-center gap-3">
+        <Link
+          href="/dashboard/profile"
+          className="flex h-9 w-9 items-center justify-center rounded-lg text-[var(--muted-foreground)] transition-colors hover:bg-[var(--secondary)] hover:text-[var(--foreground)] sm:hidden"
+          aria-label="Back"
+        >
+          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+          </svg>
+        </Link>
+      </div>
+
       <div className="mb-10 sm:mb-14 text-center">
         <h1 className="mb-3 text-3xl font-bold tracking-tight sm:text-5xl">
           Simple, <span className="text-gradient">flexible</span> pricing
@@ -58,7 +71,7 @@ export default function PricingPage() {
             }`}
           >
             Yearly
-            <span className="rounded-md bg-emerald-900 px-1.5 py-0.5 text-[11px] font-semibold text-emerald-400">
+            <span className="rounded-md bg-emerald-500/20 px-1.5 py-0.5 text-[11px] font-semibold text-emerald-400">
               -20%
             </span>
           </button>
@@ -114,14 +127,25 @@ export default function PricingPage() {
             <h3 className="text-lg font-bold">{PLANS.pro.name}</h3>
             <p className="mt-0.5 text-sm text-[var(--muted-foreground)]">For regular creators</p>
           </div>
-          <p className="mb-6">
-            <span className="text-4xl font-bold tracking-tight">
+          <p className="mb-2">
+            <span className="text-5xl font-bold tracking-tight">
               {billingPeriod === "yearly"
                 ? formatPrice(PLANS.pro.price_yearly / 12)
                 : formatPrice(PLANS.pro.price_monthly)}
             </span>
             <span className="ml-1 text-sm text-[var(--muted-foreground)]">/mo</span>
           </p>
+          {billingPeriod === "yearly" && (
+            <div className="mb-6 space-y-1">
+              <p className="text-sm font-semibold text-[var(--primary)]">
+                Save $87/year — was {formatPrice(PLANS.pro.price_monthly * 12)}
+              </p>
+              <p className="text-xs text-[var(--muted-foreground)]">
+                ⏰ Offer ends Feb 28
+              </p>
+            </div>
+          )}
+          {billingPeriod === "monthly" && <div className="mb-6" />}
           <ul className="mb-7 space-y-3 text-sm text-[var(--muted-foreground)]">
             {[
               "30,000 credits/month",
@@ -146,8 +170,11 @@ export default function PricingPage() {
             className="w-full rounded-xl py-3.5 text-sm font-semibold text-[var(--background)] transition-all active:scale-[0.98] disabled:opacity-50"
             style={{ background: "linear-gradient(135deg, #e8a838, #d4942e)" }}
           >
-            Get Pro
+            Upgrade to Pro
           </button>
+          <p className="mt-3 text-center text-xs text-[var(--muted-foreground)]">
+            Cancel anytime. No questions asked.
+          </p>
         </div>
 
         {/* Premium */}
@@ -195,8 +222,8 @@ export default function PricingPage() {
       {/* Creator Weekly */}
       <div className="mb-12 sm:mb-20 flex justify-center">
         <div className="w-full max-w-md overflow-hidden rounded-2xl bg-[var(--card)]">
-          <div className="px-7 py-3 text-center" style={{ background: "linear-gradient(90deg, rgba(249,115,22,0.1), rgba(245,158,11,0.1))" }}>
-            <span className="text-xs font-semibold text-orange-400">
+          <div className="px-7 py-3 text-center" style={{ background: "linear-gradient(90deg, rgba(34,197,94,0.08), rgba(34,197,94,0.04))" }}>
+            <span className="text-xs font-semibold text-emerald-400">
               LIMITED OFFER &mdash; 50% OFF
             </span>
           </div>

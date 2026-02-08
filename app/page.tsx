@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { UploadZone } from "@/components/upload/upload-zone";
+import { UploadZone, saveRecentUpload } from "@/components/upload/upload-zone";
 import { VideoGenerator } from "@/components/video/video-generator";
 import { HERO_EXAMPLES } from "@/lib/constants";
 
@@ -33,6 +33,8 @@ export default function HomePage() {
       if (!res.ok) throw new Error(data.error || "Upload failed");
 
       setImageUrl(data.url);
+      // Save to recent uploads for quick reuse
+      saveRecentUpload(data.url, file.name);
     } catch (err) {
       console.error("Upload failed:", err);
       setSelectedFile(null);

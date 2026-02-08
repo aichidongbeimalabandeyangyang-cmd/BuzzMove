@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
+import Image from "next/image";
 import { SUPPORTED_FORMATS, MAX_FILE_SIZE } from "@/lib/constants";
 
 interface UploadZoneProps {
@@ -8,10 +9,49 @@ interface UploadZoneProps {
   disabled?: boolean;
 }
 
+interface RecentUpload {
+  id: string;
+  url: string;
+  name: string;
+  uploadedAt: number;
+}
+
+const RECENT_UPLOADS_KEY = "buzzmove_recent_uploads";
+const MAX_RECENT = 8;
+
+function getRecentUploads(): RecentUpload[] {
+  try {
+    const stored = localStorage.getItem(RECENT_UPLOADS_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveRecentUpload(url: string, name: string) {
+  try {
+    const uploads = getRecentUploads();
+    const newUpload: RecentUpload = {
+      id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+      url,
+      name,
+      uploadedAt: Date.now(),
+    };
+    const updated = [newUpload, ...uploads.filter(u => u.url !== url)].slice(0, MAX_RECENT);
+    localStorage.setItem(RECENT_UPLOADS_KEY, JSON.stringify(updated));
+  } catch {}
+}
+
+export { saveRecentUpload };
+
 export function UploadZone({ onFileSelected, disabled }: UploadZoneProps) {
-  const [isDragging, setIsDragging] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [recentUploads, setRecentUploads] = useState<RecentUpload[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setRecentUploads(getRecentUploads());
+  }, []);
 
   const validateFile = (file: File): boolean => {
     if (!SUPPORTED_FORMATS.includes(file.type)) {
@@ -35,42 +75,78 @@ export function UploadZone({ onFileSelected, disabled }: UploadZoneProps) {
     [onFileSelected]
   );
 
-  const handleDrop = useCallback(
-    (e: React.DragEvent) => {
-      e.preventDefault();
-      setIsDragging(false);
-      const file = e.dataTransfer.files[0];
-      if (file) handleFile(file);
-    },
-    [handleFile]
-  );
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      inputRef.current?.click();
-    }
+  const handleRecentClick = (upload: RecentUpload) => {
+    // For recent uploads, we create a synthetic file from the URL
+    // but since we already have the URL, we signal this differently
+    // We'll fetch the image and create a file from it
+    setError(null);
+    fetch(upload.url)
+      .then(res => res.blob())
+      .then(blob => {
+        const file = new File([blob], upload.name, { type: blob.type || "image/jpeg" });
+        onFileSelected(file);
+      })
+      .catch(() => setError("Failed to load this image. Please try uploading again."));
   };
 
   return (
-    <div
-      role="button"
-      tabIndex={0}
-      aria-label="Upload image"
-      className={`group relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-8 sm:p-12 transition-all duration-300 cursor-pointer active:scale-[0.99] ${
-        isDragging
-          ? "border-[var(--primary)] bg-[var(--primary-5)]"
-          : "border-[var(--border)] hover:border-[var(--primary-40)] hover:bg-[var(--card)]"
-      } ${disabled ? "opacity-50 pointer-events-none" : ""}`}
-      onDragOver={(e) => {
-        e.preventDefault();
-        setIsDragging(true);
-      }}
-      onDragLeave={() => setIsDragging(false)}
-      onDrop={handleDrop}
-      onClick={() => inputRef.current?.click()}
-      onKeyDown={handleKeyDown}
-    >
+    <div className={`${disabled ? "opacity-50 pointer-events-none" : ""}`}>
+      {/* Header */}
+      <div className="mb-5 text-center">
+        <h2 className="text-xl font-bold tracking-tight sm:text-2xl">Choose a photo</h2>
+        <p className="mt-1 text-sm text-[var(--muted-foreground)]">
+          Pick a recent upload or add a new one
+        </p>
+      </div>
+
+      {/* Photo grid */}
+      <div className="grid grid-cols-3 gap-2.5">
+        {/* Add New card */}
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          className="group flex aspect-square flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-[var(--border)] bg-[var(--card)] transition-all hover:border-[var(--primary-40)] hover:bg-[var(--primary-5)] active:scale-[0.97]"
+          aria-label="Upload new photo"
+        >
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--primary-10)] transition-transform group-hover:scale-110">
+            <svg className="h-5 w-5 text-[var(--primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+          </div>
+          <span className="text-xs font-medium text-[var(--muted-foreground)] group-hover:text-[var(--primary)]">
+            Add New
+          </span>
+        </button>
+
+        {/* Recent uploads */}
+        {recentUploads.map((upload) => (
+          <button
+            key={upload.id}
+            type="button"
+            onClick={() => handleRecentClick(upload)}
+            className="group relative aspect-square overflow-hidden rounded-2xl bg-[var(--secondary)] transition-all hover:ring-2 hover:ring-[var(--primary)] active:scale-[0.97]"
+          >
+            <Image
+              src={upload.url}
+              alt={upload.name}
+              fill
+              className="object-cover transition-transform group-hover:scale-105"
+              unoptimized
+            />
+            <div className="absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/20" />
+          </button>
+        ))}
+
+        {/* Empty placeholders if fewer than 8 recent uploads */}
+        {recentUploads.length === 0 && Array.from({ length: 5 }).map((_, i) => (
+          <div
+            key={`placeholder-${i}`}
+            className="aspect-square rounded-2xl bg-[var(--card)] border border-[var(--border)]"
+          />
+        ))}
+      </div>
+
+      {/* Hidden file input */}
       <input
         ref={inputRef}
         type="file"
@@ -83,48 +159,13 @@ export function UploadZone({ onFileSelected, disabled }: UploadZoneProps) {
         }}
       />
 
-      {/* Upload icon */}
-      <div className="relative mb-4">
-        <div
-          className="flex h-16 w-16 items-center justify-center rounded-2xl transition-transform duration-300 group-hover:scale-110"
-          style={{ background: "linear-gradient(135deg, rgba(232,168,56,0.12), rgba(240,192,96,0.06))" }}
-        >
-          <svg
-            className="h-7 w-7 text-[var(--primary)] transition-transform duration-300 group-hover:-translate-y-0.5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={1.5}
-            aria-hidden="true"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"
-            />
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z"
-            />
-          </svg>
-        </div>
-      </div>
-
-      <p className="mb-1 text-base font-semibold">
-        <span className="sm:hidden">Choose a photo</span>
-        <span className="hidden sm:inline">Drop your image here</span>
-      </p>
-      <p className="text-sm text-[var(--muted-foreground)]">
-        <span className="sm:hidden">or take a new one</span>
-        <span className="hidden sm:inline">or <span className="text-[var(--primary)] font-medium">browse files</span></span>
-      </p>
-      <p className="mt-2 text-xs text-[var(--muted-foreground)]">
+      {/* Formats hint */}
+      <p className="mt-4 text-center text-xs text-[var(--muted-foreground)]">
         JPG, PNG, WebP &middot; Up to 10 MB
       </p>
 
       {error && (
-        <div role="alert" className="mt-3 rounded-xl bg-[var(--destructive-10)] px-4 py-2.5 text-sm text-[var(--destructive)]">
+        <div role="alert" className="mt-3 rounded-xl bg-[var(--destructive-10)] px-4 py-2.5 text-center text-sm text-[var(--destructive)]">
           {error}
         </div>
       )}

@@ -107,6 +107,11 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
         className="relative w-full max-w-[420px] mx-0 sm:mx-4 animate-scale-in rounded-t-2xl sm:rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 sm:p-8 pb-[calc(1.5rem+env(safe-area-inset-bottom))] sm:pb-8 outline-none"
         style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.5), 0 0 80px rgba(232,168,56,0.06)" }}
       >
+        {/* Grab handle (mobile) */}
+        <div className="sm:hidden mb-4 flex justify-center">
+          <div className="h-1 w-10 rounded-full bg-[var(--border)]" />
+        </div>
+
         {/* Close button */}
         <button
           onClick={onClose}
@@ -195,6 +200,14 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
                 {loading ? "Sending..." : "Continue with Email"}
               </button>
             </form>
+
+            {/* Terms */}
+            <p className="mt-5 text-center text-[11px] leading-relaxed text-[var(--muted-foreground)]">
+              By continuing, you agree to our{" "}
+              <a href="/terms" className="underline hover:text-[var(--foreground)]">Terms of Service</a>{" "}
+              and{" "}
+              <a href="/privacy" className="underline hover:text-[var(--foreground)]">Privacy Policy</a>
+            </p>
           </>
         )}
       </div>
