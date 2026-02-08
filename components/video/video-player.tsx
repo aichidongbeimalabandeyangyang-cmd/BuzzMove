@@ -15,7 +15,7 @@ export function VideoPlayer({ videoId, onReset, creditCost }: VideoPlayerProps) 
   if (!video?.output_video_url) {
     return (
       <div className="flex w-full flex-1 items-center justify-center">
-        <p className="text-sm text-[#6B6B70]">Video not ready</p>
+        <p style={{ fontSize: 14, color: "#6B6B70" }}>Video not ready</p>
       </div>
     );
   }
@@ -31,42 +31,32 @@ export function VideoPlayer({ videoId, onReset, creditCost }: VideoPlayerProps) 
   return (
     <div className="flex w-full flex-1 flex-col">
       {/* Result Body: h-fill, vertical, gap 20, padding [8,20,20,20] */}
-      <div className="flex flex-1 flex-col gap-5 px-5 pt-2 pb-5">
+      <div className="flex flex-1 flex-col" style={{ gap: 20, padding: "8px 20px 20px 20px" }}>
         {/* Video Player: h440, cornerRadius 20 */}
-        <div className="relative w-full shrink-0 overflow-hidden rounded-[20px]" style={{ height: 440 }}>
-          <video
-            src={video.output_video_url}
-            controls
-            autoPlay
-            loop
-            playsInline
-            className="h-full w-full object-cover"
-          />
+        <div className="relative w-full overflow-hidden" style={{ height: 440, borderRadius: 20, flexShrink: 0 }}>
+          <video src={video.output_video_url} controls autoPlay loop playsInline className="h-full w-full object-cover" />
         </div>
 
-        {/* Action Row: gap 10, horizontal */}
-        <div className="flex gap-2.5">
+        {/* Action Row: gap 10 */}
+        <div className="flex" style={{ gap: 10 }}>
           {/* Download: h48, cornerRadius 14, gradient + shadow, gap 8 */}
           <a
             href={video.output_video_url}
             download
-            className="flex h-12 flex-1 items-center justify-center gap-2 rounded-[14px] text-[15px] font-bold text-[#0B0B0E] transition-all active:scale-[0.98]"
-            style={{
-              background: "linear-gradient(135deg, #F0C060, #E8A838)",
-              boxShadow: "0 4px 20px #E8A83840",
-            }}
+            className="flex flex-1 items-center justify-center transition-all active:scale-[0.98]"
+            style={{ height: 48, borderRadius: 14, gap: 8, background: "linear-gradient(135deg, #F0C060, #E8A838)", boxShadow: "0 4px 20px #E8A83840" }}
           >
-            <Download className="h-5 w-5" strokeWidth={1.5} />
-            Download
+            <Download style={{ width: 20, height: 20, color: "#0B0B0E" }} strokeWidth={1.5} />
+            <span style={{ fontSize: 15, fontWeight: 700, color: "#0B0B0E" }}>Download</span>
           </a>
           {/* Share: h48, cornerRadius 14, stroke 1.5px #252530, gap 8 */}
           <button
             onClick={handleShare}
-            className="flex h-12 flex-1 items-center justify-center gap-2 rounded-[14px] text-[15px] font-semibold text-[#FAFAF9] transition-all active:scale-[0.98]"
-            style={{ border: "1.5px solid #252530" }}
+            className="flex flex-1 items-center justify-center transition-all active:scale-[0.98]"
+            style={{ height: 48, borderRadius: 14, border: "1.5px solid #252530", gap: 8 }}
           >
-            <Share2 className="h-5 w-5" strokeWidth={1.5} />
-            Share
+            <Share2 style={{ width: 20, height: 20, color: "#FAFAF9" }} strokeWidth={1.5} />
+            <span style={{ fontSize: 15, fontWeight: 600, color: "#FAFAF9" }}>Share</span>
           </button>
         </div>
 
@@ -74,11 +64,11 @@ export function VideoPlayer({ videoId, onReset, creditCost }: VideoPlayerProps) 
         {onReset && (
           <button
             onClick={onReset}
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-[14px] text-[15px] font-semibold text-[#FAFAF9] transition-all active:scale-[0.98]"
-            style={{ border: "1.5px solid #252530" }}
+            className="flex w-full items-center justify-center transition-all active:scale-[0.98]"
+            style={{ height: 48, borderRadius: 14, border: "1.5px solid #252530", gap: 8 }}
           >
-            <RefreshCw className="h-[18px] w-[18px]" strokeWidth={1.5} />
-            Regenerate · {creditCost || 300} credits
+            <RefreshCw style={{ width: 18, height: 18, color: "#FAFAF9" }} strokeWidth={1.5} />
+            <span style={{ fontSize: 15, fontWeight: 600, color: "#FAFAF9" }}>Regenerate · {creditCost || 300} credits</span>
           </button>
         )}
       </div>

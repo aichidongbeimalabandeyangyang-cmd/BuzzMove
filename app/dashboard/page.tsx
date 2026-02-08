@@ -11,41 +11,41 @@ export default function AssetsPage() {
 
   return (
     <div className="flex w-full flex-1 flex-col">
-      {/* Tab Switcher: padding [0,16,8,16], horizontal */}
-      <div className="flex gap-1 px-4 pb-2">
-        {/* Active Tab: h36, cornerRadius 10, fill #E8A838, padding [0,20] */}
-        <button
-          onClick={() => setTab("videos")}
-          className={`flex h-9 items-center justify-center rounded-[10px] px-5 text-sm transition-all ${
-            tab === "videos"
-              ? "bg-[#E8A838] font-semibold text-[#0B0B0E]"
-              : "font-medium text-[#6B6B70]"
-          }`}
-        >
-          Videos
-        </button>
-        <button
-          onClick={() => setTab("photos")}
-          className={`flex h-9 items-center justify-center rounded-[10px] px-5 text-sm transition-all ${
-            tab === "photos"
-              ? "bg-[#E8A838] font-semibold text-[#0B0B0E]"
-              : "font-medium text-[#6B6B70]"
-          }`}
-        >
-          Photos
-        </button>
+      {/* Tab Switcher: padding [0,16,8,16], horizontal, gap 4 */}
+      <div className="flex" style={{ gap: 4, padding: "0 16px 8px 16px" }}>
+        {(["videos", "photos"] as const).map((t) => (
+          <button
+            key={t}
+            onClick={() => setTab(t)}
+            className="flex items-center justify-center"
+            style={{
+              height: 36,
+              borderRadius: 10,
+              padding: "0 20px",
+              fontSize: 14,
+              fontWeight: tab === t ? 600 : 500,
+              color: tab === t ? "#0B0B0E" : "#6B6B70",
+              backgroundColor: tab === t ? "#E8A838" : "transparent",
+            }}
+          >
+            {t === "videos" ? "Videos" : "Photos"}
+          </button>
+        ))}
       </div>
 
       {/* Video Grid: vertical, gap 12, padding [8,16], h-fill, scrollable */}
-      <div className="flex flex-1 flex-col gap-3 overflow-y-auto px-4 pt-2 pb-4">
+      <div className="flex flex-1 flex-col overflow-y-auto" style={{ gap: 12, padding: "8px 16px 16px 16px" }}>
         {tab === "videos" ? (
           videos && videos.length > 0 ? (
-            <div className="flex flex-col gap-3">
-              {/* Render in rows of 2 */}
+            <div className="flex flex-col" style={{ gap: 12 }}>
               {Array.from({ length: Math.ceil(videos.length / 2) }).map((_, rowIdx) => (
-                <div key={rowIdx} className="grid grid-cols-2 gap-3">
+                <div key={rowIdx} className="grid grid-cols-2" style={{ gap: 12 }}>
                   {videos.slice(rowIdx * 2, rowIdx * 2 + 2).map((video) => (
-                    <div key={video.id} className="relative h-[210px] overflow-hidden rounded-2xl bg-[#16161A]">
+                    <div
+                      key={video.id}
+                      className="relative overflow-hidden"
+                      style={{ height: 210, borderRadius: 16, backgroundColor: "#16161A" }}
+                    >
                       {video.output_video_url ? (
                         <video
                           src={video.output_video_url}
@@ -57,9 +57,12 @@ export default function AssetsPage() {
                       ) : video.input_image_url ? (
                         <Image src={video.input_image_url} alt="" fill className="object-cover" unoptimized />
                       ) : null}
-                      {/* Duration Badge: x8 y182, cornerRadius 8, fill #00000080, padding [3,8] */}
-                      <div className="absolute bottom-[28px] left-2 rounded-lg bg-black/50 px-2 py-0.5">
-                        <span className="text-[11px] font-semibold text-white">
+                      {/* Duration Badge: cornerRadius 8, fill #00000080, padding [3,8] */}
+                      <div
+                        className="absolute"
+                        style={{ bottom: 8, left: 8, borderRadius: 8, backgroundColor: "#00000080", padding: "3px 8px" }}
+                      >
+                        <span style={{ fontSize: 11, fontWeight: 600, color: "#FFFFFF" }}>
                           0:{String(video.duration || 5).padStart(2, "0")}
                         </span>
                       </div>
@@ -69,15 +72,15 @@ export default function AssetsPage() {
               ))}
             </div>
           ) : (
-            <div className="flex flex-1 flex-col items-center justify-center gap-3">
-              <p className="text-sm text-[#6B6B70]">No videos yet</p>
-              <p className="text-xs text-[#4A4A50]">Your generated videos will appear here</p>
+            <div className="flex flex-1 flex-col items-center justify-center" style={{ gap: 12 }}>
+              <p style={{ fontSize: 14, color: "#6B6B70" }}>No videos yet</p>
+              <p style={{ fontSize: 12, color: "#4A4A50" }}>Your generated videos will appear here</p>
             </div>
           )
         ) : (
-          <div className="flex flex-1 flex-col items-center justify-center gap-3">
-            <p className="text-sm text-[#6B6B70]">No photos yet</p>
-            <p className="text-xs text-[#4A4A50]">Your uploaded photos will appear here</p>
+          <div className="flex flex-1 flex-col items-center justify-center" style={{ gap: 12 }}>
+            <p style={{ fontSize: 14, color: "#6B6B70" }}>No photos yet</p>
+            <p style={{ fontSize: 12, color: "#4A4A50" }}>Your uploaded photos will appear here</p>
           </div>
         )}
       </div>

@@ -19,28 +19,28 @@ export function BottomNav({ isLoggedIn, onLoginClick }: BottomNavProps) {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-50 sm:hidden bg-[#0B0B0E] pb-[env(safe-area-inset-bottom)]">
+    <nav className="fixed inset-x-0 bottom-0 z-50 sm:hidden" style={{ backgroundColor: "#0B0B0E", paddingBottom: "env(safe-area-inset-bottom)" }}>
       {/* Tab separator: 1px #1A1A1E */}
-      <div className="h-px w-full bg-[#1A1A1E]" />
+      <div style={{ width: "100%", height: 1, backgroundColor: "#1A1A1E" }} />
       {/* BottomTab: h64, justify-around, padding [6,0,14,0] */}
-      <div className="flex h-16 items-center justify-around pt-1.5 pb-3.5">
+      <div className="flex items-center justify-around" style={{ height: 64, padding: "6px 0 14px 0" }}>
         {TABS.map((tab) => {
           const isActive = tab.match(pathname);
           const Icon = tab.icon;
-          const colorClass = isActive ? "text-[#E8A838]" : "text-[#6B6B70]";
-          const weightClass = isActive ? "font-semibold" : "font-medium";
+          const color = isActive ? "#E8A838" : "#6B6B70";
+          const weight = isActive ? 600 : 500;
 
-          // Profile tab: if not logged in, show button that opens login
           if (tab.label === "My Profile" && !isLoggedIn) {
             return (
               <button
                 key={tab.label}
                 type="button"
                 onClick={onLoginClick}
-                className={`flex flex-col items-center gap-[3px] min-w-[64px] min-h-[44px] justify-center ${colorClass}`}
+                className="flex flex-col items-center justify-center"
+                style={{ gap: 3, minWidth: 64, minHeight: 44 }}
               >
-                <Icon className="h-[22px] w-[22px]" strokeWidth={1.5} />
-                <span className={`text-[11px] ${weightClass}`}>{tab.label}</span>
+                <Icon style={{ width: 22, height: 22, color }} strokeWidth={1.5} />
+                <span style={{ fontSize: 11, fontWeight: weight, color }}>{tab.label}</span>
               </button>
             );
           }
@@ -49,10 +49,11 @@ export function BottomNav({ isLoggedIn, onLoginClick }: BottomNavProps) {
             <Link
               key={tab.label}
               href={tab.href}
-              className={`flex flex-col items-center gap-[3px] min-w-[64px] min-h-[44px] justify-center ${colorClass}`}
+              className="flex flex-col items-center justify-center"
+              style={{ gap: 3, minWidth: 64, minHeight: 44 }}
             >
-              <Icon className="h-[22px] w-[22px]" strokeWidth={1.5} />
-              <span className={`text-[11px] ${weightClass}`}>{tab.label}</span>
+              <Icon style={{ width: 22, height: 22, color }} strokeWidth={1.5} />
+              <span style={{ fontSize: 11, fontWeight: weight, color }}>{tab.label}</span>
             </Link>
           );
         })}

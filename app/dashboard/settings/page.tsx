@@ -3,53 +3,46 @@
 import Link from "next/link";
 import { User, Bell, Shield, FileText, Lock, RotateCcw } from "lucide-react";
 
+const ICON_STYLE = { width: 20, height: 20, color: "#9898A4", flexShrink: 0 } as const;
+const ITEM_STYLE = { gap: 12, padding: "14px 16px" } as const;
+const LABEL_STYLE = { fontSize: 15, fontWeight: 500, color: "#FAFAF9" } as const;
+
+function MenuItem({ href, icon: Icon, label }: { href: string; icon: any; label: string }) {
+  return (
+    <Link href={href} className="flex w-full items-center" style={ITEM_STYLE}>
+      <Icon style={ICON_STYLE} strokeWidth={1.5} />
+      <span style={LABEL_STYLE}>{label}</span>
+    </Link>
+  );
+}
+
 export default function SettingsPage() {
   return (
     <div className="flex w-full flex-1 flex-col">
       {/* settingsBody: gap 24, padding [24,20,12,20], h-fill */}
-      <div className="flex flex-1 flex-col gap-6 px-5 pt-6 pb-3">
-        {/* Section 1: ACCOUNT — gap 8 */}
-        <div className="flex flex-col gap-2">
-          {/* Label: 12/600 #6B6B70, letterSpacing 1px */}
-          <p className="text-xs font-semibold tracking-[1px] text-[#6B6B70]">ACCOUNT</p>
-          {/* Card: cornerRadius 16, fill #16161A, vertical */}
-          <div className="overflow-hidden rounded-2xl bg-[#16161A]">
-            <Link href="#" className="flex items-center gap-3 px-4 py-3.5 transition-colors hover:bg-[#1E1E22]">
-              <User className="h-5 w-5 text-[#9898A4]" strokeWidth={1.5} />
-              <span className="text-[15px] font-medium text-[#FAFAF9]">Edit Profile</span>
-            </Link>
-            <Link href="#" className="flex items-center gap-3 px-4 py-3.5 transition-colors hover:bg-[#1E1E22]">
-              <Bell className="h-5 w-5 text-[#9898A4]" strokeWidth={1.5} />
-              <span className="text-[15px] font-medium text-[#FAFAF9]">Notifications</span>
-            </Link>
-            <Link href="#" className="flex items-center gap-3 px-4 py-3.5 transition-colors hover:bg-[#1E1E22]">
-              <Shield className="h-5 w-5 text-[#9898A4]" strokeWidth={1.5} />
-              <span className="text-[15px] font-medium text-[#FAFAF9]">Privacy & Security</span>
-            </Link>
+      <div className="flex w-full flex-1 flex-col" style={{ gap: 24, padding: "24px 20px 12px 20px" }}>
+        {/* Section 1: ACCOUNT */}
+        <div className="flex w-full flex-col" style={{ gap: 8 }}>
+          <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: 1, color: "#6B6B70" }}>ACCOUNT</p>
+          <div className="flex w-full flex-col" style={{ borderRadius: 16, backgroundColor: "#16161A", overflow: "hidden" }}>
+            <MenuItem href="#" icon={User} label="Edit Profile" />
+            <MenuItem href="#" icon={Bell} label="Notifications" />
+            <MenuItem href="#" icon={Shield} label="Privacy & Security" />
           </div>
         </div>
 
-        {/* Section 2: LEGAL — gap 8 */}
-        <div className="flex flex-col gap-2">
-          <p className="text-xs font-semibold tracking-[1px] text-[#6B6B70]">LEGAL</p>
-          <div className="overflow-hidden rounded-2xl bg-[#16161A]">
-            <Link href="/terms" className="flex items-center gap-3 px-4 py-3.5 transition-colors hover:bg-[#1E1E22]">
-              <FileText className="h-5 w-5 text-[#9898A4]" strokeWidth={1.5} />
-              <span className="text-[15px] font-medium text-[#FAFAF9]">Terms of Service</span>
-            </Link>
-            <Link href="/privacy" className="flex items-center gap-3 px-4 py-3.5 transition-colors hover:bg-[#1E1E22]">
-              <Lock className="h-5 w-5 text-[#9898A4]" strokeWidth={1.5} />
-              <span className="text-[15px] font-medium text-[#FAFAF9]">Privacy Policy</span>
-            </Link>
-            <Link href="/refund-policy" className="flex items-center gap-3 px-4 py-3.5 transition-colors hover:bg-[#1E1E22]">
-              <RotateCcw className="h-5 w-5 text-[#9898A4]" strokeWidth={1.5} />
-              <span className="text-[15px] font-medium text-[#FAFAF9]">Refund Policy</span>
-            </Link>
+        {/* Section 2: LEGAL */}
+        <div className="flex w-full flex-col" style={{ gap: 8 }}>
+          <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: 1, color: "#6B6B70" }}>LEGAL</p>
+          <div className="flex w-full flex-col" style={{ borderRadius: 16, backgroundColor: "#16161A", overflow: "hidden" }}>
+            <MenuItem href="/terms" icon={FileText} label="Terms of Service" />
+            <MenuItem href="/privacy" icon={Lock} label="Privacy Policy" />
+            <MenuItem href="/refund-policy" icon={RotateCcw} label="Refund Policy" />
           </div>
         </div>
 
         {/* Version: 12/400 #4A4A50, center */}
-        <p className="text-center text-xs text-[#4A4A50]">BuzzMove v1.0.0</p>
+        <p style={{ fontSize: 12, fontWeight: 400, color: "#4A4A50", textAlign: "center" }}>BuzzMove v1.0.0</p>
       </div>
     </div>
   );
