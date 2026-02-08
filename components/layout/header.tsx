@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { createSupabaseBrowserClient } from "@/server/supabase/client";
 import { trpc } from "@/lib/trpc";
 import { formatCredits } from "@/lib/utils";
+import { useHomeView } from "@/lib/view-context";
 import { LoginModal } from "@/components/auth/login-modal";
 import { BottomNav } from "./bottom-nav";
 
@@ -37,15 +38,31 @@ export function Header() {
     return () => window.removeEventListener("open-login", handler);
   }, []);
 
+  const { homeView, setHomeView } = useHomeView();
+
   const isAssets = pathname === "/dashboard" || pathname === "/dashboard/";
   const isSettings = pathname === "/dashboard/settings";
   const isPricing = pathname === "/pricing";
   const isProfile = pathname === "/dashboard/profile";
   const isHome = pathname === "/";
-  const hasBackArrow = isSettings || isPricing;
-  const showBuzzMoveLogo = isHome || isProfile;
-  const showCredits = isAssets && user;
-  const pageTitle = isSettings ? "Settings" : isPricing ? "Pricing & Plans" : isAssets ? "Assets" : "";
+
+  // On homepage, sub-views (generator/progress/result) override the header
+  const isSubView = isHome && (homeView === "generator" || homeView === "progress" || homeView === "result");
+  const hasBackArrow = isSettings || isPricing || isSubView;
+  const showBuzzMoveLogo = isHome && !isSubView; // Only default homepage gets the logo icon
+  const showBuzzMoveText = isProfile; // Profile page gets just "BuzzMove" text (no icon)
+  const showCredits = (isAssets || (isHome && (homeView === "generator" || homeView === "progress"))) && user;
+  const pageTitle = isSettings
+    ? "Settings"
+    : isPricing
+      ? "Pricing & Plans"
+      : isAssets
+        ? "Assets"
+        : isHome && homeView === "result"
+          ? "Result"
+          : isSubView
+            ? "BuzzMove"
+            : "";
 
   return (
     <>
@@ -53,7 +70,7 @@ export function Header() {
         <div className="flex h-14 items-center justify-between px-5">
           {/* Left */}
           {hasBackArrow ? (
-            <button onClick={() => router.back()} className="flex items-center gap-2">
+            <button onClick={() => isSubView ? setHomeView("home") : router.back()} className="flex items-center gap-2">
               <svg className="h-[22px] w-[22px] text-[var(--foreground)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
               </svg>
@@ -66,6 +83,8 @@ export function Header() {
               </div>
               <span className="text-[17px] font-bold text-[var(--foreground)]">BuzzMove</span>
             </Link>
+          ) : showBuzzMoveText ? (
+            <span className="text-[17px] font-bold text-[var(--foreground)]">BuzzMove</span>
           ) : (
             <span className="text-xl font-bold text-[var(--foreground)]">{pageTitle}</span>
           )}

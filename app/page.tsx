@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { UploadZone, saveRecentUpload } from "@/components/upload/upload-zone";
 import { VideoGenerator } from "@/components/video/video-generator";
 import { HERO_EXAMPLES } from "@/lib/constants";
+import { useHomeView } from "@/lib/view-context";
 
 export default function HomePage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -14,6 +15,14 @@ export default function HomePage() {
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [showUpload, setShowUpload] = useState(false);
+  const { setHomeView } = useHomeView();
+
+  // Sync homeView for upload and home states (generator/progress/result handled inside VideoGenerator)
+  useEffect(() => {
+    if (!imageUrl && !imagePreview) {
+      setHomeView(showUpload ? "upload" : "home");
+    }
+  }, [showUpload, imageUrl, imagePreview, setHomeView]);
 
   const handleFileSelected = async (file: File) => {
     const preview = URL.createObjectURL(file);
@@ -78,7 +87,7 @@ export default function HomePage() {
   // Show upload zone (photo picker)
   if (showUpload) {
     return (
-      <div className="flex w-full flex-1 flex-col px-5 py-4">
+      <div className="flex w-full flex-1 flex-col px-4 pt-4 pb-3">
         {uploading ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-5">
             <div className="relative h-12 w-12" role="status" aria-label="Uploading image">

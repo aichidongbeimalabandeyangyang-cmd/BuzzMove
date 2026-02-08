@@ -80,7 +80,7 @@ export function UploadZone({ onFileSelected, disabled }: UploadZoneProps) {
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
-          className="flex aspect-[1/1.25] flex-col items-center justify-center gap-2 rounded-[14px] transition-all active:scale-[0.97]"
+          className="flex h-[150px] flex-col items-center justify-center gap-2 rounded-[14px] transition-all active:scale-[0.97]"
           style={{ border: "1.5px solid #252530" }}
           aria-label="Upload new photo"
         >
@@ -96,7 +96,7 @@ export function UploadZone({ onFileSelected, disabled }: UploadZoneProps) {
             key={upload.id}
             type="button"
             onClick={() => handleRecentClick(upload)}
-            className="relative aspect-[1/1.25] overflow-hidden rounded-[14px] bg-[var(--secondary)] transition-all active:scale-[0.97]"
+            className="relative h-[150px] overflow-hidden rounded-[14px] bg-[var(--secondary)] transition-all active:scale-[0.97]"
           >
             <Image src={upload.url} alt={upload.name} fill className="object-cover" unoptimized />
           </button>
@@ -104,7 +104,7 @@ export function UploadZone({ onFileSelected, disabled }: UploadZoneProps) {
 
         {/* Empty placeholder cells to fill the grid */}
         {Array.from({ length: Math.max(0, 8 - recentUploads.length) }).map((_, i) => (
-          <div key={`empty-${i}`} className="aspect-[1/1.25] rounded-[14px] bg-[#16161A]" />
+          <div key={`empty-${i}`} className="h-[150px] rounded-[14px] bg-[#16161A]" />
         ))}
       </div>
 

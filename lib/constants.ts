@@ -64,19 +64,19 @@ export const STRICT_COUNTRIES = [
 export const HERO_EXAMPLES = [
   {
     id: "example-1",
-    image: "/examples/example-1.svg",
-    prompt: "Gentle breeze blowing through hair, soft smile, cinematic movement",
+    image: "/examples/hero-portrait.jpg",
+    prompt: "Blowing a kiss, flirty expression, charming smile.",
     label: "Portrait",
   },
   {
     id: "example-2",
-    image: "/examples/example-2.svg",
+    image: "/examples/hero-portrait.jpg",
     prompt: "Slow zoom out revealing the full scene, atmospheric golden hour lighting",
     label: "Landscape",
   },
   {
     id: "example-3",
-    image: "/examples/example-3.svg",
+    image: "/examples/hero-portrait.jpg",
     prompt: "Product rotating slowly with dramatic lighting and reflections",
     label: "Product",
   },

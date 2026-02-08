@@ -7,6 +7,7 @@ import { trpc } from "@/lib/trpc";
 import { createSupabaseBrowserClient } from "@/server/supabase/client";
 import { getDeviceKey } from "@/components/tracking/device-key-ensurer";
 import { CREDIT_COSTS } from "@/lib/constants";
+import { useHomeView } from "@/lib/view-context";
 import { VideoProgress } from "./video-progress";
 import { VideoPlayer } from "./video-player";
 
@@ -29,6 +30,18 @@ export function VideoGenerator({
   const [videoId, setVideoId] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+  const { setHomeView } = useHomeView();
+
+  // Sync homeView context with current sub-view state
+  useEffect(() => {
+    if (videoId && status === "completed") {
+      setHomeView("result");
+    } else if (videoId && (status === "generating" || status === "submitting")) {
+      setHomeView("progress");
+    } else {
+      setHomeView("generator");
+    }
+  }, [videoId, status, setHomeView]);
 
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
@@ -65,7 +78,7 @@ export function VideoGenerator({
       {/* Content area */}
       <div className="flex flex-1 flex-col gap-4 px-5 pb-6">
         {/* Image preview — ~33% of viewport, rounded-[20px] */}
-        <div className="relative w-full shrink-0 overflow-hidden rounded-[20px] bg-[var(--card)]" style={{ height: "33vh" }}>
+        <div className="relative w-full shrink-0 overflow-hidden rounded-[20px] bg-[var(--card)]" style={{ height: "240px" }}>
           <Image src={imagePreview} alt="Upload preview" fill className="object-cover" unoptimized />
           <button
             type="button"
@@ -89,7 +102,7 @@ export function VideoGenerator({
             rows={2}
             className="w-full resize-none bg-transparent text-sm leading-[1.4] text-[var(--foreground)] placeholder:text-[#6B6B70] outline-none"
           />
-          <p className="mt-1 text-right text-xs text-[#4A4A50]">{prompt.length}/1000</p>
+          <p className="mt-2 text-right text-xs text-[#4A4A50]">{prompt.length}/1000</p>
         </div>
 
         {/* Options row */}

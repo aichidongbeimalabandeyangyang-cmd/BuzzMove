@@ -36,12 +36,12 @@ export function BottomNav({ isLoggedIn, onLoginClick }: BottomNavProps) {
                 key={tab.label}
                 type="button"
                 onClick={tab.action}
-                className={`flex flex-col items-center gap-1 min-w-[64px] min-h-[44px] justify-center transition-colors ${
+                className={`flex flex-col items-center gap-[3px] min-w-[64px] min-h-[44px] justify-center transition-colors ${
                   isActive ? "text-[var(--primary)]" : "text-[#6B6B70]"
                 }`}
               >
                 <Icon className="h-[22px] w-[22px]" />
-                <span className="text-[11px] font-medium">{tab.label}</span>
+                <span className={`text-[11px] ${isActive ? "font-semibold" : "font-medium"}`}>{tab.label}</span>
               </button>
             );
           }
@@ -50,12 +50,12 @@ export function BottomNav({ isLoggedIn, onLoginClick }: BottomNavProps) {
             <Link
               key={tab.label}
               href={tab.href}
-              className={`flex flex-col items-center gap-1 min-w-[64px] min-h-[44px] justify-center transition-colors ${
+              className={`flex flex-col items-center gap-[3px] min-w-[64px] min-h-[44px] justify-center transition-colors ${
                 isActive ? "text-[var(--primary)]" : "text-[#6B6B70]"
               }`}
             >
               <Icon className="h-[22px] w-[22px]" />
-              <span className="text-[11px] font-medium">{tab.label}</span>
+              <span className={`text-[11px] ${isActive ? "font-semibold" : "font-medium"}`}>{tab.label}</span>
             </Link>
           );
         })}
