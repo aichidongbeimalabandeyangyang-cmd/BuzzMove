@@ -52,6 +52,14 @@ body {
   .animate-spin-slow { animation: spin-slow 2.5s linear infinite; }
 }
 
+/* Main content padding to clear fixed BottomNav (65px + safe-area) */
+.main-with-nav {
+  padding-bottom: calc(65px + env(safe-area-inset-bottom, 0px));
+}
+@media (min-width: 640px) {
+  .main-with-nav { padding-bottom: 0; }
+}
+
 input:focus, textarea:focus {
   outline: none;
 }

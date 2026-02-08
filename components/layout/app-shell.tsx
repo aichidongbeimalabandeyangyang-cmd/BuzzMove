@@ -67,7 +67,8 @@ export function AppShell({ children }: { children: ReactNode }) {
         onBackToHome={() => setHomeView("home")}
         onLoginClick={openLogin}
       />
-      <main className="flex flex-1 flex-col pb-16 sm:pb-0">{children}</main>
+      {/* Main: pb must clear BottomNav (1px sep + 64px content + safe-area-inset-bottom) */}
+      <main className="flex flex-1 flex-col main-with-nav">{children}</main>
       <BottomNav isLoggedIn={!!user} onLoginClick={openLogin} />
       <LoginModal open={showLogin} onClose={() => setShowLogin(false)} />
     </AppContext.Provider>

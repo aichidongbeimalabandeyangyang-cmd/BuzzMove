@@ -102,7 +102,7 @@ export default function HomePage() {
 
   // ---- DEFAULT HOMEPAGE ----
   return (
-    <div className="flex w-full flex-1 flex-col" style={{ overflow: "hidden" }}>
+    <div className="flex w-full flex-1 flex-col">
       {/* Hero Photo: height 460 FIXED, width fill, clip, layout none */}
       <div
         className="relative w-full overflow-hidden"
