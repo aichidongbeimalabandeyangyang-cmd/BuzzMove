@@ -30,7 +30,7 @@ export function BottomNav({ isLoggedIn, onLoginClick }: BottomNavProps) {
           const color = isActive ? "#E8A838" : "#6B6B70";
           const weight = isActive ? 600 : 500;
 
-          if (tab.label === "My Profile" && !isLoggedIn) {
+          if ((tab.label === "My Profile" || tab.label === "Assets") && !isLoggedIn) {
             return (
               <button
                 key={tab.label}

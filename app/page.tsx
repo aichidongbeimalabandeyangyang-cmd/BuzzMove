@@ -2,10 +2,54 @@
 
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { Sparkles, Download, Share2, Plus } from "lucide-react";
+import { Sparkles, Plus } from "lucide-react";
 import { useApp } from "@/components/layout/app-shell";
 import { UploadZone, saveRecentUpload } from "@/components/upload/upload-zone";
 import { VideoGenerator } from "@/components/video/video-generator";
+
+const TAGLINES = [
+  "Make her Move",
+  "Let her Dance for me",
+  "Dress with skirt",
+  "Photo to Live",
+  "Blow a kiss",
+  "Wave and smile",
+  "Turn around slowly",
+];
+
+function RotatingTaglines() {
+  const [index, setIndex] = useState(0);
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setVisible(false);
+      setTimeout(() => {
+        setIndex((i) => (i + 1) % TAGLINES.length);
+        setVisible(true);
+      }, 400); // fade out duration
+    }, 3000); // show each for 3s
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div style={{ height: 28, overflow: "hidden", textAlign: "center" }}>
+      <p
+        style={{
+          fontSize: 15,
+          fontWeight: 500,
+          color: "#E8A838",
+          letterSpacing: 0.5,
+          opacity: visible ? 1 : 0,
+          transform: visible ? "translateY(0)" : "translateY(8px)",
+          transition: "opacity 0.4s ease, transform 0.4s ease",
+        }}
+      >
+        &ldquo;{TAGLINES[index]}&rdquo;
+      </p>
+    </div>
+  );
+}
 
 const SHOWCASE = {
   image: "/examples/showcase.png",
@@ -33,6 +77,13 @@ export default function HomePage() {
       setHomeView("home");
     }
   }, [imageUrl, imagePreview, showcase]);
+
+  // Reset showcase when navigating away (header back button / tab switch)
+  useEffect(() => {
+    if (homeView === "home" && showcase !== "idle") {
+      setShowcase("idle");
+    }
+  }, [homeView]);
 
   // ---- File upload handler (logged-in only) ----
   const handleFileSelected = async (file: File) => {
@@ -95,7 +146,13 @@ export default function HomePage() {
             <p style={{ fontSize: 14, color: "#6B6B70" }}>Uploading your image...</p>
           </div>
         ) : (
-          <UploadZone onFileSelected={handleFileSelected} />
+          <UploadZone
+            onFileSelected={handleFileSelected}
+            onExistingSelected={(url) => {
+              setImageUrl(url);
+              setImagePreview(url);
+            }}
+          />
         )}
         {uploadError && (
           <div className="mt-4 rounded-xl bg-red-500/10 px-4 py-3 text-center text-sm text-[#EF4444]">
@@ -138,10 +195,8 @@ export default function HomePage() {
             </div>
           </button>
 
-          {/* Subtitle */}
-          <p style={{ fontSize: 14, fontWeight: 400, color: "#6B6B70", textAlign: "center" }}>
-            Upload a photo and turn it into a short AI video
-          </p>
+          {/* Rotating taglines */}
+          <RotatingTaglines />
         </div>
       </div>
     );
@@ -180,15 +235,6 @@ export default function HomePage() {
 
   // ---- Showcase: Playing (video result → CTA to sign up) ----
   if (showcase === "playing") {
-    const handleShare = async () => {
-      const url = `${window.location.origin}${SHOWCASE.video}`;
-      if (navigator.share) {
-        try { await navigator.share({ title: "Check out this AI video!", url }); } catch {}
-      } else {
-        await navigator.clipboard.writeText(url);
-      }
-    };
-
     return (
       <div className="flex w-full flex-1 flex-col">
         <div className="flex flex-1 flex-col" style={{ gap: 20, padding: "8px 20px 20px 20px" }}>
@@ -202,27 +248,6 @@ export default function HomePage() {
               playsInline
               className="h-full w-full object-cover"
             />
-          </div>
-
-          {/* Action Row */}
-          <div className="flex" style={{ gap: 10 }}>
-            <a
-              href={SHOWCASE.video}
-              download="buzzmove-showcase.mp4"
-              className="flex flex-1 items-center justify-center transition-all active:scale-[0.98]"
-              style={{ height: 48, borderRadius: 14, gap: 8, background: "linear-gradient(135deg, #F0C060, #E8A838)", boxShadow: "0 4px 20px #E8A83840" }}
-            >
-              <Download style={{ width: 20, height: 20, color: "#0B0B0E" }} strokeWidth={1.5} />
-              <span style={{ fontSize: 15, fontWeight: 700, color: "#0B0B0E" }}>Download</span>
-            </a>
-            <button
-              onClick={handleShare}
-              className="flex flex-1 items-center justify-center transition-all active:scale-[0.98]"
-              style={{ height: 48, borderRadius: 14, border: "1.5px solid #252530", gap: 8 }}
-            >
-              <Share2 style={{ width: 20, height: 20, color: "#FAFAF9" }} strokeWidth={1.5} />
-              <span style={{ fontSize: 15, fontWeight: 600, color: "#FAFAF9" }}>Share</span>
-            </button>
           </div>
 
           {/* CTA: Try your own → opens login */}

@@ -2,21 +2,30 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { ArrowLeft, Download, Share2 } from "lucide-react";
+import { ArrowLeft, Download, Share2, Trash2, X } from "lucide-react";
 import { trpc } from "@/lib/trpc";
+import { removeRecentUpload } from "@/components/upload/upload-zone";
 
 // ---- VIDEO DETAIL (uses getStatus to poll & resolve video URL) ----
 function VideoDetail({ videoId, onBack }: { videoId: string; onBack: () => void }) {
+  const utils = trpc.useUtils();
   const { data: video, isLoading } = trpc.video.getStatus.useQuery(
     { videoId },
     {
       refetchInterval: (query) => {
         const st = query.state.data?.status;
         if (st === "completed" || st === "failed") return false;
-        return 5000; // poll every 5s if still generating
+        return 5000;
       },
     }
   );
+
+  const deleteMutation = trpc.video.delete.useMutation({
+    onSuccess() {
+      utils.video.list.invalidate();
+      onBack();
+    },
+  });
 
   const videoUrl = video?.output_video_url;
 
@@ -26,6 +35,12 @@ function VideoDetail({ videoId, onBack }: { videoId: string; onBack: () => void 
       try { await navigator.share({ title: "Check out my AI video!", url: videoUrl }); } catch {}
     } else {
       await navigator.clipboard.writeText(videoUrl);
+    }
+  };
+
+  const handleDelete = () => {
+    if (confirm("Delete this video?")) {
+      deleteMutation.mutate({ videoId });
     }
   };
 
@@ -82,7 +97,65 @@ function VideoDetail({ videoId, onBack }: { videoId: string; onBack: () => void 
             </button>
           </div>
         )}
+
+        {/* Delete button */}
+        <button
+          onClick={handleDelete}
+          disabled={deleteMutation.isPending}
+          className="flex w-full items-center justify-center transition-all active:scale-[0.98]"
+          style={{ height: 48, borderRadius: 14, border: "1.5px solid #EF444440", gap: 8 }}
+        >
+          <Trash2 style={{ width: 18, height: 18, color: "#EF4444" }} strokeWidth={1.5} />
+          <span style={{ fontSize: 15, fontWeight: 500, color: "#EF4444" }}>
+            {deleteMutation.isPending ? "Deleting..." : "Delete Video"}
+          </span>
+        </button>
       </div>
+    </div>
+  );
+}
+
+// ---- PHOTOS GRID (from localStorage recent uploads) ----
+function PhotosGrid() {
+  const [, forceUpdate] = useState(0);
+
+  let photos: { url: string; name: string; timestamp: number }[] = [];
+  try {
+    photos = JSON.parse(localStorage.getItem("buzzmove_recent_uploads") || "[]");
+  } catch {}
+
+  const handleDelete = (url: string) => {
+    removeRecentUpload(url);
+    forceUpdate((n) => n + 1);
+  };
+
+  if (photos.length === 0) {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center" style={{ gap: 12 }}>
+        <p style={{ fontSize: 14, color: "#6B6B70" }}>No photos yet</p>
+        <p style={{ fontSize: 12, color: "#4A4A50" }}>Your uploaded photos will appear here</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col" style={{ gap: 12 }}>
+      {Array.from({ length: Math.ceil(photos.length / 3) }).map((_, rowIdx) => (
+        <div key={rowIdx} className="grid grid-cols-3" style={{ gap: 12 }}>
+          {photos.slice(rowIdx * 3, rowIdx * 3 + 3).map((photo) => (
+            <div key={photo.url} className="relative overflow-hidden" style={{ height: 150, borderRadius: 14 }}>
+              <Image src={photo.url} alt={photo.name} fill className="object-cover" unoptimized />
+              <button
+                onClick={() => handleDelete(photo.url)}
+                className="absolute flex items-center justify-center"
+                style={{ top: 6, right: 6, width: 24, height: 24, borderRadius: 100, backgroundColor: "rgba(0,0,0,0.6)", zIndex: 10 }}
+              >
+                <X style={{ width: 12, height: 12, color: "#FFFFFF" }} strokeWidth={2} />
+              </button>
+            </div>
+          ))}
+        </div>
+      ))}
     </div>
   );
 }
@@ -174,10 +247,7 @@ export default function AssetsPage() {
             </div>
           )
         ) : (
-          <div className="flex flex-1 flex-col items-center justify-center" style={{ gap: 12 }}>
-            <p style={{ fontSize: 14, color: "#6B6B70" }}>No photos yet</p>
-            <p style={{ fontSize: 12, color: "#4A4A50" }}>Your uploaded photos will appear here</p>
-          </div>
+          <PhotosGrid />
         )}
       </div>
     </div>

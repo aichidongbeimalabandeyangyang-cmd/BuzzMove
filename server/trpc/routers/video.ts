@@ -236,4 +236,39 @@ export const videoRouter = router({
 
       return { videos: data || [], total: count || 0 };
     }),
+
+  // Delete a video
+  delete: protectedProcedure
+    .input(z.object({ videoId: z.string().uuid() }))
+    .mutation(async ({ ctx, input }) => {
+      // Verify ownership
+      const { data: video } = await ctx.supabase
+        .from("videos")
+        .select("id, user_id")
+        .eq("id", input.videoId)
+        .eq("user_id", ctx.user.id)
+        .single();
+
+      if (!video) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Video not found" });
+      }
+
+      // Delete associated credit transactions
+      await ctx.supabase
+        .from("credit_transactions")
+        .delete()
+        .eq("video_id", video.id);
+
+      // Delete the video record
+      const { error } = await ctx.supabase
+        .from("videos")
+        .delete()
+        .eq("id", video.id);
+
+      if (error) {
+        throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to delete video" });
+      }
+
+      return { success: true };
+    }),
 });
