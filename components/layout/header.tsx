@@ -44,7 +44,7 @@ export function Header() {
         }`}
       >
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4 sm:px-6">
-          <Link href="/" className="flex items-center gap-2 shrink-0">
+          <Link href="/" className="flex items-center gap-2 shrink-0" aria-label="BuzzMove home">
             <div
               className="flex h-7 w-7 items-center justify-center rounded-md"
               style={{ background: "linear-gradient(135deg, #e8a838, #f0c060)" }}

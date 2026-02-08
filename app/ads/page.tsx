@@ -121,15 +121,15 @@ export default function AdsPage() {
         className="rounded-2xl p-12 text-center"
         style={{ background: "linear-gradient(135deg, #e8a838, #f0c060)" }}
       >
-        <h2 className="mb-3 text-3xl font-bold text-[#050505]">
+        <h2 className="mb-3 text-3xl font-bold text-[var(--background)]">
           Ready to Scale Your Creatives?
         </h2>
-        <p className="mb-6 text-[#050505]/70">
+        <p className="mb-6 text-[var(--background)]/70">
           Start with free credits. No credit card required.
         </p>
         <Link
           href="/"
-          className="inline-block rounded-xl bg-[#050505] px-8 py-3 font-semibold text-[var(--foreground)] transition-all hover:bg-[#111] active:scale-[0.98]"
+          className="inline-block rounded-xl bg-[var(--background)] px-8 py-3 font-semibold text-[var(--foreground)] transition-all hover:bg-[#111] active:scale-[0.98]"
         >
           Get Started Free
         </Link>

@@ -110,15 +110,13 @@ export default function DashboardPage() {
                 <GeneratingPoller videoId={video.id} />
               ) : (
                 <div className="flex aspect-[9/16] items-center justify-center bg-[var(--secondary)]">
-                  {video.status === "failed" ? (
-                    <span className="rounded-full bg-[var(--destructive-10)] px-3 py-1 text-xs text-[var(--destructive)]">
-                      Failed
-                    </span>
-                  ) : (
-                    <span className="text-xs text-[var(--muted-foreground)]">
-                      {video.status}
-                    </span>
-                  )}
+                  <span className={`rounded-full px-3 py-1 text-xs ${
+                    video.status === "failed"
+                      ? "bg-[var(--destructive-10)] text-[var(--destructive)]"
+                      : "bg-[var(--secondary)] text-[var(--muted-foreground)] border border-[var(--border)]"
+                  }`}>
+                    {video.status === "failed" ? "Failed" : video.status}
+                  </span>
                 </div>
               )}
               <div className="p-3">

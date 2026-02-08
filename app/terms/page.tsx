@@ -4,7 +4,7 @@ export const metadata: Metadata = { title: "Terms of Service - BuzzMove" };
 
 export default function TermsPage() {
   return (
-    <div className="mx-auto max-w-3xl px-4 py-16 prose prose-invert">
+    <div className="mx-auto max-w-3xl px-4 py-16 prose prose-invert prose-headings:font-[Sora] prose-headings:text-[var(--foreground)] prose-p:text-[var(--foreground-80)] prose-a:text-[var(--primary)]">
       <h1>Terms of Service</h1>
       <p className="text-[var(--muted-foreground)]">
         Last updated: {new Date().toLocaleDateString()}

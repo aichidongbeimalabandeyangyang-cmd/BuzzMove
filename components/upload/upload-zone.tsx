@@ -45,8 +45,18 @@ export function UploadZone({ onFileSelected, disabled }: UploadZoneProps) {
     [handleFile]
   );
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      inputRef.current?.click();
+    }
+  };
+
   return (
     <div
+      role="button"
+      tabIndex={0}
+      aria-label="Upload image — drop your image here or click to browse files. Accepts JPG, PNG, WebP up to 10 MB."
       className={`group relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-12 transition-all duration-300 cursor-pointer active:scale-[0.99] ${
         isDragging
           ? "border-[var(--primary)] bg-[var(--primary-5)]"
@@ -59,12 +69,14 @@ export function UploadZone({ onFileSelected, disabled }: UploadZoneProps) {
       onDragLeave={() => setIsDragging(false)}
       onDrop={handleDrop}
       onClick={() => inputRef.current?.click()}
+      onKeyDown={handleKeyDown}
     >
       <input
         ref={inputRef}
         type="file"
         accept={SUPPORTED_FORMATS.join(",")}
-        className="hidden"
+        tabIndex={-1}
+        className="sr-only"
         onChange={(e) => {
           const file = e.target.files?.[0];
           if (file) handleFile(file);
@@ -83,6 +95,7 @@ export function UploadZone({ onFileSelected, disabled }: UploadZoneProps) {
             viewBox="0 0 24 24"
             stroke="currentColor"
             strokeWidth={1.5}
+            aria-hidden="true"
           >
             <path
               strokeLinecap="round"
@@ -104,7 +117,7 @@ export function UploadZone({ onFileSelected, disabled }: UploadZoneProps) {
       </p>
 
       {error && (
-        <div className="mt-4 rounded-lg bg-[var(--destructive-10)] px-3 py-2 text-sm text-[var(--destructive)]">
+        <div role="alert" className="mt-4 rounded-lg bg-[var(--destructive-10)] px-3 py-2 text-sm text-[var(--destructive)]">
           {error}
         </div>
       )}

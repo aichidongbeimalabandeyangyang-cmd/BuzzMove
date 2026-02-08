@@ -31,9 +31,9 @@ export function VideoProgress({
   }, [video?.status]);
 
   return (
-    <div className="flex flex-col items-center gap-8 py-16 animate-fade-up">
+    <div className="flex flex-col items-center gap-8 py-16 animate-fade-up" role="status" aria-label="Generating video">
       {/* Spinner */}
-      <div className="relative h-20 w-20">
+      <div className="relative h-20 w-20" aria-hidden="true">
         <div className="absolute inset-0 rounded-full border border-[var(--border)]" />
         <div className="absolute inset-0 animate-spin-slow rounded-full border-2 border-transparent border-t-[var(--primary)]" />
         <div className="absolute inset-0 flex items-center justify-center">
@@ -49,14 +49,14 @@ export function VideoProgress({
       </div>
 
       <div className="flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--secondary)] px-4 py-2">
-        <div className="h-1.5 w-1.5 rounded-full bg-[var(--primary)] animate-pulse" />
+        <div className="h-1.5 w-1.5 rounded-full bg-[var(--primary)] animate-pulse" aria-hidden="true" />
         <span className="text-xs text-[var(--muted-foreground)]">
           AI is generating frames...
         </span>
       </div>
 
       {video?.status === "failed" && (
-        <div className="rounded-lg bg-[var(--destructive-10)] px-4 py-3 text-sm text-[var(--destructive)]">
+        <div role="alert" className="rounded-lg bg-[var(--destructive-10)] px-4 py-3 text-sm text-[var(--destructive)]">
           Generation failed. Credits have been refunded.
         </div>
       )}

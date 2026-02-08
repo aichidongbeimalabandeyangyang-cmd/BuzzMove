@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { createSupabaseBrowserClient } from "@/server/supabase/client";
 
 interface LoginModalProps {
@@ -13,6 +13,49 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const supabase = createSupabaseBrowserClient();
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
+
+  // Focus trap and restore focus on close
+  useEffect(() => {
+    if (open) {
+      previousFocusRef.current = document.activeElement as HTMLElement;
+      // Focus the dialog after animation
+      requestAnimationFrame(() => {
+        dialogRef.current?.focus();
+      });
+    } else {
+      previousFocusRef.current?.focus();
+    }
+  }, [open]);
+
+  // Escape key handler
+  useEffect(() => {
+    if (!open) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+      // Focus trap
+      if (e.key === "Tab" && dialogRef.current) {
+        const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
+          'button, [href], input, textarea, select, [tabindex]:not([tabindex="-1"])'
+        );
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last?.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first?.focus();
+        }
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [open, onClose]);
 
   if (!open) return null;
 
@@ -44,15 +87,21 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
   return (
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-md animate-fade-in"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="login-modal-title"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div
-        className="relative w-full max-w-[380px] mx-4 animate-scale-in rounded-2xl border border-[var(--border)] bg-[var(--card)] p-8"
+        ref={dialogRef}
+        tabIndex={-1}
+        className="relative w-full max-w-[380px] mx-4 animate-scale-in rounded-2xl border border-[var(--border)] bg-[var(--card)] p-8 outline-none"
         style={{ boxShadow: "0 8px 40px rgba(0,0,0,0.5), 0 0 80px rgba(232,168,56,0.06)" }}
       >
         {/* Close button */}
         <button
           onClick={onClose}
+          aria-label="Close"
           className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full text-[var(--muted-foreground)] transition-colors hover:text-[var(--foreground)] hover:bg-[var(--secondary)]"
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -70,7 +119,7 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
               <path d="M8 5v14l11-7z" />
             </svg>
           </div>
-          <h2 className="text-xl font-bold tracking-tight">Welcome to BuzzMove</h2>
+          <h2 id="login-modal-title" className="text-xl font-bold tracking-tight">Welcome to BuzzMove</h2>
           <p className="mt-1 text-sm text-[var(--muted-foreground)]">
             Sign in to create AI-powered videos
           </p>
@@ -117,7 +166,9 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
 
             {/* Email form */}
             <form onSubmit={handleEmailLogin}>
+              <label htmlFor="login-email" className="sr-only">Email address</label>
               <input
+                id="login-email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -128,6 +179,7 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
               <button
                 type="submit"
                 disabled={loading}
+                aria-busy={loading}
                 className="w-full rounded-xl py-3 text-sm font-semibold text-[var(--background)] transition-all hover:brightness-110 active:scale-[0.98] disabled:opacity-50"
                 style={{ background: "linear-gradient(135deg, #e8a838, #d4942e)", boxShadow: "0 1px 8px rgba(232,168,56,0.2)" }}
               >
