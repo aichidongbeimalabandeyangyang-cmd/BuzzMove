@@ -3,13 +3,21 @@
 import { trpc } from "@/lib/trpc";
 import { formatCredits } from "@/lib/utils";
 import Link from "next/link";
+import { GeneratingPoller } from "@/components/video/generating-poller";
 
 export default function DashboardPage() {
   const { data: creditData } = trpc.credit.getBalance.useQuery();
-  const { data: videosData, isLoading } = trpc.video.list.useQuery({
-    limit: 20,
-    offset: 0,
-  });
+  const { data: videosData, isLoading } = trpc.video.list.useQuery(
+    { limit: 20, offset: 0 },
+    {
+      refetchInterval: (query) => {
+        const hasGenerating = query.state.data?.videos.some(
+          (v) => v.status === "generating" || v.status === "pending"
+        );
+        return hasGenerating ? 5000 : false;
+      },
+    }
+  );
 
   return (
     <div className="mx-auto max-w-6xl px-5 py-12">
@@ -98,20 +106,17 @@ export default function DashboardPage() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                 </div>
+              ) : video.status === "generating" || video.status === "pending" ? (
+                <GeneratingPoller videoId={video.id} />
               ) : (
                 <div className="flex aspect-[9/16] items-center justify-center bg-[var(--secondary)]">
-                  {video.status === "generating" ? (
-                    <div className="flex flex-col items-center gap-2">
-                      <div className="h-6 w-6 animate-spin-slow rounded-full border-2 border-[var(--border)] border-t-[var(--primary)]" />
-                      <span className="text-[10px] text-[var(--muted-foreground)]">Generating</span>
-                    </div>
-                  ) : video.status === "failed" ? (
+                  {video.status === "failed" ? (
                     <span className="rounded-full bg-[var(--destructive-10)] px-3 py-1 text-xs text-[var(--destructive)]">
                       Failed
                     </span>
                   ) : (
                     <span className="text-xs text-[var(--muted-foreground)]">
-                      Pending
+                      {video.status}
                     </span>
                   )}
                 </div>
