@@ -79,7 +79,7 @@ export function Header() {
           ) : showBuzzMoveLogo ? (
             <Link href="/" className="flex items-center gap-2">
               <div className="flex h-7 w-7 items-center justify-center rounded-lg" style={{ background: "linear-gradient(135deg, #E8A838, #F0C060)" }}>
-                <svg className="h-3.5 w-3.5" fill="#0B0B0E" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                <svg className="h-3.5 w-3.5" fill="#0B0B0E" viewBox="0 0 24 24"><path d="M10 8l6 4-6 4V8z" /></svg>
               </div>
               <span className="text-[17px] font-bold text-[var(--foreground)]">BuzzMove</span>
             </Link>
