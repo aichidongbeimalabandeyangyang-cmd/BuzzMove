@@ -12,7 +12,7 @@ export default function SettingsPage() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-6 sm:px-6 sm:py-12">
-      <div className="mb-6 sm:mb-10 animate-fade-up">
+      <div className="mb-6 sm:mb-10">
         <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Settings</h1>
         <p className="mt-0.5 text-sm text-[var(--muted-foreground)]">
           Manage your account and subscription
@@ -20,7 +20,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Profile info */}
-      <div className="mb-4 sm:mb-6 rounded-2xl bg-[var(--card)] p-5 sm:p-7 animate-fade-up delay-100">
+      <div className="mb-4 sm:mb-6 rounded-2xl bg-[var(--card)] p-5 sm:p-7">
         <h2 className="mb-5 text-base font-bold">Profile</h2>
         <div className="space-y-4">
           {[
@@ -51,7 +51,7 @@ export default function SettingsPage() {
       </div>
 
       {/* Billing */}
-      <div className="rounded-2xl bg-[var(--card)] p-5 sm:p-7 animate-fade-up delay-200">
+      <div className="rounded-2xl bg-[var(--card)] p-5 sm:p-7">
         <h2 className="mb-5 text-base font-bold">Billing</h2>
         {profile?.stripe_customer_id ? (
           <button

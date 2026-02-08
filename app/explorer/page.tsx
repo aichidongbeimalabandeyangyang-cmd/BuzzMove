@@ -13,7 +13,7 @@ export default function ExplorerPage() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-10">
-      <div className="mb-6 sm:mb-10 animate-fade-up">
+      <div className="mb-6 sm:mb-10">
         <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Explore</h1>
         <p className="mt-0.5 text-sm text-[var(--muted-foreground)]">
           Discover AI-generated videos from the community
@@ -28,7 +28,7 @@ export default function ExplorerPage() {
           </div>
         </div>
       ) : data?.videos.length === 0 ? (
-        <div className="py-20 text-center animate-fade-up delay-200">
+        <div className="py-20 text-center">
           <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--secondary)]">
             <svg className="h-5 w-5 text-[var(--muted-foreground)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
@@ -41,7 +41,7 @@ export default function ExplorerPage() {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-3 md:grid-cols-4 animate-fade-up delay-200">
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-3 md:grid-cols-4">
             {data?.videos.map((video) => (
               <VideoCard key={video.id} video={video} />
             ))}

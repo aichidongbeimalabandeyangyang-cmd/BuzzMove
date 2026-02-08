@@ -42,10 +42,17 @@ export function VideoCard({ video }: VideoCardProps) {
           }}
         />
 
-        {/* Play button — visible by default, hidden on desktop hover */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-100 transition-opacity duration-300 sm:group-hover:opacity-0 pointer-events-none">
+        {/* Desktop: center play on hover. Mobile: small corner button */}
+        <div className="absolute inset-0 hidden items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100 pointer-events-none sm:flex">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-black/50 backdrop-blur-sm">
             <svg className="h-4 w-4 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+          </div>
+        </div>
+        <div className="absolute bottom-2 right-2 sm:hidden pointer-events-none">
+          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-black/50 backdrop-blur-sm">
+            <svg className="h-3 w-3 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               <path d="M8 5v14l11-7z" />
             </svg>
           </div>

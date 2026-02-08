@@ -4,7 +4,7 @@ export const metadata: Metadata = { title: "Support - BuzzMove" };
 
 export default function SupportPage() {
   return (
-    <div className="mx-auto max-w-3xl px-4 py-6 sm:px-6 sm:py-16">
+    <div className="mx-auto max-w-3xl px-4 py-6 sm:px-6 sm:py-12">
       <h1 className="mb-6 sm:mb-8 text-2xl font-bold sm:text-3xl">Support</h1>
 
       <div className="space-y-4 sm:space-y-6">

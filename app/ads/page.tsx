@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function AdsPage() {
   return (
-    <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-20">
+    <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 sm:py-12">
       {/* Hero */}
       <div className="mb-12 sm:mb-20 text-center">
         <div className="mb-4 inline-block rounded-full bg-[var(--primary-10)] px-4 py-1 text-sm font-medium text-[var(--primary)]">

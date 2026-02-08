@@ -172,7 +172,7 @@ export default function HomePage() {
 
           {/* Label */}
           <div className="absolute top-3 left-3">
-            <span className="rounded-full bg-black/60 backdrop-blur-sm px-2.5 py-0.5 text-[11px] font-medium text-white">
+            <span className="rounded-full bg-black/60 backdrop-blur-sm px-2.5 py-0.5 text-[10px] font-medium text-white">
               {currentExample.label}
             </span>
           </div>
@@ -188,7 +188,7 @@ export default function HomePage() {
           <span className="text-xs font-medium text-[var(--primary)]">Motion Prompt</span>
         </div>
         <div className="rounded-xl bg-[var(--card)] px-3.5 py-2.5">
-          <p className="text-[13px] text-[var(--foreground-80)] leading-relaxed">
+          <p className="text-xs text-[var(--foreground-80)] leading-relaxed">
             {currentExample.prompt}
           </p>
         </div>
@@ -199,7 +199,7 @@ export default function HomePage() {
         <button
           type="button"
           onClick={handleExampleClick}
-          className="w-full rounded-xl py-3.5 text-[15px] font-semibold text-[var(--background)] transition-all hover:brightness-110 active:scale-[0.98]"
+          className="w-full rounded-xl py-3.5 text-sm font-semibold text-[var(--background)] transition-all hover:brightness-110 active:scale-[0.98]"
           style={{ background: "linear-gradient(135deg, #e8a838, #d4942e)", boxShadow: "0 2px 16px rgba(232,168,56,0.25)" }}
         >
           Make It Move (Free)
@@ -216,21 +216,21 @@ export default function HomePage() {
 
       {/* Trust signals — hidden on very small screens to save space */}
       <div className="mt-auto pt-4 flex items-center justify-center gap-4 animate-fade-up delay-300">
-        <div className="flex items-center gap-1 text-[11px] text-[var(--muted-foreground)]">
+        <div className="flex items-center gap-1 text-[10px] text-[var(--muted-foreground)]">
           <svg className="h-3 w-3 text-[var(--primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
           </svg>
           30-60s
         </div>
         <div className="h-2.5 w-px bg-[var(--border)]" aria-hidden="true" />
-        <div className="flex items-center gap-1 text-[11px] text-[var(--muted-foreground)]">
+        <div className="flex items-center gap-1 text-[10px] text-[var(--muted-foreground)]">
           <svg className="h-3 w-3 text-[var(--primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
           </svg>
           Private
         </div>
         <div className="h-2.5 w-px bg-[var(--border)]" aria-hidden="true" />
-        <div className="flex items-center gap-1 text-[11px] text-[var(--muted-foreground)]">
+        <div className="flex items-center gap-1 text-[10px] text-[var(--muted-foreground)]">
           <svg className="h-3 w-3 text-[var(--primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 9.563C9 9.252 9.252 9 9.563 9h4.874c.311 0 .563.252.563.563v4.874c0 .311-.252.563-.563.563H9.564A.562.562 0 019 14.437V9.564z" />

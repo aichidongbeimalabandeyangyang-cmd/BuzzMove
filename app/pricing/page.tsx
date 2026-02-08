@@ -25,9 +25,9 @@ export default function PricingPage() {
     });
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-20">
+    <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-12">
       {/* Header */}
-      <div className="mb-10 sm:mb-14 text-center animate-fade-up">
+      <div className="mb-10 sm:mb-14 text-center">
         <h1 className="mb-3 text-3xl font-bold tracking-tight sm:text-5xl">
           Simple, <span className="text-gradient">flexible</span> pricing
         </h1>
@@ -37,7 +37,7 @@ export default function PricingPage() {
       </div>
 
       {/* Billing toggle */}
-      <div className="mb-8 sm:mb-12 flex items-center justify-center animate-fade-up delay-100">
+      <div className="mb-8 sm:mb-12 flex items-center justify-center">
         <div className="inline-flex rounded-xl bg-[var(--secondary)] p-1 gap-1">
           <button
             onClick={() => setBillingPeriod("monthly")}
@@ -66,7 +66,7 @@ export default function PricingPage() {
       </div>
 
       {/* Subscription plans */}
-      <div className="mb-12 sm:mb-20 grid gap-4 sm:gap-5 md:grid-cols-3 animate-fade-up delay-200">
+      <div className="mb-12 sm:mb-20 grid gap-4 sm:gap-5 md:grid-cols-3">
         {/* Free */}
         <div className="rounded-2xl bg-[var(--card)] p-6 sm:p-7">
           <div className="mb-5">
@@ -193,7 +193,7 @@ export default function PricingPage() {
       </div>
 
       {/* Creator Weekly */}
-      <div className="mb-12 sm:mb-20 flex justify-center animate-fade-up delay-300">
+      <div className="mb-12 sm:mb-20 flex justify-center">
         <div className="w-full max-w-md overflow-hidden rounded-2xl bg-[var(--card)]">
           <div className="px-7 py-2.5 text-center" style={{ background: "linear-gradient(90deg, rgba(249,115,22,0.1), rgba(245,158,11,0.1))" }}>
             <span className="text-xs font-semibold text-orange-400">
@@ -228,7 +228,7 @@ export default function PricingPage() {
       </div>
 
       {/* Credit Packs */}
-      <div className="animate-fade-up delay-400">
+      <div>
         <div className="mb-8 sm:mb-10 text-center">
           <h2 className="mb-2 text-2xl font-bold tracking-tight">Credit Packs</h2>
           <p className="text-sm text-[var(--muted-foreground)]">

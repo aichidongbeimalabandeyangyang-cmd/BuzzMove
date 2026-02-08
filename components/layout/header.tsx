@@ -59,12 +59,14 @@ export function Header() {
 
           <nav className="flex items-center gap-0.5 sm:gap-1">
             {/* Desktop-only nav links */}
-            <Link href="/explorer" className="hidden sm:block px-3 py-1.5 text-[13px] text-[var(--muted-foreground)] transition-colors hover:text-[var(--foreground)]">
+            <Link href="/explorer" className="hidden sm:block px-3 py-1.5 text-xs text-[var(--muted-foreground)] transition-colors hover:text-[var(--foreground)]">
               Explore
             </Link>
-            <Link href="/pricing" className="hidden sm:block px-3 py-1.5 text-[13px] text-[var(--muted-foreground)] transition-colors hover:text-[var(--foreground)]">
-              Pricing
-            </Link>
+            {!user && (
+              <Link href="/pricing" className="hidden sm:block px-3 py-1.5 text-xs text-[var(--muted-foreground)] transition-colors hover:text-[var(--foreground)]">
+                Pricing
+              </Link>
+            )}
 
             {user ? (
               <>
@@ -72,14 +74,17 @@ export function Header() {
                   <div className="h-1.5 w-1.5 rounded-full bg-[var(--primary)]" />
                   <span className="text-xs font-medium tabular-nums">{formatCredits(creditData?.balance ?? 0)}</span>
                 </div>
-                <Link href="/dashboard" className="hidden sm:block px-3 py-1.5 text-[13px] text-[var(--muted-foreground)] transition-colors hover:text-[var(--foreground)]">
+                <Link href="/dashboard" className="hidden sm:block px-3 py-1.5 text-xs text-[var(--muted-foreground)] transition-colors hover:text-[var(--foreground)]">
                   Dashboard
+                </Link>
+                <Link href="/dashboard/settings" className="hidden sm:block px-3 py-1.5 text-xs text-[var(--muted-foreground)] transition-colors hover:text-[var(--foreground)]">
+                  Settings
                 </Link>
               </>
             ) : (
               <button
                 onClick={() => setShowLogin(true)}
-                className="ml-2 sm:ml-4 rounded-lg px-4 sm:px-5 py-2 sm:py-2.5 text-[13px] font-semibold text-[var(--background)] transition-all active:scale-[0.97]"
+                className="ml-2 sm:ml-4 rounded-lg px-4 sm:px-5 py-2 sm:py-2.5 text-xs font-semibold text-[var(--background)] transition-all active:scale-[0.97]"
                 style={{ background: "linear-gradient(135deg, #e8a838, #d4942e)" }}
               >
                 Get Started
