@@ -74,70 +74,38 @@ export function UploadZone({ onFileSelected, disabled }: UploadZoneProps) {
         <p className="mt-1 text-[13px] font-medium text-[#6B6B70]">Recent uploads</p>
       </div>
 
-      {/* Photo grid — 3 columns, gap 10, items 150px height */}
-      <div className="flex flex-col gap-2.5">
-        {/* Row 1: Add New + 2 photos */}
-        <div className="flex gap-2.5">
+      {/* Photo grid — 3 columns, responsive using CSS grid */}
+      <div className="grid grid-cols-3 gap-2.5">
+        {/* Add New button */}
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          className="flex aspect-[1/1.25] flex-col items-center justify-center gap-2 rounded-[14px] transition-all active:scale-[0.97]"
+          style={{ border: "1.5px solid #252530" }}
+          aria-label="Upload new photo"
+        >
+          <svg className="h-8 w-8 text-[var(--primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+          <span className="text-xs font-medium text-[#6B6B70]">Add New</span>
+        </button>
+
+        {/* Recent photos */}
+        {recentUploads.slice(0, 8).map((upload) => (
           <button
+            key={upload.id}
             type="button"
-            onClick={() => inputRef.current?.click()}
-            className="flex h-[150px] flex-1 flex-col items-center justify-center gap-2 rounded-[14px] transition-all active:scale-[0.97]"
-            style={{ border: "1.5px solid #252530" }}
-            aria-label="Upload new photo"
+            onClick={() => handleRecentClick(upload)}
+            className="relative aspect-[1/1.25] overflow-hidden rounded-[14px] bg-[var(--secondary)] transition-all active:scale-[0.97]"
           >
-            <svg className="h-8 w-8 text-[var(--primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-            </svg>
-            <span className="text-xs font-medium text-[#6B6B70]">Add New</span>
+            <Image src={upload.url} alt={upload.name} fill className="object-cover" unoptimized />
           </button>
-          {recentUploads.slice(0, 2).map((upload) => (
-            <button
-              key={upload.id}
-              type="button"
-              onClick={() => handleRecentClick(upload)}
-              className="relative h-[150px] flex-1 overflow-hidden rounded-[14px] bg-[var(--secondary)] transition-all active:scale-[0.97]"
-            >
-              <Image src={upload.url} alt={upload.name} fill className="object-cover" unoptimized />
-            </button>
-          ))}
-          {recentUploads.length < 2 && Array.from({ length: 2 - recentUploads.length }).map((_, i) => (
-            <div key={`e1-${i}`} className="h-[150px] flex-1 rounded-[14px] bg-[#16161A]" />
-          ))}
-        </div>
+        ))}
 
-        {/* Row 2: 3 photos */}
-        <div className="flex gap-2.5">
-          {recentUploads.slice(2, 5).map((upload) => (
-            <button
-              key={upload.id}
-              type="button"
-              onClick={() => handleRecentClick(upload)}
-              className="relative h-[150px] flex-1 overflow-hidden rounded-[14px] bg-[var(--secondary)] transition-all active:scale-[0.97]"
-            >
-              <Image src={upload.url} alt={upload.name} fill className="object-cover" unoptimized />
-            </button>
-          ))}
-          {recentUploads.length < 5 && Array.from({ length: Math.max(0, 3 - Math.max(0, recentUploads.length - 2)) }).map((_, i) => (
-            <div key={`e2-${i}`} className="h-[150px] flex-1 rounded-[14px] bg-[#16161A]" />
-          ))}
-        </div>
-
-        {/* Row 3: 3 photos */}
-        <div className="flex gap-2.5">
-          {recentUploads.slice(5, 8).map((upload) => (
-            <button
-              key={upload.id}
-              type="button"
-              onClick={() => handleRecentClick(upload)}
-              className="relative h-[150px] flex-1 overflow-hidden rounded-[14px] bg-[var(--secondary)] transition-all active:scale-[0.97]"
-            >
-              <Image src={upload.url} alt={upload.name} fill className="object-cover" unoptimized />
-            </button>
-          ))}
-          {recentUploads.length < 8 && Array.from({ length: Math.max(0, 3 - Math.max(0, recentUploads.length - 5)) }).map((_, i) => (
-            <div key={`e3-${i}`} className="h-[150px] flex-1 rounded-[14px] bg-[#16161A]" />
-          ))}
-        </div>
+        {/* Empty placeholder cells to fill the grid */}
+        {Array.from({ length: Math.max(0, 8 - recentUploads.length) }).map((_, i) => (
+          <div key={`empty-${i}`} className="aspect-[1/1.25] rounded-[14px] bg-[#16161A]" />
+        ))}
       </div>
 
       {/* Hidden file input */}

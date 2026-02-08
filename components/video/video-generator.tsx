@@ -61,11 +61,11 @@ export function VideoGenerator({
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-[390px] flex-1 flex-col">
+    <div className="flex w-full flex-1 flex-col">
       {/* Content area */}
       <div className="flex flex-1 flex-col gap-4 px-5 pb-6 pt-2">
-        {/* Image preview — 280px, rounded-[20px] */}
-        <div className="relative w-full shrink-0 overflow-hidden rounded-[20px] bg-[var(--card)]" style={{ height: 280 }}>
+        {/* Image preview — ~33% of viewport, rounded-[20px] */}
+        <div className="relative w-full shrink-0 overflow-hidden rounded-[20px] bg-[var(--card)]" style={{ height: "33vh" }}>
           <Image src={imagePreview} alt="Upload preview" fill className="object-cover" unoptimized />
           <button
             type="button"
@@ -137,7 +137,7 @@ export function VideoGenerator({
         {/* Spacer */}
         <div className="flex-1" />
 
-        {/* Generate button — h-[56px], fontSize 17 */}
+        {/* Generate button — h-14, full width */}
         <button
           type="button"
           onClick={handleGenerate}

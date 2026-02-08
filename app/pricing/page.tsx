@@ -18,7 +18,7 @@ export default function PricingPage() {
     : formatPrice(PLANS.pro.price_monthly);
 
   return (
-    <div className="mx-auto flex w-full max-w-[390px] flex-1 flex-col">
+    <div className="flex w-full flex-1 flex-col">
       {/* Title section */}
       <div className="flex flex-col items-center gap-3 px-5 py-4">
         <h1 className="text-[28px] font-bold leading-tight tracking-[-0.8px] text-[var(--foreground)] text-center">

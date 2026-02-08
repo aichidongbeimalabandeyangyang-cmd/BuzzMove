@@ -37,31 +37,21 @@ export function Header() {
     return () => window.removeEventListener("open-login", handler);
   }, []);
 
-  // Determine header style based on route
-  const isHome = pathname === "/";
-  const isGenerator = false; // Generator is inline in the page
   const isAssets = pathname === "/dashboard" || pathname === "/dashboard/";
-  const isProfile = pathname === "/dashboard/profile";
   const isSettings = pathname === "/dashboard/settings";
   const isPricing = pathname === "/pricing";
-
-  // Pages with back arrow
+  const isProfile = pathname === "/dashboard/profile";
+  const isHome = pathname === "/";
   const hasBackArrow = isSettings || isPricing;
-  // Pages that show "BuzzMove" text as title
   const showBuzzMoveLogo = isHome || isProfile;
-  // Pages with credit badge
   const showCredits = isAssets && user;
-
-  const backHref = isSettings ? "/dashboard/profile" : isPricing ? "/dashboard/profile" : "/";
-
-  // Title for back-arrow pages
   const pageTitle = isSettings ? "Settings" : isPricing ? "Pricing & Plans" : isAssets ? "Assets" : "";
 
   return (
     <>
       <header className="sticky top-0 z-50 bg-[#0B0B0E]">
-        <div className="mx-auto flex h-14 max-w-[390px] items-center justify-between px-5">
-          {/* Left side */}
+        <div className="flex h-14 items-center justify-between px-5">
+          {/* Left */}
           {hasBackArrow ? (
             <button onClick={() => router.back()} className="flex items-center gap-2">
               <svg className="h-[22px] w-[22px] text-[var(--foreground)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -80,7 +70,7 @@ export function Header() {
             <span className="text-xl font-bold text-[var(--foreground)]">{pageTitle}</span>
           )}
 
-          {/* Right side */}
+          {/* Right */}
           <div className="flex items-center gap-2.5">
             {showCredits && creditData && (
               <div className="flex items-center gap-1.5 rounded-full bg-[#16161A] px-3 py-1.5">
@@ -88,7 +78,6 @@ export function Header() {
                 <span className="text-[13px] font-semibold text-[var(--foreground)]">{formatCredits(creditData.balance)}</span>
               </div>
             )}
-            {/* Avatar */}
             {user ? (
               <Link href="/dashboard/profile" className="flex h-8 w-8 items-center justify-center rounded-full bg-[#1E1E22]">
                 <svg className="h-[18px] w-[18px] text-[#9898A4]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -106,11 +95,7 @@ export function Header() {
         </div>
       </header>
 
-      {/* Tab separator line */}
-
-      {/* Mobile bottom navigation */}
       <BottomNav isLoggedIn={!!user} onLoginClick={() => setShowLogin(true)} />
-
       <LoginModal open={showLogin} onClose={() => setShowLogin(false)} />
     </>
   );

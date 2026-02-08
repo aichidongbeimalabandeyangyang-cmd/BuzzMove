@@ -54,12 +54,12 @@ export function VideoProgress({ videoId, imagePreview, onComplete, onError }: Vi
   const pct = Math.round(Math.min(progress, 99));
 
   return (
-    <div className="mx-auto flex w-full max-w-[390px] flex-1 flex-col" role="status" aria-label="Generating video">
+    <div className="flex w-full flex-1 flex-col" role="status" aria-label="Generating video">
       {/* Content — centered vertically */}
       <div className="flex flex-1 flex-col items-center justify-center gap-6 px-5">
-        {/* Processing image — 280px, rounded-[20px] */}
+        {/* Processing image — ~33% of viewport, responsive */}
         {imagePreview && (
-          <div className="relative w-full overflow-hidden rounded-[20px]" style={{ height: 280 }}>
+          <div className="relative w-full overflow-hidden rounded-[20px]" style={{ height: "33vh" }}>
             <Image src={imagePreview} alt="Processing" fill className="object-cover" unoptimized />
             {/* Processing badge */}
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">

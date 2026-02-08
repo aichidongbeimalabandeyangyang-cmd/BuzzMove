@@ -13,7 +13,7 @@ export function VideoPlayer({ videoId, onReset, creditCost }: VideoPlayerProps) 
 
   if (!video?.output_video_url) {
     return (
-      <div className="mx-auto flex w-full max-w-[390px] flex-1 items-center justify-center">
+      <div className="flex w-full flex-1 items-center justify-center">
         <p className="text-sm text-[var(--muted-foreground)]">Video not ready</p>
       </div>
     );
@@ -28,10 +28,10 @@ export function VideoPlayer({ videoId, onReset, creditCost }: VideoPlayerProps) 
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-[390px] flex-1 flex-col">
+    <div className="flex w-full flex-1 flex-col">
       <div className="flex flex-1 flex-col gap-5 px-5 pb-5 pt-2">
-        {/* Video player — 440px, rounded-[20px] */}
-        <div className="relative w-full shrink-0 overflow-hidden rounded-[20px]" style={{ height: 440 }}>
+        {/* Video player — ~52% of viewport, responsive */}
+        <div className="relative w-full shrink-0 overflow-hidden rounded-[20px]" style={{ height: "52vh" }}>
           <video
             src={video.output_video_url}
             controls

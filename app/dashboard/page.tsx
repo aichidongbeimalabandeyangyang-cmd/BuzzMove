@@ -23,9 +23,9 @@ export default function DashboardPage() {
   );
 
   return (
-    <div className="mx-auto flex w-full max-w-[390px] flex-1 flex-col">
-      {/* Tab switcher — matches design exactly */}
-      <div className="flex gap-1 px-4 pb-2">
+    <div className="flex w-full flex-1 flex-col">
+      {/* Tab switcher */}
+      <div className="flex gap-1 px-5 pb-2">
         <button
           onClick={() => setActiveTab("videos")}
           className={`flex h-9 items-center justify-center rounded-[10px] px-5 text-sm font-semibold transition-all ${
@@ -50,7 +50,7 @@ export default function DashboardPage() {
 
       {/* Content */}
       {activeTab === "videos" && (
-        <div className="flex-1 px-4 pt-2">
+        <div className="flex-1 px-5 pt-2">
           {isLoading ? (
             <div className="flex justify-center py-20">
               <div className="relative h-12 w-12">
@@ -76,15 +76,9 @@ export default function DashboardPage() {
               </Link>
             </div>
           ) : (
-            <div className="flex flex-col gap-3">
-              {/* 2-column grid, 210px height, gap 12, rounded-2xl */}
-              {chunk(videosData?.videos ?? [], 2).map((row, i) => (
-                <div key={i} className="flex gap-3">
-                  {row.map((video) => (
-                    <DashboardVideoCard key={video.id} video={video} />
-                  ))}
-                  {row.length < 2 && <div className="flex-1" />}
-                </div>
+            <div className="grid grid-cols-2 gap-3">
+              {(videosData?.videos ?? []).map((video) => (
+                <DashboardVideoCard key={video.id} video={video} />
               ))}
             </div>
           )}
@@ -92,18 +86,12 @@ export default function DashboardPage() {
       )}
 
       {activeTab === "photos" && (
-        <div className="flex-1 px-4 pt-2">
+        <div className="flex-1 px-5 pt-2">
           <PhotosTab />
         </div>
       )}
     </div>
   );
-}
-
-function chunk<T>(arr: T[], size: number): T[][] {
-  const result: T[][] = [];
-  for (let i = 0; i < arr.length; i += size) result.push(arr.slice(i, i + size));
-  return result;
 }
 
 function PhotosTab() {
@@ -131,14 +119,10 @@ function PhotosTab() {
   }
 
   return (
-    <div className="flex flex-col gap-3">
-      {chunk(photos, 3).map((row, i) => (
-        <div key={i} className="flex gap-3">
-          {row.map((photo) => (
-            <div key={photo.id} className="relative h-[150px] flex-1 overflow-hidden rounded-2xl bg-[var(--secondary)]">
-              <Image src={photo.url} alt={photo.name} fill className="object-cover" unoptimized />
-            </div>
-          ))}
+    <div className="grid grid-cols-3 gap-3">
+      {photos.map((photo) => (
+        <div key={photo.id} className="relative aspect-[1/1.25] overflow-hidden rounded-2xl bg-[var(--secondary)]">
+          <Image src={photo.url} alt={photo.name} fill className="object-cover" unoptimized />
         </div>
       ))}
     </div>
@@ -155,7 +139,7 @@ function DashboardVideoCard({ video }: { video: any }) {
 
   if (video.status === "generating" || video.status === "pending") {
     return (
-      <div className="flex-1 overflow-hidden rounded-2xl bg-[var(--card)]">
+      <div className="overflow-hidden rounded-2xl bg-[var(--card)]">
         <GeneratingPoller videoId={video.id} />
         <div className="p-3">
           <p className="line-clamp-1 text-xs text-[var(--foreground-80)]">{video.prompt || "No prompt"}</p>
@@ -166,7 +150,7 @@ function DashboardVideoCard({ video }: { video: any }) {
 
   if (video.status === "completed" && video.output_video_url) {
     return (
-      <div className="group flex-1 overflow-hidden rounded-2xl bg-[var(--card)]" style={{ height: 210 }}>
+      <div className="group overflow-hidden rounded-2xl bg-[var(--card)] aspect-[9/16]">
         <div className="relative h-full cursor-pointer" onClick={handleTogglePlay}>
           <video ref={videoRef} src={video.output_video_url} className="h-full w-full object-cover" muted loop playsInline preload="none" />
           <div className="absolute inset-0 flex items-center justify-center bg-black/10 group-hover:bg-black/20">
@@ -184,7 +168,7 @@ function DashboardVideoCard({ video }: { video: any }) {
   }
 
   return (
-    <div className="flex flex-1 items-center justify-center overflow-hidden rounded-2xl bg-[var(--secondary)]" style={{ height: 210 }}>
+    <div className="flex items-center justify-center overflow-hidden rounded-2xl bg-[var(--secondary)] aspect-[9/16]">
       <span className={`rounded-full px-3 py-1.5 text-xs ${video.status === "failed" ? "bg-[var(--destructive-10)] text-[var(--destructive)]" : "text-[#6B6B70]"}`}>
         {video.status === "failed" ? "Failed" : video.status}
       </span>

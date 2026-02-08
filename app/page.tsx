@@ -78,7 +78,7 @@ export default function HomePage() {
   // Show upload zone (photo picker)
   if (showUpload) {
     return (
-      <div className="mx-auto flex w-full max-w-[390px] flex-1 flex-col px-4 py-4">
+      <div className="flex w-full flex-1 flex-col px-5 py-4">
         {uploading ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-5">
             <div className="relative h-12 w-12" role="status" aria-label="Uploading image">
@@ -111,13 +111,13 @@ export default function HomePage() {
     );
   }
 
-  // Default: Hero view matching design exactly
+  // Default: Hero view — full width, responsive
   return (
-    <div className="mx-auto flex w-full max-w-[390px] flex-1 flex-col">
-      {/* Hero Photo — 460px fixed height */}
+    <div className="flex w-full flex-1 flex-col">
+      {/* Hero Photo — takes available space minus bottom content */}
       <div
-        className="relative w-full shrink-0 overflow-hidden cursor-pointer"
-        style={{ height: 460 }}
+        className="relative w-full shrink overflow-hidden cursor-pointer min-h-[200px]"
+        style={{ flex: "1 1 0%" }}
         onClick={() => setShowUpload(true)}
       >
         <Image
@@ -125,7 +125,7 @@ export default function HomePage() {
           alt={currentExample.label}
           fill
           className="object-cover"
-          sizes="390px"
+          sizes="100vw"
           priority
         />
 
@@ -138,13 +138,13 @@ export default function HomePage() {
 
         {/* Bottom gradient overlay */}
         <div
-          className="absolute inset-x-0 bottom-0"
-          style={{ height: 160, background: "linear-gradient(to top, #0B0B0E, transparent)" }}
+          className="absolute inset-x-0 bottom-0 h-[160px]"
+          style={{ background: "linear-gradient(to top, #0B0B0E, transparent)" }}
         />
       </div>
 
-      {/* Bottom Content — flex-1, pushed to bottom */}
-      <div className="flex flex-1 flex-col justify-end gap-3 px-5 pb-6">
+      {/* Bottom Content — fixed height, full width */}
+      <div className="flex shrink-0 flex-col gap-3 px-5 pb-6 pt-4">
         {/* Motion Prompt label */}
         <div className="flex items-center gap-1.5">
           <svg className="h-4 w-4 text-[var(--primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -153,9 +153,9 @@ export default function HomePage() {
           <span className="text-[13px] font-semibold text-[var(--primary)]">Motion Prompt</span>
         </div>
 
-        {/* Prompt card */}
-        <div className="rounded-2xl bg-[#16161A] p-4">
-          <p className="text-[15px] leading-[1.4] text-[var(--foreground)]">
+        {/* Prompt card — generous padding */}
+        <div className="rounded-2xl bg-[#16161A] px-5 py-4">
+          <p className="text-base leading-relaxed text-[var(--foreground)]">
             {currentExample.prompt}
           </p>
         </div>

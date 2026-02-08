@@ -12,6 +12,7 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  const [showEmailInput, setShowEmailInput] = useState(false);
   const supabase = createSupabaseBrowserClient();
   const dialogRef = useRef<HTMLDivElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
@@ -22,6 +23,10 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
       requestAnimationFrame(() => dialogRef.current?.focus());
     } else {
       previousFocusRef.current?.focus();
+      // Reset state when closed
+      setShowEmailInput(false);
+      setSent(false);
+      setEmail("");
     }
   }, [open]);
 
@@ -51,6 +56,7 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
 
   const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!email) return;
     setLoading(true);
     try {
       await supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: `${window.location.origin}/auth/callback` } });
@@ -64,25 +70,34 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-end justify-center animate-fade-in"
+      className="fixed inset-0 z-[100] flex items-center justify-center px-5 animate-fade-in"
       role="dialog"
       aria-modal="true"
       aria-labelledby="login-modal-title"
-      style={{ background: "rgba(0,0,0,0.5)" }}
+      style={{ background: "rgba(0,0,0,0.6)" }}
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div
         ref={dialogRef}
         tabIndex={-1}
-        className="relative w-full max-w-[390px] animate-scale-in bg-[#0B0B0E] outline-none"
-        style={{ borderRadius: "24px 24px 0 0", padding: "24px 24px 40px 24px" }}
+        className="relative w-full animate-scale-in rounded-3xl bg-[#0B0B0E] p-6 outline-none"
+        style={{ maxWidth: 400, border: "1px solid #252530" }}
       >
-        <div className="flex flex-col items-center gap-6">
-          {/* Grab handle */}
-          <div className="h-1 w-10 rounded-full bg-[#3A3A40]" />
+        {/* Close button */}
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-[#1E1E22] text-[#9898A4] transition-colors hover:text-[var(--foreground)]"
+          aria-label="Close"
+        >
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
 
+        <div className="flex flex-col items-center gap-5">
           {/* Logo + title */}
-          <div className="flex flex-col items-center gap-3 w-full">
+          <div className="flex flex-col items-center gap-3 pt-2">
             <div
               className="flex h-12 w-12 items-center justify-center rounded-xl"
               style={{ background: "linear-gradient(135deg, #E8A838, #F0C060)" }}
@@ -104,7 +119,7 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
               <svg className="mx-auto mb-3 h-8 w-8 text-[var(--primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
               </svg>
-              <p className="text-sm font-medium">Check your email</p>
+              <p className="text-sm font-medium text-[var(--foreground)]">Check your email</p>
               <p className="mt-1 text-sm text-[var(--muted-foreground)]">We sent a sign-in link to {email}</p>
             </div>
           ) : (
@@ -118,16 +133,6 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
                 Continue with Google
               </button>
 
-              {/* Apple button */}
-              <button
-                className="flex h-[52px] w-full items-center justify-center gap-2.5 rounded-[14px] bg-white text-base font-semibold text-[#0B0B0E] transition-all active:scale-[0.98]"
-              >
-                <svg className="h-5 w-5" fill="#0B0B0E" viewBox="0 0 24 24">
-                  <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
-                </svg>
-                Continue with Apple
-              </button>
-
               {/* Divider */}
               <div className="flex w-full items-center gap-4">
                 <div className="h-px flex-1 bg-[#252530]" />
@@ -135,16 +140,31 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
                 <div className="h-px flex-1 bg-[#252530]" />
               </div>
 
-              {/* Email button */}
-              <form onSubmit={handleEmailLogin} className="w-full">
+              {/* Email section */}
+              {showEmailInput ? (
+                <form onSubmit={handleEmailLogin} className="w-full space-y-3">
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="name@email.com"
+                    required
+                    autoFocus
+                    className="w-full rounded-[14px] border border-[#252530] bg-[#16161A] px-4 py-3.5 text-sm text-[var(--foreground)] placeholder:text-[#6B6B70] outline-none focus:border-[var(--primary)]"
+                  />
+                  <button
+                    type="submit"
+                    disabled={loading || !email}
+                    className="flex h-[52px] w-full items-center justify-center rounded-[14px] text-base font-semibold text-[#0B0B0E] transition-all active:scale-[0.98] disabled:opacity-50"
+                    style={{ background: "linear-gradient(135deg, #F0C060, #E8A838)" }}
+                  >
+                    {loading ? "Sending..." : "Send Magic Link"}
+                  </button>
+                </form>
+              ) : (
                 <button
                   type="button"
-                  onClick={() => {
-                    // For simplicity, show email input on click
-                    const input = document.getElementById("login-email-input");
-                    if (input) { input.style.display = "block"; input.focus(); }
-                    else handleEmailLogin({ preventDefault: () => {} } as any);
-                  }}
+                  onClick={() => setShowEmailInput(true)}
                   className="flex h-[52px] w-full items-center justify-center gap-2.5 rounded-[14px] text-base font-semibold text-[var(--foreground)] transition-all active:scale-[0.98]"
                   style={{ border: "1.5px solid #252530" }}
                 >
@@ -153,26 +173,7 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
                   </svg>
                   Continue with Email
                 </button>
-                {/* Hidden email input that shows on demand */}
-                <div id="login-email-input" style={{ display: "none" }} className="mt-3 space-y-3">
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="name@email.com"
-                    required
-                    className="w-full rounded-[14px] border border-[#252530] bg-[#16161A] px-4 py-3.5 text-sm text-[var(--foreground)] placeholder:text-[#6B6B70] outline-none focus:border-[var(--primary)]"
-                  />
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="flex h-[52px] w-full items-center justify-center rounded-[14px] text-base font-semibold text-[#0B0B0E] transition-all active:scale-[0.98] disabled:opacity-50"
-                    style={{ background: "linear-gradient(135deg, #F0C060, #E8A838)" }}
-                  >
-                    {loading ? "Sending..." : "Send Magic Link"}
-                  </button>
-                </div>
-              </form>
+              )}
 
               {/* Terms */}
               <p className="text-center text-xs leading-[1.5] text-[#4A4A50]">

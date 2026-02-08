@@ -24,14 +24,10 @@ export function BottomNav({ isLoggedIn, onLoginClick }: BottomNavProps) {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 sm:hidden bg-[#0B0B0E] pb-[env(safe-area-inset-bottom)]">
-      {/* Separator line */}
       <div className="h-px w-full bg-[#1A1A1E]" />
-      <div className="mx-auto flex h-16 max-w-[390px] items-center justify-around pt-1.5 pb-3.5">
+      <div className="flex h-16 items-center justify-around pt-1.5 pb-3.5">
         {tabs.map((tab) => {
-          const isActive =
-            tab.href === "/"
-              ? pathname === "/"
-              : pathname.startsWith(tab.href);
+          const isActive = tab.href === "/" ? pathname === "/" : pathname.startsWith(tab.href);
           const Icon = tab.icon;
 
           if ("action" in tab && tab.action) {
@@ -41,9 +37,7 @@ export function BottomNav({ isLoggedIn, onLoginClick }: BottomNavProps) {
                 type="button"
                 onClick={tab.action}
                 className={`flex flex-col items-center gap-1 min-w-[64px] min-h-[44px] justify-center transition-colors ${
-                  isActive
-                    ? "text-[var(--primary)]"
-                    : "text-[var(--muted-foreground)]"
+                  isActive ? "text-[var(--primary)]" : "text-[#6B6B70]"
                 }`}
               >
                 <Icon className="h-[22px] w-[22px]" />
@@ -57,9 +51,7 @@ export function BottomNav({ isLoggedIn, onLoginClick }: BottomNavProps) {
               key={tab.label}
               href={tab.href}
               className={`flex flex-col items-center gap-1 min-w-[64px] min-h-[44px] justify-center transition-colors ${
-                isActive
-                  ? "text-[var(--primary)]"
-                  : "text-[var(--muted-foreground)]"
+                isActive ? "text-[var(--primary)]" : "text-[#6B6B70]"
               }`}
             >
               <Icon className="h-[22px] w-[22px]" />
@@ -71,8 +63,6 @@ export function BottomNav({ isLoggedIn, onLoginClick }: BottomNavProps) {
     </nav>
   );
 }
-
-/* ── Icons ─────────────────────────────────────── */
 
 function FlameIcon({ className }: { className?: string }) {
   return (
