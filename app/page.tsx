@@ -143,9 +143,9 @@ export default function HomePage() {
         />
       </div>
 
-      {/* Bottom Content — fixed height, full width */}
-      <div className="flex shrink-0 flex-col gap-3 px-5 pb-6 pt-4">
-        {/* Motion Prompt label */}
+      {/* Bottom Content — design: padding [0,20,24,20], gap 12 */}
+      <div className="flex shrink-0 flex-col gap-3 px-5 pb-6">
+        {/* Motion Prompt label — design: gap 6 */}
         <div className="flex items-center gap-1.5">
           <svg className="h-4 w-4 text-[var(--primary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456z" />
@@ -153,9 +153,9 @@ export default function HomePage() {
           <span className="text-[13px] font-semibold text-[var(--primary)]">Motion Prompt</span>
         </div>
 
-        {/* Prompt card — generous padding */}
-        <div className="rounded-2xl bg-[#16161A] px-5 py-4">
-          <p className="text-base leading-relaxed text-[var(--foreground)]">
+        {/* Prompt card — design: padding 16, fontSize 15, lineHeight 1.4 */}
+        <div className="rounded-2xl bg-[#16161A] p-4">
+          <p className="text-[15px] leading-[1.4] text-[var(--foreground)]">
             {currentExample.prompt}
           </p>
         </div>

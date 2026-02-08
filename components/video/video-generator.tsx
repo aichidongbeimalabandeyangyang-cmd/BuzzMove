@@ -63,7 +63,7 @@ export function VideoGenerator({
   return (
     <div className="flex w-full flex-1 flex-col">
       {/* Content area */}
-      <div className="flex flex-1 flex-col gap-4 px-5 pb-6 pt-2">
+      <div className="flex flex-1 flex-col gap-4 px-5 pb-6">
         {/* Image preview — ~33% of viewport, rounded-[20px] */}
         <div className="relative w-full shrink-0 overflow-hidden rounded-[20px] bg-[var(--card)]" style={{ height: "33vh" }}>
           <Image src={imagePreview} alt="Upload preview" fill className="object-cover" unoptimized />
