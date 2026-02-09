@@ -5,6 +5,7 @@ import { Check, Zap } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { useApp } from "@/components/layout/app-shell";
 import { CREDIT_PACKS } from "@/lib/constants";
+import { trackClickCheckout } from "@/lib/gtag";
 
 export default function PricingPage() {
   const [billing, setBilling] = useState<"monthly" | "yearly">("yearly");
@@ -19,11 +20,13 @@ export default function PricingPage() {
 
   const handleSubscribe = (plan: "pro" | "premium") => {
     if (!user) { openLogin(); return; }
+    trackClickCheckout({ type: "subscription", plan });
     subCheckout.mutate({ plan, billingPeriod: billing });
   };
 
   const handleBuyPack = (packId: string) => {
     if (!user) { openLogin(); return; }
+    trackClickCheckout({ type: "credit_pack", plan: packId });
     packCheckout.mutate({ packId: packId as any });
   };
 

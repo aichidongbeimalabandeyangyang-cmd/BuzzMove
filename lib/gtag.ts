@@ -44,3 +44,13 @@ export function trackVideoDownload() {
 export function trackShareClick() {
   gtag("event", "click_share");
 }
+
+// 7. Paywall shown
+export function trackPaywallView() {
+  gtag("event", "paywall_view");
+}
+
+// 8. Click checkout button (before Stripe redirect)
+export function trackClickCheckout(params: { type: "credit_pack" | "subscription"; plan: string }) {
+  gtag("event", "click_checkout", params);
+}

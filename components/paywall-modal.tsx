@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { X, Zap, Check } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { CREDIT_PACKS } from "@/lib/constants";
+import { trackPaywallView, trackClickCheckout } from "@/lib/gtag";
 
 interface PaywallModalProps {
   open: boolean;
@@ -22,6 +23,7 @@ export function PaywallModal({ open, onClose }: PaywallModalProps) {
 
   useEffect(() => {
     if (!open) return;
+    trackPaywallView();
     const handleEsc = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     window.addEventListener("keydown", handleEsc);
     return () => window.removeEventListener("keydown", handleEsc);
@@ -73,7 +75,7 @@ export function PaywallModal({ open, onClose }: PaywallModalProps) {
           {CREDIT_PACKS.map((pack, i) => (
             <button
               key={pack.id}
-              onClick={() => packCheckout.mutate({ packId: pack.id as any })}
+              onClick={() => { trackClickCheckout({ type: "credit_pack", plan: pack.id }); packCheckout.mutate({ packId: pack.id as any }); }}
               disabled={isPending}
               className="flex w-full items-center justify-between transition-all active:scale-[0.98] disabled:opacity-50"
               style={{
@@ -109,7 +111,7 @@ export function PaywallModal({ open, onClose }: PaywallModalProps) {
 
           {/* Pro */}
           <button
-            onClick={() => subCheckout.mutate({ plan: "pro", billingPeriod: "yearly" })}
+            onClick={() => { trackClickCheckout({ type: "subscription", plan: "pro" }); subCheckout.mutate({ plan: "pro", billingPeriod: "yearly" }); }}
             disabled={isPending}
             className="flex w-full flex-col transition-all active:scale-[0.98] disabled:opacity-50"
             style={{ borderRadius: 14, backgroundColor: "#16161A", padding: "12px 14px", gap: 8 }}
@@ -134,7 +136,7 @@ export function PaywallModal({ open, onClose }: PaywallModalProps) {
 
           {/* Premium */}
           <button
-            onClick={() => subCheckout.mutate({ plan: "premium", billingPeriod: "yearly" })}
+            onClick={() => { trackClickCheckout({ type: "subscription", plan: "premium" }); subCheckout.mutate({ plan: "premium", billingPeriod: "yearly" }); }}
             disabled={isPending}
             className="flex w-full flex-col transition-all active:scale-[0.98] disabled:opacity-50"
             style={{ borderRadius: 14, backgroundColor: "#16161A", padding: "12px 14px", gap: 8 }}
