@@ -4,12 +4,14 @@ import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { trackPurchase } from "@/lib/gtag";
 import Image from "next/image";
-import { ArrowLeft, Download, Share2, Trash2, X, Lock, CheckCircle, XCircle, Loader2, Copy, Check } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ArrowLeft, Download, Share2, Trash2, X, Lock, CheckCircle, XCircle, Loader2, Copy, Check, RefreshCw } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { PaywallModal } from "@/components/paywall-modal";
 
 // ---- VIDEO DETAIL (uses getStatus to poll & resolve video URL) ----
 function VideoDetail({ videoId, onBack }: { videoId: string; onBack: () => void }) {
+  const router = useRouter();
   const utils = trpc.useUtils();
   const { data: video, isLoading } = trpc.video.getStatus.useQuery(
     { videoId },
@@ -152,6 +154,23 @@ function VideoDetail({ videoId, onBack }: { videoId: string; onBack: () => void 
                   <span style={{ fontSize: 15, fontWeight: 600, color: "#FAFAF9" }}>Share</span>
                 </button>
               </div>
+            )}
+
+            {/* Refine button — go back to generator with same image + prompt */}
+            {video?.input_image_url && (
+              <button
+                onClick={() => {
+                  const params = new URLSearchParams();
+                  params.set("image", video.input_image_url);
+                  if (video.prompt) params.set("prompt", video.prompt);
+                  router.push(`/?${params.toString()}`);
+                }}
+                className="flex w-full items-center justify-center transition-all active:scale-[0.98]"
+                style={{ height: 48, borderRadius: 14, border: "1.5px solid #252530", gap: 8 }}
+              >
+                <RefreshCw style={{ width: 18, height: 18, color: "#E8A838" }} strokeWidth={1.5} />
+                <span style={{ fontSize: 15, fontWeight: 600, color: "#FAFAF9" }}>Refine</span>
+              </button>
             )}
 
             {/* Delete button — two-tap confirm */}

@@ -294,12 +294,24 @@ export default function HomePage() {
   const [initialPrompt, setInitialPrompt] = useState("");
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
-
   // Showcase (guest only): idle → loading → playing
   const [showcase, setShowcase] = useState<"idle" | "loading" | "playing">("idle");
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const isLoggedIn = !!user;
+
+  // Handle refine params from Assets page (e.g. /?image=...&prompt=...)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const image = params.get("image");
+    if (image) {
+      setImageUrl(image);
+      setImagePreview(image);
+      const prompt = params.get("prompt");
+      if (prompt) setInitialPrompt(prompt);
+      window.history.replaceState({}, "", "/");
+    }
+  }, []);
 
   useEffect(() => {
     if (!imageUrl && !imagePreview && showcase === "idle" && homeView !== "upload") {
