@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Flame, Layers, CircleUser, Gift } from "lucide-react";
+import { Flame, Layers, Gift } from "lucide-react";
 
 interface BottomNavProps {
   isLoggedIn: boolean;
@@ -12,8 +12,7 @@ interface BottomNavProps {
 const TABS = [
   { href: "/", label: "Move", icon: Flame, match: (p: string) => p === "/" },
   { href: "/dashboard", label: "Assets", icon: Layers, match: (p: string) => p === "/dashboard" || p === "/dashboard/" },
-  { href: "/dashboard/referrals", label: "Referrals", icon: Gift, match: (p: string) => p.startsWith("/dashboard/referrals") },
-  { href: "/dashboard/profile", label: "My Profile", icon: CircleUser, match: (p: string) => p.startsWith("/dashboard/profile") || p.startsWith("/dashboard/settings") || p.startsWith("/pricing") },
+  { href: "/dashboard/referrals", label: "Earn 500", icon: Gift, match: (p: string) => p.startsWith("/dashboard/referrals"), highlight: true },
 ] as const;
 
 export function BottomNav({ isLoggedIn, onLoginClick }: BottomNavProps) {
@@ -31,7 +30,18 @@ export function BottomNav({ isLoggedIn, onLoginClick }: BottomNavProps) {
           const color = isActive ? "#E8A838" : "#6B6B70";
           const weight = isActive ? 600 : 500;
 
-          if ((tab.label === "My Profile" || tab.label === "Assets" || tab.label === "Referrals") && !isLoggedIn) {
+          const hasHighlight = "highlight" in tab && tab.highlight;
+
+          const iconEl = (
+            <div className="relative">
+              <Icon style={{ width: 22, height: 22, color: hasHighlight && !isActive ? "#E8A838" : color }} strokeWidth={1.5} />
+              {hasHighlight && !isActive && (
+                <div className="absolute animate-pulse" style={{ top: -2, right: -4, width: 7, height: 7, borderRadius: 100, backgroundColor: "#EF4444", border: "1.5px solid #0B0B0E" }} />
+              )}
+            </div>
+          );
+
+          if ((tab.label === "Assets" || tab.label === "Earn 500") && !isLoggedIn) {
             return (
               <button
                 key={tab.label}
@@ -40,8 +50,8 @@ export function BottomNav({ isLoggedIn, onLoginClick }: BottomNavProps) {
                 className="flex flex-col items-center justify-center"
                 style={{ gap: 3, minWidth: 64, minHeight: 44 }}
               >
-                <Icon style={{ width: 22, height: 22, color }} strokeWidth={1.5} />
-                <span style={{ fontSize: 11, fontWeight: weight, color }}>{tab.label}</span>
+                {iconEl}
+                <span style={{ fontSize: 11, fontWeight: hasHighlight ? 600 : weight, color: hasHighlight && !isActive ? "#E8A838" : color }}>{tab.label}</span>
               </button>
             );
           }
@@ -58,8 +68,8 @@ export function BottomNav({ isLoggedIn, onLoginClick }: BottomNavProps) {
               className="flex flex-col items-center justify-center"
               style={{ gap: 3, minWidth: 64, minHeight: 44 }}
             >
-              <Icon style={{ width: 22, height: 22, color }} strokeWidth={1.5} />
-              <span style={{ fontSize: 11, fontWeight: weight, color }}>{tab.label}</span>
+              {iconEl}
+              <span style={{ fontSize: 11, fontWeight: hasHighlight ? 600 : weight, color: hasHighlight && !isActive ? "#E8A838" : color }}>{tab.label}</span>
             </Link>
           );
         })}
