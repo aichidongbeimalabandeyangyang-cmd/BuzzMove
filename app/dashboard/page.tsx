@@ -216,6 +216,8 @@ function PhotoDetail({ photoId, photoUrl, isPinned, onBack }: { photoId: string;
   const utils = trpc.useUtils();
   const [confirmDelete, setConfirmDelete] = useState(false);
 
+  const [pinned, setPinned] = useState(isPinned);
+
   const deleteMutation = trpc.image.delete.useMutation({
     onSuccess() {
       utils.image.list.invalidate();
@@ -224,12 +226,15 @@ function PhotoDetail({ photoId, photoUrl, isPinned, onBack }: { photoId: string;
   });
 
   const pinMutation = trpc.image.togglePin.useMutation({
-    onSuccess() {
+    onSuccess(data) {
+      setPinned(data.pinned);
       utils.image.list.invalidate();
     },
+    onError() {
+      // Roll back optimistic update
+      setPinned((prev) => !prev);
+    },
   });
-
-  const pinned = pinMutation.data ? pinMutation.data.pinned : isPinned;
 
   return (
     <div className="flex w-full flex-1 flex-col">
@@ -248,7 +253,7 @@ function PhotoDetail({ photoId, photoUrl, isPinned, onBack }: { photoId: string;
         <div className="flex lg:max-w-2xl lg:mx-auto lg:w-full" style={{ gap: 10 }}>
           {/* Pin / Unpin */}
           <button
-            onClick={() => pinMutation.mutate({ id: photoId })}
+            onClick={() => { setPinned((prev) => !prev); pinMutation.mutate({ id: photoId }); }}
             disabled={pinMutation.isPending}
             className="flex flex-1 items-center justify-center transition-all active:scale-[0.98] disabled:opacity-50"
             style={{
