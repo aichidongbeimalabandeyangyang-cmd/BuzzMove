@@ -66,6 +66,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`dark ${dmSans.variable}`}>
       <head>
+        <meta name="google-site-verification" content="OP2MnQVhdBcSlH6E1-9IVVAMknHs22wc0RRN9Jfvn6A" />
         {/* Google Analytics 4 + Google Ads */}
         <script
           async
