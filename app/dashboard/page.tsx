@@ -4,7 +4,6 @@ import { useState } from "react";
 import Image from "next/image";
 import { ArrowLeft, Download, Share2, Trash2, X, Lock, CheckCircle, XCircle, Loader2, Copy, Check } from "lucide-react";
 import { trpc } from "@/lib/trpc";
-import { removeRecentUpload } from "@/components/upload/upload-zone";
 import { PaywallModal } from "@/components/paywall-modal";
 
 // ---- VIDEO DETAIL (uses getStatus to poll & resolve video URL) ----
@@ -180,21 +179,30 @@ function VideoDetail({ videoId, onBack }: { videoId: string; onBack: () => void 
   );
 }
 
-// ---- PHOTOS GRID (from localStorage recent uploads) ----
+// ---- PHOTOS GRID (from image_uploads table) ----
 function PhotosGrid() {
-  const [, forceUpdate] = useState(0);
+  const utils = trpc.useUtils();
+  const { data: photos, isLoading } = trpc.image.list.useQuery({ limit: 20 });
 
-  let photos: { url: string; name: string; timestamp: number }[] = [];
-  try {
-    photos = JSON.parse(localStorage.getItem("buzzmove_recent_uploads") || "[]");
-  } catch {}
+  const deleteMutation = trpc.image.delete.useMutation({
+    onSuccess() {
+      utils.image.list.invalidate();
+    },
+  });
 
-  const handleDelete = (url: string) => {
-    removeRecentUpload(url);
-    forceUpdate((n) => n + 1);
-  };
+  if (isLoading) {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center" style={{ gap: 8 }}>
+        <div className="relative" style={{ width: 32, height: 32 }}>
+          <div className="absolute inset-0 rounded-full" style={{ border: "2px solid #252530" }} />
+          <div className="absolute inset-0 animate-spin rounded-full" style={{ border: "2px solid transparent", borderTopColor: "#E8A838" }} />
+        </div>
+        <span style={{ fontSize: 13, color: "#6B6B70" }}>Loading...</span>
+      </div>
+    );
+  }
 
-  if (photos.length === 0) {
+  if (!photos || photos.length === 0) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center" style={{ gap: 12 }}>
         <p style={{ fontSize: 14, color: "#6B6B70" }}>No photos yet</p>
@@ -208,10 +216,10 @@ function PhotosGrid() {
       {Array.from({ length: Math.ceil(photos.length / 3) }).map((_, rowIdx) => (
         <div key={rowIdx} className="grid grid-cols-3" style={{ gap: 12 }}>
           {photos.slice(rowIdx * 3, rowIdx * 3 + 3).map((photo) => (
-            <div key={photo.url} className="relative overflow-hidden" style={{ height: 150, borderRadius: 14 }}>
-              <Image src={photo.url} alt={photo.name} fill className="object-cover" unoptimized />
+            <div key={photo.id} className="relative overflow-hidden" style={{ height: 150, borderRadius: 14 }}>
+              <Image src={photo.url} alt={photo.filename || "Photo"} fill className="object-cover" unoptimized />
               <button
-                onClick={() => handleDelete(photo.url)}
+                onClick={() => deleteMutation.mutate({ id: photo.id })}
                 className="absolute flex items-center justify-center"
                 style={{ top: 6, right: 6, width: 24, height: 24, borderRadius: 100, backgroundColor: "rgba(0,0,0,0.6)", zIndex: 10 }}
               >

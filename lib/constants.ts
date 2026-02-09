@@ -41,10 +41,10 @@ export const PLANS = {
 
 // Credit packs (one-time purchase, prices in cents)
 export const CREDIT_PACKS = [
-  { id: "mini", name: "Mini Pack", credits: 700, price: 499, perVideo: "$0.70" },       // 7 videos
-  { id: "starter", name: "Starter Pack", credits: 1500, price: 999, perVideo: "$0.65" }, // 15 videos
-  { id: "creator", name: "Creator Pack", credits: 5000, price: 2999, perVideo: "$0.60" }, // 50 videos
-  { id: "pro", name: "Pro Pack", credits: 20000, price: 9999, perVideo: "$0.50" },       // 200 videos
+  { id: "mini", name: "Mini Pack", credits: 700, price: 499, tag: "QUICK START", savings: null },
+  { id: "starter", name: "Starter Pack", credits: 1500, price: 999, tag: "POPULAR", savings: 7 },
+  { id: "creator", name: "Creator Pack", credits: 5000, price: 2999, tag: null, savings: 16 },
+  { id: "pro", name: "Pro Pack", credits: 20000, price: 9999, tag: "BEST VALUE", savings: 30 },
 ] as const;
 
 // High-risk countries that force strict content policy

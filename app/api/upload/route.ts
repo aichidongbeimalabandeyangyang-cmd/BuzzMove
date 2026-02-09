@@ -49,5 +49,13 @@ export async function POST(request: NextRequest) {
     data: { publicUrl },
   } = supabase.storage.from("uploads").getPublicUrl(data.path);
 
+  // Record in image_uploads table (ignore duplicate — UNIQUE index handles it)
+  await supabase.from("image_uploads").insert({
+    user_id: user.id,
+    url: publicUrl,
+    filename: file.name,
+    size_bytes: file.size,
+  });
+
   return NextResponse.json({ url: publicUrl });
 }

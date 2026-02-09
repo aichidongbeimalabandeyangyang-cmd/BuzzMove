@@ -1,50 +1,26 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import Image from "next/image";
 import { Plus, X } from "lucide-react";
 import { SUPPORTED_FORMATS, MAX_FILE_SIZE } from "@/lib/constants";
+import { trpc } from "@/lib/trpc";
 
 interface UploadZoneProps {
   onFileSelected: (file: File) => void;
   onExistingSelected?: (url: string) => void;
 }
 
-const STORAGE_KEY = "buzzmove_recent_uploads";
-
-interface RecentUpload {
-  url: string;
-  name: string;
-  timestamp: number;
-}
-
-export function saveRecentUpload(url: string, name: string) {
-  try {
-    const existing: RecentUpload[] = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-    const updated = [{ url, name, timestamp: Date.now() }, ...existing.filter((u) => u.url !== url)].slice(0, 8);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-  } catch {}
-}
-
-function getRecentUploads(): RecentUpload[] {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-  } catch {
-    return [];
-  }
-}
-
-export function removeRecentUpload(url: string) {
-  try {
-    const existing: RecentUpload[] = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(existing.filter((u) => u.url !== url)));
-  } catch {}
-}
-
 export function UploadZone({ onFileSelected, onExistingSelected }: UploadZoneProps) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const recents = getRecentUploads();
-  const [, forceUpdate] = useState(0);
+  const utils = trpc.useUtils();
+  const { data: images } = trpc.image.list.useQuery({ limit: 8 });
+
+  const deleteMutation = trpc.image.delete.useMutation({
+    onSuccess() {
+      utils.image.list.invalidate();
+    },
+  });
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -55,21 +31,18 @@ export function UploadZone({ onFileSelected, onExistingSelected }: UploadZonePro
   };
 
   const handleRecentClick = (url: string) => {
-    // Reuse existing URL directly — no re-upload
     if (onExistingSelected) {
       onExistingSelected(url);
     }
   };
 
-  const handleDeletePhoto = (e: React.MouseEvent, url: string) => {
+  const handleDeletePhoto = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
-    removeRecentUpload(url);
-    forceUpdate((n) => n + 1);
+    deleteMutation.mutate({ id });
   };
 
-  // Build 3 rows x 3 cols of photos
-  const allSlots: (RecentUpload | null)[] = [];
-  for (let i = 0; i < 8; i++) allSlots.push(recents[i] ?? null);
+  // Build 3 rows x 3 cols (slot 0 = "Add New", slots 1-8 = images)
+  const slots = images || [];
 
   return (
     <div className="flex flex-1 flex-col" style={{ gap: 16 }}>
@@ -93,15 +66,21 @@ export function UploadZone({ onFileSelected, onExistingSelected }: UploadZonePro
             <Plus style={{ width: 32, height: 32, color: "#E8A838" }} strokeWidth={1.5} />
             <span style={{ fontSize: 12, fontWeight: 500, color: "#6B6B70" }}>Add New</span>
           </button>
-          {[0, 1].map((i) => <PhotoCell key={i} item={allSlots[i]} onClick={handleRecentClick} onDelete={handleDeletePhoto} />)}
+          {[0, 1].map((i) => (
+            <PhotoCell key={i} item={slots[i]} onClick={handleRecentClick} onDelete={handleDeletePhoto} />
+          ))}
         </div>
         {/* Row 2 */}
         <div className="grid grid-cols-3" style={{ gap: 10 }}>
-          {[2, 3, 4].map((i) => <PhotoCell key={i} item={allSlots[i]} onClick={handleRecentClick} onDelete={handleDeletePhoto} />)}
+          {[2, 3, 4].map((i) => (
+            <PhotoCell key={i} item={slots[i]} onClick={handleRecentClick} onDelete={handleDeletePhoto} />
+          ))}
         </div>
         {/* Row 3 */}
         <div className="grid grid-cols-3" style={{ gap: 10 }}>
-          {[5, 6, 7].map((i) => <PhotoCell key={i} item={allSlots[i]} onClick={handleRecentClick} onDelete={handleDeletePhoto} />)}
+          {[5, 6, 7].map((i) => (
+            <PhotoCell key={i} item={slots[i]} onClick={handleRecentClick} onDelete={handleDeletePhoto} />
+          ))}
         </div>
       </div>
     </div>
@@ -114,19 +93,19 @@ function PhotoCell({
   onClick,
   onDelete,
 }: {
-  item: RecentUpload | null;
+  item: { id: string; url: string; filename: string | null } | undefined;
   onClick: (url: string) => void;
-  onDelete: (e: React.MouseEvent, url: string) => void;
+  onDelete: (e: React.MouseEvent, id: string) => void;
 }) {
   if (!item) {
     return <div style={{ height: 150, borderRadius: 14, backgroundColor: "#16161A" }} />;
   }
   return (
     <button onClick={() => onClick(item.url)} className="relative overflow-hidden" style={{ height: 150, borderRadius: 14 }}>
-      <Image src={item.url} alt={item.name} fill className="object-cover" unoptimized />
+      <Image src={item.url} alt={item.filename || "Upload"} fill className="object-cover" unoptimized />
       {/* Delete button */}
       <div
-        onClick={(e) => onDelete(e, item.url)}
+        onClick={(e) => onDelete(e, item.id)}
         className="absolute flex items-center justify-center"
         style={{ top: 6, right: 6, width: 24, height: 24, borderRadius: 100, backgroundColor: "rgba(0,0,0,0.6)", zIndex: 10 }}
       >

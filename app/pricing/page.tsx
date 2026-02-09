@@ -103,10 +103,10 @@ export default function PricingPage() {
 
             <div className="flex w-full flex-col" style={{ gap: 10 }}>
               {[
-                "4,000 credits/month (~40 videos)",
-                "$0.50 per video (Std 5s)",
-                "No watermark · Commercial license",
-                "Priority processing · 3 concurrent",
+                "4,000 credits every month",
+                "Watermark-free HD downloads",
+                "Generate 3 videos in parallel",
+                "Commercial license included",
               ].map((f) => (
                 <div key={f} className="flex items-center" style={{ gap: 10 }}>
                   <Check style={{ width: 16, height: 16, color: "#E8A838", flexShrink: 0 }} strokeWidth={1.5} />
@@ -151,10 +151,11 @@ export default function PricingPage() {
 
             <div className="flex w-full flex-col" style={{ gap: 10 }}>
               {[
-                "17,500 credits/month (~175 videos)",
-                "$0.40 per video (Std 5s)",
-                "No watermark · Commercial license",
-                "Priority processing · 10 concurrent",
+                "17,500 credits every month",
+                "Watermark-free HD downloads",
+                "Generate up to 10 videos at once",
+                "Commercial license included",
+                "30% cheaper credits vs packs",
               ].map((f) => (
                 <div key={f} className="flex items-center" style={{ gap: 10 }}>
                   <Check style={{ width: 16, height: 16, color: "#22C55E", flexShrink: 0 }} strokeWidth={1.5} />
@@ -195,10 +196,17 @@ export default function PricingPage() {
                 className="flex w-full items-center justify-between transition-all active:scale-[0.98] disabled:opacity-50"
                 style={{ borderRadius: 16, backgroundColor: "#16161A", padding: "14px 16px" }}
               >
-                <div className="flex flex-col" style={{ gap: 2 }}>
-                  <span style={{ fontSize: 15, fontWeight: 600, color: "#FAFAF9" }}>{pack.name}</span>
+                <div className="flex flex-col" style={{ gap: 3 }}>
+                  <div className="flex items-center" style={{ gap: 8 }}>
+                    <span style={{ fontSize: 15, fontWeight: 600, color: "#FAFAF9" }}>{pack.name}</span>
+                    {pack.tag && (
+                      <span style={{ fontSize: 10, fontWeight: 700, color: "#E8A838", backgroundColor: "#E8A83820", borderRadius: 6, padding: "2px 6px" }}>
+                        {pack.tag}
+                      </span>
+                    )}
+                  </div>
                   <span style={{ fontSize: 12, fontWeight: 400, color: "#6B6B70" }}>
-                    {pack.credits.toLocaleString()} credits · {pack.perVideo}/video
+                    {pack.credits.toLocaleString()} credits{pack.savings ? ` · Save ${pack.savings}%` : ""}
                   </span>
                 </div>
                 <div

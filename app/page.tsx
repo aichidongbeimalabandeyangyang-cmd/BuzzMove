@@ -4,7 +4,8 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { Sparkles, Plus } from "lucide-react";
 import { useApp } from "@/components/layout/app-shell";
-import { UploadZone, saveRecentUpload } from "@/components/upload/upload-zone";
+import { UploadZone } from "@/components/upload/upload-zone";
+import { trpc } from "@/lib/trpc";
 import { VideoGenerator } from "@/components/video/video-generator";
 
 const TAGLINES = [
@@ -159,6 +160,7 @@ function useShowcase() {
 export default function HomePage() {
   const { homeView, setHomeView, user, openLogin } = useApp();
   const SHOWCASE = useShowcase();
+  const utils = trpc.useUtils();
 
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -198,7 +200,12 @@ export default function HomePage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Upload failed");
       setImageUrl(data.url);
-      saveRecentUpload(data.url, file.name);
+      // Optimistic: prepend to image list cache so it appears immediately
+      utils.image.list.setData({ limit: 8 }, (prev) =>
+        prev
+          ? [{ id: `temp-${Date.now()}`, url: data.url, filename: file.name, created_at: new Date().toISOString() }, ...prev].slice(0, 8)
+          : prev
+      );
     } catch (err) {
       URL.revokeObjectURL(preview);
       setImagePreview(null);
