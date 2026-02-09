@@ -14,10 +14,11 @@ interface VideoGeneratorProps {
   imageUrl: string;
   imagePreview: string;
   onReset: () => void;
+  onBackHome?: () => void;
   initialPrompt?: string;
 }
 
-export function VideoGenerator({ imageUrl, imagePreview, onReset, initialPrompt }: VideoGeneratorProps) {
+export function VideoGenerator({ imageUrl, imagePreview, onReset, onBackHome, initialPrompt }: VideoGeneratorProps) {
   const [prompt, setPrompt] = useState(initialPrompt ?? "");
   const [duration, setDuration] = useState<"5" | "10">("5");
   const [mode, setMode] = useState<"standard" | "professional">("standard");
@@ -65,7 +66,7 @@ export function VideoGenerator({ imageUrl, imagePreview, onReset, initialPrompt 
   const creditCost = CREDIT_COSTS[mode][parseInt(duration) as 5 | 10];
 
   if (videoId && status === "completed") {
-    return <VideoPlayer videoId={videoId} onReset={onReset} creditCost={creditCost} />;
+    return <VideoPlayer videoId={videoId} onReset={onReset} onBackHome={onBackHome} creditCost={creditCost} />;
   }
 
   if (videoId && (status === "generating" || status === "submitting")) {
@@ -73,11 +74,11 @@ export function VideoGenerator({ imageUrl, imagePreview, onReset, initialPrompt 
   }
 
   return (
-    <div className="flex w-full flex-1 flex-col">
-      {/* Gen Content: h-fill, vertical, gap 16, padding [0,20,24,20] */}
-      <div className="flex flex-1 flex-col" style={{ gap: 16, padding: "0 20px 24px 20px" }}>
-        {/* Image Preview: h280, cornerRadius 20, clip */}
-        <div className="relative w-full overflow-hidden" style={{ height: 280, borderRadius: 20, backgroundColor: "#16161A", flexShrink: 0 }}>
+    <div className="flex w-full flex-1 flex-col desktop-container">
+      {/* Gen Content: two-column on desktop */}
+      <div className="flex flex-1 flex-col lg:flex-row lg:items-start" style={{ gap: 16, padding: "0 20px 24px 20px" }}>
+        {/* Image Preview: h280 mobile, fill-height desktop */}
+        <div className="relative w-full overflow-hidden lg:flex-1 lg:sticky lg:top-[72px]" style={{ height: 280, borderRadius: 20, backgroundColor: "#16161A", flexShrink: 0 }}>
           <Image src={imagePreview} alt="Upload preview" fill className="object-cover" unoptimized />
           <button
             onClick={onReset}
@@ -89,85 +90,88 @@ export function VideoGenerator({ imageUrl, imagePreview, onReset, initialPrompt 
           </button>
         </div>
 
-        {/* Prompt Input: cornerRadius 16, fill #16161A, gap 8, padding 16 */}
-        <div style={{ borderRadius: 16, backgroundColor: "#16161A", padding: 16 }}>
-          <textarea
-            value={prompt}
-            onChange={(e) => setPrompt(e.target.value)}
-            placeholder="Describe the motion you want..."
-            maxLength={1000}
-            rows={2}
-            className="w-full resize-none bg-transparent outline-none"
-            style={{ fontSize: 14, lineHeight: 1.4, color: "#FAFAF9" }}
-          />
-          <p style={{ marginTop: 8, textAlign: "right", fontSize: 12, fontWeight: 400, color: "#4A4A50" }}>{prompt.length}/1000</p>
-        </div>
+        {/* Controls column */}
+        <div className="flex flex-1 flex-col lg:max-w-md" style={{ gap: 16 }}>
+          {/* Prompt Input */}
+          <div style={{ borderRadius: 16, backgroundColor: "#16161A", padding: 16 }}>
+            <textarea
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              placeholder="Describe the motion you want..."
+              maxLength={1000}
+              rows={2}
+              className="w-full resize-none bg-transparent outline-none"
+              style={{ fontSize: 14, lineHeight: 1.4, color: "#FAFAF9" }}
+            />
+            <p style={{ marginTop: 8, textAlign: "right", fontSize: 12, fontWeight: 400, color: "#4A4A50" }}>{prompt.length}/1000</p>
+          </div>
 
-        {/* Options Row: gap 12, horizontal */}
-        <div className="flex" style={{ gap: 12 }}>
-          {/* Duration */}
-          <div className="flex-1">
-            <p style={{ marginBottom: 6, fontSize: 12, fontWeight: 500, color: "#6B6B70" }}>Duration</p>
-            <div className="flex" style={{ height: 44, borderRadius: 12, backgroundColor: "#16161A", padding: 4 }}>
-              {(["5", "10"] as const).map((d) => (
-                <button
-                  key={d}
-                  onClick={() => setDuration(d)}
-                  className="flex-1 flex items-center justify-center"
-                  style={{
-                    borderRadius: 8,
-                    fontSize: 14, fontWeight: duration === d ? 600 : 500,
-                    color: duration === d ? "#0B0B0E" : "#6B6B70",
-                    backgroundColor: duration === d ? "#E8A838" : "transparent",
-                  }}
-                >
-                  {d}s
-                </button>
-              ))}
+          {/* Options Row */}
+          <div className="flex" style={{ gap: 12 }}>
+            {/* Duration */}
+            <div className="flex-1">
+              <p style={{ marginBottom: 6, fontSize: 12, fontWeight: 500, color: "#6B6B70" }}>Duration</p>
+              <div className="flex" style={{ height: 44, borderRadius: 12, backgroundColor: "#16161A", padding: 4 }}>
+                {(["5", "10"] as const).map((d) => (
+                  <button
+                    key={d}
+                    onClick={() => setDuration(d)}
+                    className="flex-1 flex items-center justify-center"
+                    style={{
+                      borderRadius: 8,
+                      fontSize: 14, fontWeight: duration === d ? 600 : 500,
+                      color: duration === d ? "#0B0B0E" : "#6B6B70",
+                      backgroundColor: duration === d ? "#E8A838" : "transparent",
+                    }}
+                  >
+                    {d}s
+                  </button>
+                ))}
+              </div>
+            </div>
+            {/* Quality */}
+            <div className="flex-1">
+              <p style={{ marginBottom: 6, fontSize: 12, fontWeight: 500, color: "#6B6B70" }}>Quality</p>
+              <div className="flex" style={{ height: 44, borderRadius: 12, backgroundColor: "#16161A", padding: 4 }}>
+                {(["standard", "professional"] as const).map((m) => (
+                  <button
+                    key={m}
+                    onClick={() => setMode(m)}
+                    className="flex-1 flex items-center justify-center"
+                    style={{
+                      borderRadius: 8,
+                      fontSize: 14, fontWeight: mode === m ? 600 : 500,
+                      color: mode === m ? "#0B0B0E" : "#6B6B70",
+                      backgroundColor: mode === m ? "#E8A838" : "transparent",
+                    }}
+                  >
+                    {m === "standard" ? "Std" : "Pro"}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
-          {/* Quality */}
-          <div className="flex-1">
-            <p style={{ marginBottom: 6, fontSize: 12, fontWeight: 500, color: "#6B6B70" }}>Quality</p>
-            <div className="flex" style={{ height: 44, borderRadius: 12, backgroundColor: "#16161A", padding: 4 }}>
-              {(["standard", "professional"] as const).map((m) => (
-                <button
-                  key={m}
-                  onClick={() => setMode(m)}
-                  className="flex-1 flex items-center justify-center"
-                  style={{
-                    borderRadius: 8,
-                    fontSize: 14, fontWeight: mode === m ? 600 : 500,
-                    color: mode === m ? "#0B0B0E" : "#6B6B70",
-                    backgroundColor: mode === m ? "#E8A838" : "transparent",
-                  }}
-                >
-                  {m === "standard" ? "Std" : "Pro"}
-                </button>
-              ))}
+
+          <div className="flex-1 lg:hidden" />
+
+          {/* Generate Button */}
+          <button
+            onClick={handleGenerate}
+            disabled={generateMutation.isPending}
+            className="flex w-full items-center justify-center transition-all active:scale-[0.98] disabled:opacity-50"
+            style={{ height: 56, flexShrink: 0, borderRadius: 14, background: "linear-gradient(135deg, #F0C060, #E8A838)", boxShadow: "0 4px 20px #E8A83840" }}
+          >
+            <span style={{ fontSize: 17, fontWeight: 700, color: "#0B0B0E" }}>
+              {generateMutation.isPending ? "Starting..." : !user ? "Sign in to Generate" : `Generate Video · ${creditCost} credits`}
+            </span>
+          </button>
+
+          {generateMutation.error && (
+            <div style={{ borderRadius: 12, backgroundColor: "rgba(239,68,68,0.1)", padding: "12px 16px", textAlign: "center", fontSize: 14, color: "#EF4444" }}>
+              {generateMutation.error.message}
             </div>
-          </div>
+          )}
         </div>
-
-        <div className="flex-1" />
-
-        {/* Generate Button: h56, cornerRadius 14, gradient + shadow */}
-        <button
-          onClick={handleGenerate}
-          disabled={generateMutation.isPending}
-          className="flex w-full items-center justify-center transition-all active:scale-[0.98] disabled:opacity-50"
-          style={{ height: 56, flexShrink: 0, borderRadius: 14, background: "linear-gradient(135deg, #F0C060, #E8A838)", boxShadow: "0 4px 20px #E8A83840" }}
-        >
-          <span style={{ fontSize: 17, fontWeight: 700, color: "#0B0B0E" }}>
-            {generateMutation.isPending ? "Starting..." : !user ? "Sign in to Generate" : `Generate Video · ${creditCost} credits`}
-          </span>
-        </button>
-
-        {generateMutation.error && (
-          <div style={{ borderRadius: 12, backgroundColor: "rgba(239,68,68,0.1)", padding: "12px 16px", textAlign: "center", fontSize: 14, color: "#EF4444" }}>
-            {generateMutation.error.message}
-          </div>
-        )}
       </div>
     </div>
   );

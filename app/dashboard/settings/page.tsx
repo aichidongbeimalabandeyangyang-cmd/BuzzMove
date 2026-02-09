@@ -20,7 +20,7 @@ export default function SettingsPage() {
   return (
     <div className="flex w-full flex-1 flex-col">
       {/* settingsBody: gap 24, padding [24,20,12,20], h-fill */}
-      <div className="flex w-full flex-1 flex-col" style={{ gap: 24, padding: "24px 20px 12px 20px" }}>
+      <div className="flex w-full flex-1 flex-col lg:max-w-lg lg:mx-auto" style={{ gap: 24, padding: "24px 20px 12px 20px" }}>
         {/* Section 1: ACCOUNT */}
         <div className="flex w-full flex-col" style={{ gap: 8 }}>
           <p style={{ fontSize: 12, fontWeight: 600, letterSpacing: 1, color: "#6B6B70" }}>ACCOUNT</p>

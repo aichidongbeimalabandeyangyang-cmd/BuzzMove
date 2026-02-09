@@ -26,7 +26,7 @@ export default function ProfilePage() {
   return (
     <div className="flex w-full flex-1 flex-col">
       {/* profileContent: gap 24, padding [24,20,12,20], h-fill, width fill */}
-      <div className="flex w-full flex-1 flex-col" style={{ gap: 24, padding: "24px 20px 12px 20px" }}>
+      <div className="flex w-full flex-1 flex-col lg:max-w-lg lg:mx-auto" style={{ gap: 24, padding: "24px 20px 12px 20px" }}>
 
         {/* userSection: vertical, gap 12, padding [8,0], center, width fill */}
         <div className="flex w-full flex-col items-center" style={{ gap: 12, padding: "8px 0" }}>

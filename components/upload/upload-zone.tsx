@@ -57,7 +57,7 @@ export function UploadZone({ onFileSelected, onExistingSelected }: UploadZonePro
       {/* Photo Grid: gap 10, 3 columns */}
       <div className="flex flex-col" style={{ gap: 10 }}>
         {/* Row 1: Add New + 2 recent */}
-        <div className="grid grid-cols-3" style={{ gap: 10 }}>
+        <div className="grid grid-cols-3 lg:grid-cols-4" style={{ gap: 10 }}>
           <button
             onClick={() => inputRef.current?.click()}
             className="flex flex-col items-center justify-center"
@@ -71,13 +71,13 @@ export function UploadZone({ onFileSelected, onExistingSelected }: UploadZonePro
           ))}
         </div>
         {/* Row 2 */}
-        <div className="grid grid-cols-3" style={{ gap: 10 }}>
+        <div className="grid grid-cols-3 lg:grid-cols-4" style={{ gap: 10 }}>
           {[2, 3, 4].map((i) => (
             <PhotoCell key={i} item={slots[i]} onClick={handleRecentClick} onDelete={handleDeletePhoto} />
           ))}
         </div>
         {/* Row 3 */}
-        <div className="grid grid-cols-3" style={{ gap: 10 }}>
+        <div className="grid grid-cols-3 lg:grid-cols-4" style={{ gap: 10 }}>
           {[5, 6, 7].map((i) => (
             <PhotoCell key={i} item={slots[i]} onClick={handleRecentClick} onDelete={handleDeletePhoto} />
           ))}

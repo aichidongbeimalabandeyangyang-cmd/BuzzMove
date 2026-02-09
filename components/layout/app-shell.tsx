@@ -4,6 +4,7 @@ import { useState, useEffect, createContext, useContext, type ReactNode } from "
 import { createSupabaseBrowserClient } from "@/server/supabase/client";
 import { Header } from "./header";
 import { BottomNav } from "./bottom-nav";
+import { Sidebar } from "./sidebar";
 import { LoginModal } from "@/components/auth/login-modal";
 
 // ---------- HomeView Context ----------
@@ -61,14 +62,17 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <AppContext.Provider value={{ homeView, setHomeView, user, openLogin }}>
-      <Header
-        user={user}
-        homeView={homeView}
-        onBackToHome={() => setHomeView("home")}
-        onLoginClick={openLogin}
-      />
-      {/* Main: pb must clear BottomNav (1px sep + 64px content + safe-area-inset-bottom) */}
-      <main className="flex flex-1 flex-col main-with-nav">{children}</main>
+      <Sidebar isLoggedIn={!!user} onLoginClick={openLogin} />
+      <div className="flex min-h-screen flex-col lg:ml-[240px]">
+        <Header
+          user={user}
+          homeView={homeView}
+          onBackToHome={() => setHomeView("home")}
+          onLoginClick={openLogin}
+        />
+        {/* Main: pb must clear BottomNav (1px sep + 64px content + safe-area-inset-bottom) */}
+        <main className="flex flex-1 flex-col main-with-nav">{children}</main>
+      </div>
       <BottomNav isLoggedIn={!!user} onLoginClick={openLogin} />
       <LoginModal open={showLogin} onClose={() => setShowLogin(false)} />
     </AppContext.Provider>

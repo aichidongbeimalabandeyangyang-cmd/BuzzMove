@@ -243,7 +243,7 @@ export default function HomePage() {
   // ---- Upload Photo (logged-in, explicit upload view) ----
   if (isLoggedIn && homeView === "upload") {
     return (
-      <div className="flex w-full flex-1 flex-col" style={{ padding: "16px 16px 12px 16px" }}>
+      <div className="flex w-full flex-1 flex-col desktop-container" style={{ padding: "16px 16px 12px 16px" }}>
         {uploading ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-5">
             <div className="relative h-12 w-12">
@@ -317,12 +317,12 @@ export default function HomePage() {
   if (showcase === "loading") {
     return (
       <div className="flex w-full flex-1 flex-col">
-        <div className="flex flex-1 flex-col items-center justify-center" style={{ gap: 20, padding: "0 40px" }}>
-          <div className="relative w-full overflow-hidden" style={{ height: 280, borderRadius: 20, backgroundColor: "#16161A" }}>
+        <div className="flex flex-1 flex-col items-center justify-center desktop-container" style={{ gap: 20, padding: "0 40px" }}>
+          <div className="relative w-full overflow-hidden lg:max-w-md" style={{ height: 280, borderRadius: 20, backgroundColor: "#16161A" }}>
             <Image src={SHOWCASE.image} alt="Showcase" fill className="object-cover" sizes="100vw" />
             <div className="absolute inset-0" style={{ backgroundColor: "rgba(0,0,0,0.3)" }} />
           </div>
-          <div className="flex flex-col items-center" style={{ gap: 16, width: "100%" }}>
+          <div className="flex flex-col items-center lg:max-w-md w-full" style={{ gap: 16 }}>
             <div className="relative" style={{ width: 48, height: 48 }}>
               <div className="absolute inset-0 rounded-full" style={{ border: "2px solid #252530" }} />
               <div className="absolute inset-0 animate-spin-slow rounded-full" style={{ border: "2px solid transparent", borderTopColor: "#E8A838" }} />
@@ -344,8 +344,8 @@ export default function HomePage() {
   if (showcase === "playing") {
     return (
       <div className="flex w-full flex-1 flex-col">
-        <div className="flex flex-1 flex-col" style={{ gap: 20, padding: "8px 20px 20px 20px" }}>
-          <div className="relative w-full overflow-hidden" style={{ height: 440, borderRadius: 20, flexShrink: 0 }}>
+        <div className="flex flex-1 flex-col lg:flex-row lg:items-center lg:justify-center desktop-container" style={{ gap: 20, padding: "8px 20px 20px 20px" }}>
+          <div className="relative w-full overflow-hidden lg:max-w-lg lg:flex-shrink-0" style={{ height: 440, borderRadius: 20, flexShrink: 0 }}>
             <video
               ref={videoRef}
               src={SHOWCASE.video}
@@ -357,26 +357,28 @@ export default function HomePage() {
             />
           </div>
 
-          {/* CTA: Try your own → opens login */}
-          <button
-            onClick={() => {
-              setShowcase("idle");
-              setHomeView("home");
-              openLogin();
-            }}
-            className="flex w-full items-center justify-center transition-all active:scale-[0.98]"
-            style={{
-              height: 52,
-              borderRadius: 14,
-              background: "linear-gradient(135deg, #F0C060, #E8A838)",
-              boxShadow: "0 4px 20px #E8A83840",
-            }}
-          >
-            <span style={{ fontSize: 16, fontWeight: 700, color: "#0B0B0E" }}>Try with your own photo</span>
-          </button>
+          <div className="flex flex-col lg:max-w-sm lg:flex-1" style={{ gap: 16 }}>
+            {/* CTA: Try your own → opens login */}
+            <button
+              onClick={() => {
+                setShowcase("idle");
+                setHomeView("home");
+                openLogin();
+              }}
+              className="flex w-full items-center justify-center transition-all active:scale-[0.98]"
+              style={{
+                height: 52,
+                borderRadius: 14,
+                background: "linear-gradient(135deg, #F0C060, #E8A838)",
+                boxShadow: "0 4px 20px #E8A83840",
+              }}
+            >
+              <span style={{ fontSize: 16, fontWeight: 700, color: "#0B0B0E" }}>Try with your own photo</span>
+            </button>
 
-          {/* Rotating taglines to reinforce CTA */}
-          <RotatingTaglines />
+            {/* Rotating taglines to reinforce CTA */}
+            <RotatingTaglines />
+          </div>
         </div>
       </div>
     );
@@ -384,9 +386,9 @@ export default function HomePage() {
 
   // ---- Guest Default Homepage (showcase) ----
   return (
-    <div className="flex w-full flex-1 flex-col">
+    <div className="flex w-full flex-1 flex-col lg:flex-row">
       {/* Hero Photo: showcase image */}
-      <div className="relative w-full overflow-hidden" style={{ height: 460, flexShrink: 0 }}>
+      <div className="relative w-full overflow-hidden lg:flex-1 lg:min-h-[calc(100vh-56px)]" style={{ height: 460, flexShrink: 0 }}>
         <Image
           src={SHOWCASE.image}
           alt="Showcase"
@@ -404,16 +406,19 @@ export default function HomePage() {
             Example photo · Sign up to create your own
           </span>
         </div>
-        {/* Gradient Overlay */}
+        {/* Gradient Overlay - bottom on mobile, right on desktop */}
         <div
-          className="absolute inset-x-0 bottom-0"
-          style={{ height: 160, background: "linear-gradient(180deg, #0B0B0E00, #0B0B0E)" }}
-        />
+          className="absolute inset-x-0 bottom-0 lg:inset-y-0 lg:right-0 lg:left-auto lg:bottom-auto"
+          style={{ height: 160 }}
+        >
+          <div className="h-full w-full lg:hidden" style={{ background: "linear-gradient(180deg, #0B0B0E00, #0B0B0E)" }} />
+          <div className="hidden h-full lg:block" style={{ width: 120, background: "linear-gradient(90deg, #0B0B0E00, #0B0B0E)" }} />
+        </div>
       </div>
 
-      {/* Bottom Content */}
+      {/* Bottom Content (mobile) / Right Content (desktop) */}
       <div
-        className="flex w-full flex-col"
+        className="flex w-full flex-col lg:w-[420px] lg:flex-shrink-0 lg:justify-center"
         style={{ flex: "1 1 0%", gap: 12, justifyContent: "flex-end", padding: "0 20px 24px 20px" }}
       >
         {/* Prompt Label */}

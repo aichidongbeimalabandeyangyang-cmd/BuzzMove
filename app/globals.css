@@ -60,6 +60,19 @@ body {
   .main-with-nav { padding-bottom: 0; }
 }
 
+/* Desktop content container utility */
+.desktop-container {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+@media (min-width: 1024px) {
+  .desktop-container { max-width: 960px; padding-left: 32px; padding-right: 32px; }
+}
+@media (min-width: 1280px) {
+  .desktop-container { max-width: 1100px; }
+}
+
 input:focus, textarea:focus {
   outline: none;
 }

@@ -33,7 +33,7 @@ export default function PricingPage() {
   const premiumPerLabel = billing === "yearly" ? "/mo, billed yearly" : "/month";
 
   return (
-    <div className="flex w-full flex-1 flex-col overflow-y-auto">
+    <div className="flex w-full flex-1 flex-col overflow-y-auto desktop-container">
       {/* Title Section */}
       <div className="flex w-full flex-col items-center" style={{ gap: 12, padding: "16px 20px 24px 20px" }}>
         <h1 style={{ width: "100%", fontSize: 28, fontWeight: 700, letterSpacing: -0.8, color: "#FAFAF9", textAlign: "center" }}>
@@ -80,8 +80,11 @@ export default function PricingPage() {
       {/* Plans + Packs */}
       <div className="flex w-full flex-col" style={{ gap: 16, padding: "0 20px 32px 20px" }}>
 
+        {/* Plans row: side-by-side on desktop */}
+        <div className="flex flex-col lg:flex-row" style={{ gap: 16 }}>
+
         {/* ---- PRO PLAN (recommended) ---- */}
-        <div className="w-full" style={{ borderRadius: 20, padding: 1.5, background: "linear-gradient(135deg, #F0C060, #E8A83850)" }}>
+        <div className="w-full lg:flex-1" style={{ borderRadius: 20, padding: 1.5, background: "linear-gradient(135deg, #F0C060, #E8A83850)" }}>
           <div className="flex w-full flex-col" style={{ borderRadius: 19, backgroundColor: "#16161A", padding: 20, gap: 14 }}>
             <div className="flex w-full flex-col" style={{ gap: 8 }}>
               <span style={{ fontSize: 22, fontWeight: 700, color: "#FAFAF9" }}>Pro</span>
@@ -129,7 +132,7 @@ export default function PricingPage() {
         </div>
 
         {/* ---- PREMIUM PLAN ---- */}
-        <div className="w-full" style={{ borderRadius: 20, backgroundColor: "#16161A", padding: 20 }}>
+        <div className="w-full lg:flex-1" style={{ borderRadius: 20, backgroundColor: "#16161A", padding: 20 }}>
           <div className="flex w-full flex-col" style={{ gap: 14 }}>
             <div className="flex w-full flex-col" style={{ gap: 8 }}>
               <span style={{ fontSize: 22, fontWeight: 700, color: "#FAFAF9" }}>Premium</span>
@@ -177,6 +180,8 @@ export default function PricingPage() {
           </div>
         </div>
 
+        </div>{/* end plans row */}
+
         {/* ---- CREDIT PACKS ---- */}
         <div className="flex w-full flex-col" style={{ gap: 12, marginTop: 8 }}>
           <div className="flex items-center" style={{ gap: 8 }}>
@@ -187,7 +192,7 @@ export default function PricingPage() {
             One-time purchase. No subscription needed.
           </p>
 
-          <div className="flex flex-col" style={{ gap: 10 }}>
+          <div className="flex flex-col lg:grid lg:grid-cols-2" style={{ gap: 10 }}>
             {CREDIT_PACKS.map((pack) => (
               <button
                 key={pack.id}

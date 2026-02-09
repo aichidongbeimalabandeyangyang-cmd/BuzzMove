@@ -66,24 +66,22 @@ export default function RootLayout({
   return (
     <html lang="en" className={`dark ${dmSans.variable}`}>
       <head>
-        {process.env.NEXT_PUBLIC_GOOGLE_ADS_ID && (
-          <>
-            <script
-              async
-              src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GOOGLE_ADS_ID}`}
-            />
-            <script
-              dangerouslySetInnerHTML={{
-                __html: `
-                  window.dataLayer = window.dataLayer || [];
-                  function gtag(){dataLayer.push(arguments);}
-                  gtag('js', new Date());
-                  gtag('config', '${process.env.NEXT_PUBLIC_GOOGLE_ADS_ID}');
-                `,
-              }}
-            />
-          </>
-        )}
+        {/* Google Analytics 4 + Google Ads */}
+        <script
+          async
+          src="https://www.googletagmanager.com/gtag/js?id=G-EBM4MV97XE"
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-EBM4MV97XE');
+              ${process.env.NEXT_PUBLIC_GOOGLE_ADS_ID ? `gtag('config', '${process.env.NEXT_PUBLIC_GOOGLE_ADS_ID}');` : ''}
+            `,
+          }}
+        />
         {process.env.NEXT_PUBLIC_TWITTER_PIXEL_ID && (
           <script
             dangerouslySetInnerHTML={{
@@ -97,7 +95,7 @@ export default function RootLayout({
           />
         )}
       </head>
-      <body className="flex min-h-screen flex-col antialiased">
+      <body className="min-h-screen antialiased">
         {/* JSON-LD Structured Data */}
         <script
           type="application/ld+json"

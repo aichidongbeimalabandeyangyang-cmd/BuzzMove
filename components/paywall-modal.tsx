@@ -43,7 +43,7 @@ export function PaywallModal({ open, onClose }: PaywallModalProps) {
       style={{ backgroundColor: "rgba(0,0,0,0.6)" }}
     >
       <div
-        className="flex w-full flex-col sm:max-w-[420px]"
+        className="flex w-full flex-col sm:max-w-[420px] sm:!rounded-3xl"
         style={{
           backgroundColor: "#0B0B0E",
           borderRadius: "24px 24px 0 0",

@@ -1,17 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { Download, Share2, RefreshCw, Lock } from "lucide-react";
+import { Download, Share2, RefreshCw, Lock, Home } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { PaywallModal } from "@/components/paywall-modal";
 
 interface VideoPlayerProps {
   videoId: string;
   onReset?: () => void;
+  onBackHome?: () => void;
   creditCost?: number;
 }
 
-export function VideoPlayer({ videoId, onReset, creditCost }: VideoPlayerProps) {
+export function VideoPlayer({ videoId, onReset, onBackHome, creditCost }: VideoPlayerProps) {
   const { data: video } = trpc.video.getStatus.useQuery({ videoId });
   const { data: creditData } = trpc.credit.getBalance.useQuery();
   const [showPaywall, setShowPaywall] = useState(false);
@@ -48,16 +49,16 @@ export function VideoPlayer({ videoId, onReset, creditCost }: VideoPlayerProps) 
 
   return (
     <div className="flex w-full flex-1 flex-col">
-      {/* Result Body: h-fill, vertical, gap 20, padding [8,20,20,20] */}
-      <div className="flex flex-1 flex-col" style={{ gap: 20, padding: "8px 20px 20px 20px" }}>
-        {/* Video Player: h440, cornerRadius 20 */}
-        <div className="relative w-full overflow-hidden" style={{ height: 440, borderRadius: 20, flexShrink: 0 }}>
+      {/* Result Body: centered on desktop */}
+      <div className="flex flex-1 flex-col desktop-container" style={{ gap: 20, padding: "8px 20px 20px 20px" }}>
+        {/* Video Player */}
+        <div className="relative w-full overflow-hidden lg:max-w-2xl lg:mx-auto" style={{ height: 440, borderRadius: 20, flexShrink: 0 }}>
           <video src={video.output_video_url} controls autoPlay loop playsInline className="h-full w-full object-cover" />
         </div>
 
-        {/* Action Row: gap 10 */}
-        <div className="flex" style={{ gap: 10 }}>
-          {/* Download: h48, cornerRadius 14, gradient + shadow, gap 8 */}
+        {/* Action Row */}
+        <div className="flex lg:max-w-2xl lg:mx-auto lg:w-full" style={{ gap: 10 }}>
+          {/* Download */}
           <button
             onClick={handleDownload}
             className="flex flex-1 items-center justify-center transition-all active:scale-[0.98]"
@@ -70,7 +71,7 @@ export function VideoPlayer({ videoId, onReset, creditCost }: VideoPlayerProps) 
             )}
             <span style={{ fontSize: 15, fontWeight: 700, color: "#0B0B0E" }}>Download</span>
           </button>
-          {/* Share: h48, cornerRadius 14, stroke 1.5px #252530, gap 8 */}
+          {/* Share */}
           <button
             onClick={handleShare}
             className="flex flex-1 items-center justify-center transition-all active:scale-[0.98]"
@@ -81,15 +82,27 @@ export function VideoPlayer({ videoId, onReset, creditCost }: VideoPlayerProps) 
           </button>
         </div>
 
-        {/* Regenerate: h48, cornerRadius 14, stroke 1.5px #252530, gap 8 */}
+        {/* Regenerate */}
         {onReset && (
           <button
             onClick={onReset}
-            className="flex w-full items-center justify-center transition-all active:scale-[0.98]"
+            className="flex w-full items-center justify-center transition-all active:scale-[0.98] lg:max-w-2xl lg:mx-auto"
             style={{ height: 48, borderRadius: 14, border: "1.5px solid #252530", gap: 8 }}
           >
             <RefreshCw style={{ width: 18, height: 18, color: "#FAFAF9" }} strokeWidth={1.5} />
             <span style={{ fontSize: 15, fontWeight: 600, color: "#FAFAF9" }}>Regenerate · {creditCost || 300} credits</span>
+          </button>
+        )}
+
+        {/* Back to Home */}
+        {onBackHome && (
+          <button
+            onClick={onBackHome}
+            className="flex w-full items-center justify-center transition-all active:scale-[0.98] lg:max-w-2xl lg:mx-auto"
+            style={{ height: 48, borderRadius: 14, gap: 8 }}
+          >
+            <Home style={{ width: 18, height: 18, color: "#6B6B70" }} strokeWidth={1.5} />
+            <span style={{ fontSize: 15, fontWeight: 600, color: "#6B6B70" }}>Back to Home</span>
           </button>
         )}
       </div>

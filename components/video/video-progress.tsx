@@ -55,11 +55,11 @@ export function VideoProgress({ videoId, imagePreview, onComplete, onError }: Vi
 
   return (
     <div className="flex w-full flex-1 flex-col">
-      {/* Progress Body: h-fill, vertical, gap 24, justify center, padding [0,20] */}
-      <div className="flex flex-1 flex-col items-center justify-center" style={{ gap: 24, padding: "0 20px" }}>
-        {/* Processing Image: h280, cornerRadius 20, clip */}
+      {/* Progress Body: centered on desktop */}
+      <div className="flex flex-1 flex-col items-center justify-center desktop-container" style={{ gap: 24, padding: "0 20px" }}>
+        {/* Processing Image */}
         {imagePreview && (
-          <div className="relative w-full overflow-hidden" style={{ height: 280, borderRadius: 20 }}>
+          <div className="relative w-full overflow-hidden lg:max-w-lg" style={{ height: 280, borderRadius: 20 }}>
             <Image src={imagePreview} alt="Processing" fill className="object-cover" unoptimized />
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
               <div className="flex items-center" style={{ gap: 8, borderRadius: 100, backgroundColor: "#0B0B0ECC", padding: "8px 16px" }}>
@@ -69,8 +69,8 @@ export function VideoProgress({ videoId, imagePreview, onComplete, onError }: Vi
           </div>
         )}
 
-        {/* Progress Section: gap 10 */}
-        <div className="w-full" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {/* Progress Section */}
+        <div className="w-full lg:max-w-lg" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           <div className="flex items-center justify-between">
             <span style={{ fontSize: 16, fontWeight: 700, color: "#E8A838" }}>{pct}%</span>
             <span style={{ fontSize: 13, fontWeight: 400, color: "#6B6B70" }}>{currentStage.label}</span>
@@ -83,18 +83,18 @@ export function VideoProgress({ videoId, imagePreview, onComplete, onError }: Vi
           </div>
         </div>
 
-        {/* Info Column: gap 8, center */}
-        <div className="w-full" style={{ display: "flex", flexDirection: "column", gap: 8, textAlign: "center" }}>
+        {/* Info Column */}
+        <div className="w-full lg:max-w-lg" style={{ display: "flex", flexDirection: "column", gap: 8, textAlign: "center" }}>
           <p style={{ fontSize: 18, fontWeight: 700, color: "#FAFAF9" }}>Creating your video...</p>
           <p style={{ fontSize: 13, fontWeight: 400, lineHeight: 1.6, color: "#6B6B70" }}>
             This usually takes 30–60 seconds.{"\n"}You can keep browsing while we work.
           </p>
         </div>
 
-        {/* Back to Move: h48, cornerRadius 14, stroke 1.5px #252530, gap 8 */}
+        {/* Back to Move */}
         <button
           onClick={() => { window.location.href = "/"; }}
-          className="flex w-full items-center justify-center transition-all active:scale-[0.98]"
+          className="flex w-full items-center justify-center transition-all active:scale-[0.98] lg:max-w-sm"
           style={{ height: 48, borderRadius: 14, border: "1.5px solid #252530", gap: 8 }}
         >
           <Flame style={{ width: 18, height: 18, color: "#E8A838" }} strokeWidth={1.5} />

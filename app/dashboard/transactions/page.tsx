@@ -33,7 +33,7 @@ export default function TransactionsPage() {
 
   return (
     <div className="flex w-full flex-1 flex-col">
-      <div className="flex w-full flex-1 flex-col" style={{ padding: "16px 20px 20px 20px", gap: 20 }}>
+      <div className="flex w-full flex-1 flex-col lg:max-w-2xl lg:mx-auto" style={{ padding: "16px 20px 20px 20px", gap: 20 }}>
 
         {/* Balance summary card */}
         <div

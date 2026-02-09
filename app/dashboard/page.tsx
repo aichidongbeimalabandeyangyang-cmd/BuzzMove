@@ -66,111 +66,122 @@ function VideoDetail({ videoId, onBack }: { videoId: string; onBack: () => void 
 
   return (
     <div className="flex w-full flex-1 flex-col">
-      <button onClick={onBack} className="flex items-center" style={{ gap: 8, padding: "0 20px", height: 44 }}>
+      <button onClick={onBack} className="flex items-center lg:hidden" style={{ gap: 8, padding: "0 20px", height: 44 }}>
         <ArrowLeft style={{ width: 22, height: 22, color: "#FAFAF9" }} strokeWidth={1.5} />
         <span style={{ fontSize: 17, fontWeight: 700, color: "#FAFAF9" }}>Result</span>
       </button>
+      {/* Desktop back link */}
+      <button onClick={onBack} className="hidden lg:flex items-center" style={{ gap: 8, padding: "0 20px", height: 44 }}>
+        <ArrowLeft style={{ width: 18, height: 18, color: "#6B6B70" }} strokeWidth={1.5} />
+        <span style={{ fontSize: 14, fontWeight: 500, color: "#6B6B70" }}>Back to Assets</span>
+      </button>
 
-      <div className="flex flex-1 flex-col" style={{ gap: 20, padding: "8px 20px 20px 20px" }}>
-        {videoUrl ? (
-          <div className="relative w-full overflow-hidden" style={{ height: 440, borderRadius: 20, flexShrink: 0 }}>
-            <video src={videoUrl} controls autoPlay loop playsInline className="h-full w-full object-cover" />
-          </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center" style={{ height: 440, borderRadius: 20, backgroundColor: "#16161A", gap: 12 }}>
-            {isLoading || video?.status === "generating" ? (
-              <>
-                <div className="relative" style={{ width: 48, height: 48 }}>
-                  <div className="absolute inset-0 rounded-full" style={{ border: "2px solid #252530" }} />
-                  <div className="absolute inset-0 animate-spin-slow rounded-full" style={{ border: "2px solid transparent", borderTopColor: "#E8A838" }} />
-                </div>
-                <p style={{ fontSize: 14, color: "#6B6B70" }}>
-                  {video?.status === "generating" ? "Video is still processing..." : "Loading..."}
-                </p>
-              </>
-            ) : (
-              <p style={{ fontSize: 14, color: "#6B6B70" }}>
-                {video?.status === "failed" ? "Generation failed" : "Video not available"}
-              </p>
-            )}
-          </div>
-        )}
-
-        {/* Prompt display with copy */}
-        {video?.prompt && (
-          <button
-            onClick={() => {
-              navigator.clipboard.writeText(video.prompt!);
-              setCopied(true);
-              setTimeout(() => setCopied(false), 2000);
-            }}
-            className="flex w-full items-start transition-all active:scale-[0.99]"
-            style={{ borderRadius: 14, backgroundColor: "#16161A", padding: "12px 14px", gap: 10, textAlign: "left" }}
-          >
-            <p className="flex-1" style={{ fontSize: 13, fontWeight: 400, lineHeight: 1.5, color: "#9898A4" }}>
-              {video.prompt}
-            </p>
-            {copied ? (
-              <Check style={{ width: 16, height: 16, color: "#22C55E", flexShrink: 0, marginTop: 2 }} strokeWidth={1.5} />
-            ) : (
-              <Copy style={{ width: 16, height: 16, color: "#6B6B70", flexShrink: 0, marginTop: 2 }} strokeWidth={1.5} />
-            )}
-          </button>
-        )}
-
-        {videoUrl && (
-          <div className="flex" style={{ gap: 10 }}>
-            <button
-              onClick={handleDownload}
-              className="flex flex-1 items-center justify-center transition-all active:scale-[0.98]"
-              style={{ height: 48, borderRadius: 14, gap: 8, background: "linear-gradient(135deg, #F0C060, #E8A838)", boxShadow: "0 4px 20px #E8A83840" }}
-            >
-              {isPaid ? (
-                <Download style={{ width: 20, height: 20, color: "#0B0B0E" }} strokeWidth={1.5} />
+      <div className="flex flex-1 flex-col desktop-container" style={{ gap: 20, padding: "8px 20px 20px 20px" }}>
+        <div className="flex flex-col lg:flex-row lg:items-start" style={{ gap: 20 }}>
+          {/* Video preview */}
+          {videoUrl ? (
+            <div className="relative w-full overflow-hidden lg:flex-1 lg:max-w-2xl" style={{ height: 440, borderRadius: 20, flexShrink: 0 }}>
+              <video src={videoUrl} controls autoPlay loop playsInline className="h-full w-full object-cover" />
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center lg:flex-1 lg:max-w-2xl" style={{ height: 440, borderRadius: 20, backgroundColor: "#16161A", gap: 12 }}>
+              {isLoading || video?.status === "generating" ? (
+                <>
+                  <div className="relative" style={{ width: 48, height: 48 }}>
+                    <div className="absolute inset-0 rounded-full" style={{ border: "2px solid #252530" }} />
+                    <div className="absolute inset-0 animate-spin-slow rounded-full" style={{ border: "2px solid transparent", borderTopColor: "#E8A838" }} />
+                  </div>
+                  <p style={{ fontSize: 14, color: "#6B6B70" }}>
+                    {video?.status === "generating" ? "Video is still processing..." : "Loading..."}
+                  </p>
+                </>
               ) : (
-                <Lock style={{ width: 18, height: 18, color: "#0B0B0E" }} strokeWidth={1.5} />
+                <p style={{ fontSize: 14, color: "#6B6B70" }}>
+                  {video?.status === "failed" ? "Generation failed" : "Video not available"}
+                </p>
               )}
-              <span style={{ fontSize: 15, fontWeight: 700, color: "#0B0B0E" }}>Download</span>
-            </button>
-            <button
-              onClick={handleShare}
-              className="flex flex-1 items-center justify-center transition-all active:scale-[0.98]"
-              style={{ height: 48, borderRadius: 14, border: "1.5px solid #252530", gap: 8 }}
-            >
-              <Share2 style={{ width: 20, height: 20, color: "#FAFAF9" }} strokeWidth={1.5} />
-              <span style={{ fontSize: 15, fontWeight: 600, color: "#FAFAF9" }}>Share</span>
-            </button>
-          </div>
-        )}
-
-        {/* Delete button — two-tap confirm */}
-        <div className="flex" style={{ gap: 10 }}>
-          <button
-            onClick={handleDelete}
-            disabled={deleteMutation.isPending}
-            className="flex flex-1 items-center justify-center transition-all active:scale-[0.98]"
-            style={{
-              height: 48,
-              borderRadius: 14,
-              border: confirmDelete ? "1.5px solid #EF4444" : "1.5px solid #EF444440",
-              backgroundColor: confirmDelete ? "#EF444420" : "transparent",
-              gap: 8,
-            }}
-          >
-            <Trash2 style={{ width: 18, height: 18, color: "#EF4444" }} strokeWidth={1.5} />
-            <span style={{ fontSize: 15, fontWeight: 500, color: "#EF4444" }}>
-              {deleteMutation.isPending ? "Deleting..." : confirmDelete ? "Tap again to confirm" : "Delete Video"}
-            </span>
-          </button>
-          {confirmDelete && (
-            <button
-              onClick={() => setConfirmDelete(false)}
-              className="flex items-center justify-center transition-all active:scale-[0.98]"
-              style={{ height: 48, borderRadius: 14, border: "1.5px solid #252530", padding: "0 16px" }}
-            >
-              <span style={{ fontSize: 15, fontWeight: 500, color: "#6B6B70" }}>Cancel</span>
-            </button>
+            </div>
           )}
+
+          {/* Right column: actions on desktop */}
+          <div className="flex flex-col lg:w-[280px] lg:flex-shrink-0" style={{ gap: 12 }}>
+            {/* Prompt display with copy */}
+            {video?.prompt && (
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(video.prompt!);
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 2000);
+                }}
+                className="flex w-full items-start transition-all active:scale-[0.99]"
+                style={{ borderRadius: 14, backgroundColor: "#16161A", padding: "12px 14px", gap: 10, textAlign: "left" }}
+              >
+                <p className="flex-1" style={{ fontSize: 13, fontWeight: 400, lineHeight: 1.5, color: "#9898A4" }}>
+                  {video.prompt}
+                </p>
+                {copied ? (
+                  <Check style={{ width: 16, height: 16, color: "#22C55E", flexShrink: 0, marginTop: 2 }} strokeWidth={1.5} />
+                ) : (
+                  <Copy style={{ width: 16, height: 16, color: "#6B6B70", flexShrink: 0, marginTop: 2 }} strokeWidth={1.5} />
+                )}
+              </button>
+            )}
+
+            {videoUrl && (
+              <div className="flex" style={{ gap: 10 }}>
+                <button
+                  onClick={handleDownload}
+                  className="flex flex-1 items-center justify-center transition-all active:scale-[0.98]"
+                  style={{ height: 48, borderRadius: 14, gap: 8, background: "linear-gradient(135deg, #F0C060, #E8A838)", boxShadow: "0 4px 20px #E8A83840" }}
+                >
+                  {isPaid ? (
+                    <Download style={{ width: 20, height: 20, color: "#0B0B0E" }} strokeWidth={1.5} />
+                  ) : (
+                    <Lock style={{ width: 18, height: 18, color: "#0B0B0E" }} strokeWidth={1.5} />
+                  )}
+                  <span style={{ fontSize: 15, fontWeight: 700, color: "#0B0B0E" }}>Download</span>
+                </button>
+                <button
+                  onClick={handleShare}
+                  className="flex flex-1 items-center justify-center transition-all active:scale-[0.98]"
+                  style={{ height: 48, borderRadius: 14, border: "1.5px solid #252530", gap: 8 }}
+                >
+                  <Share2 style={{ width: 20, height: 20, color: "#FAFAF9" }} strokeWidth={1.5} />
+                  <span style={{ fontSize: 15, fontWeight: 600, color: "#FAFAF9" }}>Share</span>
+                </button>
+              </div>
+            )}
+
+            {/* Delete button — two-tap confirm */}
+            <div className="flex" style={{ gap: 10 }}>
+              <button
+                onClick={handleDelete}
+                disabled={deleteMutation.isPending}
+                className="flex flex-1 items-center justify-center transition-all active:scale-[0.98]"
+                style={{
+                  height: 48,
+                  borderRadius: 14,
+                  border: confirmDelete ? "1.5px solid #EF4444" : "1.5px solid #EF444440",
+                  backgroundColor: confirmDelete ? "#EF444420" : "transparent",
+                  gap: 8,
+                }}
+              >
+                <Trash2 style={{ width: 18, height: 18, color: "#EF4444" }} strokeWidth={1.5} />
+                <span style={{ fontSize: 15, fontWeight: 500, color: "#EF4444" }}>
+                  {deleteMutation.isPending ? "Deleting..." : confirmDelete ? "Tap again to confirm" : "Delete Video"}
+                </span>
+              </button>
+              {confirmDelete && (
+                <button
+                  onClick={() => setConfirmDelete(false)}
+                  className="flex items-center justify-center transition-all active:scale-[0.98]"
+                  style={{ height: 48, borderRadius: 14, border: "1.5px solid #252530", padding: "0 16px" }}
+                >
+                  <span style={{ fontSize: 15, fontWeight: 500, color: "#6B6B70" }}>Cancel</span>
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -212,21 +223,17 @@ function PhotosGrid() {
   }
 
   return (
-    <div className="flex flex-col" style={{ gap: 12 }}>
-      {Array.from({ length: Math.ceil(photos.length / 3) }).map((_, rowIdx) => (
-        <div key={rowIdx} className="grid grid-cols-3" style={{ gap: 12 }}>
-          {photos.slice(rowIdx * 3, rowIdx * 3 + 3).map((photo) => (
-            <div key={photo.id} className="relative overflow-hidden" style={{ height: 150, borderRadius: 14 }}>
-              <Image src={photo.url} alt={photo.filename || "Photo"} fill className="object-cover" unoptimized />
-              <button
-                onClick={() => deleteMutation.mutate({ id: photo.id })}
-                className="absolute flex items-center justify-center"
-                style={{ top: 6, right: 6, width: 24, height: 24, borderRadius: 100, backgroundColor: "rgba(0,0,0,0.6)", zIndex: 10 }}
-              >
-                <X style={{ width: 12, height: 12, color: "#FFFFFF" }} strokeWidth={2} />
-              </button>
-            </div>
-          ))}
+    <div className="grid grid-cols-3 lg:grid-cols-4 xl:grid-cols-5" style={{ gap: 12 }}>
+      {photos.map((photo) => (
+        <div key={photo.id} className="relative overflow-hidden" style={{ height: 150, borderRadius: 14 }}>
+          <Image src={photo.url} alt={photo.filename || "Photo"} fill className="object-cover" unoptimized />
+          <button
+            onClick={() => deleteMutation.mutate({ id: photo.id })}
+            className="absolute flex items-center justify-center"
+            style={{ top: 6, right: 6, width: 24, height: 24, borderRadius: 100, backgroundColor: "rgba(0,0,0,0.6)", zIndex: 10 }}
+          >
+            <X style={{ width: 12, height: 12, color: "#FFFFFF" }} strokeWidth={2} />
+          </button>
         </div>
       ))}
     </div>
@@ -267,8 +274,8 @@ export default function AssetsPage() {
 
   // ---- ASSETS GRID ----
   return (
-    <div className="flex w-full flex-1 flex-col">
-      {/* Tab Switcher: padding [0,16,8,16], horizontal, gap 4 */}
+    <div className="flex w-full flex-1 flex-col desktop-container">
+      {/* Tab Switcher */}
       <div className="flex" style={{ gap: 4, padding: "0 16px 8px 16px" }}>
         {(["videos", "photos"] as const).map((t) => (
           <button
@@ -290,89 +297,85 @@ export default function AssetsPage() {
         ))}
       </div>
 
-      {/* Video Grid: vertical, gap 12, padding [8,16], h-fill, scrollable */}
+      {/* Content Grid */}
       <div className="flex flex-1 flex-col overflow-y-auto" style={{ gap: 12, padding: "8px 16px 16px 16px" }}>
         {tab === "videos" ? (
           videos && videos.length > 0 ? (
-            <div className="flex flex-col" style={{ gap: 12 }}>
-              {Array.from({ length: Math.ceil(videos.length / 2) }).map((_, rowIdx) => (
-                <div key={rowIdx} className="grid grid-cols-2" style={{ gap: 12 }}>
-                  {videos.slice(rowIdx * 2, rowIdx * 2 + 2).map((video) => {
-                    const isFailed = video.status === "failed";
-                    const isGenerating = video.status === "generating" || video.status === "pending";
-                    const isCompleted = video.status === "completed";
+            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" style={{ gap: 12 }}>
+              {videos.map((video) => {
+                const isFailed = video.status === "failed";
+                const isGenerating = video.status === "generating" || video.status === "pending";
+                const isCompleted = video.status === "completed";
 
-                    return (
-                      <button
-                        key={video.id}
-                        onClick={() => setSelectedVideoId(video.id)}
-                        className="relative overflow-hidden text-left"
-                        style={{ height: 210, borderRadius: 16, backgroundColor: "#16161A" }}
-                      >
-                        {video.output_video_url ? (
-                          <video
-                            src={video.output_video_url}
-                            className="h-full w-full object-cover"
-                            muted
-                            playsInline
-                            preload="metadata"
-                          />
-                        ) : video.input_image_url ? (
-                          <>
-                            <Image src={video.input_image_url} alt="Video thumbnail" fill className="object-cover" unoptimized />
-                            {/* Overlay for non-completed */}
-                            {!isCompleted && (
-                              <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
-                                {isGenerating && (
-                                  <div className="flex flex-col items-center" style={{ gap: 6 }}>
-                                    <Loader2 style={{ width: 24, height: 24, color: "#E8A838", animation: "spin 1.5s linear infinite" }} strokeWidth={2} />
-                                    <span style={{ fontSize: 11, fontWeight: 600, color: "#E8A838" }}>Processing</span>
-                                  </div>
-                                )}
-                                {isFailed && (
-                                  <div className="flex flex-col items-center" style={{ gap: 6 }}>
-                                    <XCircle style={{ width: 24, height: 24, color: "#EF4444" }} strokeWidth={1.5} />
-                                    <span style={{ fontSize: 11, fontWeight: 600, color: "#EF4444" }}>Failed</span>
-                                  </div>
-                                )}
+                return (
+                  <button
+                    key={video.id}
+                    onClick={() => setSelectedVideoId(video.id)}
+                    className="relative overflow-hidden text-left"
+                    style={{ height: 210, borderRadius: 16, backgroundColor: "#16161A" }}
+                  >
+                    {video.output_video_url ? (
+                      <video
+                        src={video.output_video_url}
+                        className="h-full w-full object-cover"
+                        muted
+                        playsInline
+                        preload="metadata"
+                      />
+                    ) : video.input_image_url ? (
+                      <>
+                        <Image src={video.input_image_url} alt="Video thumbnail" fill className="object-cover" unoptimized />
+                        {/* Overlay for non-completed */}
+                        {!isCompleted && (
+                          <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+                            {isGenerating && (
+                              <div className="flex flex-col items-center" style={{ gap: 6 }}>
+                                <Loader2 style={{ width: 24, height: 24, color: "#E8A838", animation: "spin 1.5s linear infinite" }} strokeWidth={2} />
+                                <span style={{ fontSize: 11, fontWeight: 600, color: "#E8A838" }}>Processing</span>
                               </div>
                             )}
-                          </>
-                        ) : null}
-
-                        {/* Bottom row: duration + status */}
-                        <div className="absolute flex items-center" style={{ bottom: 8, left: 8, right: 8, gap: 4 }}>
-                          {/* Duration Badge */}
-                          <div style={{ borderRadius: 8, backgroundColor: "#00000080", padding: "3px 8px" }}>
-                            <span style={{ fontSize: 11, fontWeight: 600, color: "#FFFFFF" }}>
-                              0:{String(video.duration || 5).padStart(2, "0")}
-                            </span>
+                            {isFailed && (
+                              <div className="flex flex-col items-center" style={{ gap: 6 }}>
+                                <XCircle style={{ width: 24, height: 24, color: "#EF4444" }} strokeWidth={1.5} />
+                                <span style={{ fontSize: 11, fontWeight: 600, color: "#EF4444" }}>Failed</span>
+                              </div>
+                            )}
                           </div>
-                          {/* Status Badge */}
-                          {isCompleted && (
-                            <div className="flex items-center" style={{ borderRadius: 8, backgroundColor: "#22C55E30", padding: "3px 8px", gap: 3 }}>
-                              <CheckCircle style={{ width: 10, height: 10, color: "#22C55E" }} strokeWidth={2} />
-                              <span style={{ fontSize: 10, fontWeight: 600, color: "#22C55E" }}>Done</span>
-                            </div>
-                          )}
-                          {isFailed && (
-                            <div className="flex items-center" style={{ borderRadius: 8, backgroundColor: "#EF444430", padding: "3px 8px", gap: 3 }}>
-                              <XCircle style={{ width: 10, height: 10, color: "#EF4444" }} strokeWidth={2} />
-                              <span style={{ fontSize: 10, fontWeight: 600, color: "#EF4444" }}>Failed</span>
-                            </div>
-                          )}
-                          {isGenerating && (
-                            <div className="flex items-center" style={{ borderRadius: 8, backgroundColor: "#E8A83830", padding: "3px 8px", gap: 3 }}>
-                              <Loader2 style={{ width: 10, height: 10, color: "#E8A838" }} strokeWidth={2} />
-                              <span style={{ fontSize: 10, fontWeight: 600, color: "#E8A838" }}>Processing</span>
-                            </div>
-                          )}
+                        )}
+                      </>
+                    ) : null}
+
+                    {/* Bottom row: duration + status */}
+                    <div className="absolute flex items-center" style={{ bottom: 8, left: 8, right: 8, gap: 4 }}>
+                      {/* Duration Badge */}
+                      <div style={{ borderRadius: 8, backgroundColor: "#00000080", padding: "3px 8px" }}>
+                        <span style={{ fontSize: 11, fontWeight: 600, color: "#FFFFFF" }}>
+                          0:{String(video.duration || 5).padStart(2, "0")}
+                        </span>
+                      </div>
+                      {/* Status Badge */}
+                      {isCompleted && (
+                        <div className="flex items-center" style={{ borderRadius: 8, backgroundColor: "#22C55E30", padding: "3px 8px", gap: 3 }}>
+                          <CheckCircle style={{ width: 10, height: 10, color: "#22C55E" }} strokeWidth={2} />
+                          <span style={{ fontSize: 10, fontWeight: 600, color: "#22C55E" }}>Done</span>
                         </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              ))}
+                      )}
+                      {isFailed && (
+                        <div className="flex items-center" style={{ borderRadius: 8, backgroundColor: "#EF444430", padding: "3px 8px", gap: 3 }}>
+                          <XCircle style={{ width: 10, height: 10, color: "#EF4444" }} strokeWidth={2} />
+                          <span style={{ fontSize: 10, fontWeight: 600, color: "#EF4444" }}>Failed</span>
+                        </div>
+                      )}
+                      {isGenerating && (
+                        <div className="flex items-center" style={{ borderRadius: 8, backgroundColor: "#E8A83830", padding: "3px 8px", gap: 3 }}>
+                          <Loader2 style={{ width: 10, height: 10, color: "#E8A838" }} strokeWidth={2} />
+                          <span style={{ fontSize: 10, fontWeight: 600, color: "#E8A838" }}>Processing</span>
+                        </div>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           ) : (
             <div className="flex flex-1 flex-col items-center justify-center" style={{ gap: 12 }}>

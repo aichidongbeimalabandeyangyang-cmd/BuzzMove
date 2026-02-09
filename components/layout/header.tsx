@@ -51,6 +51,9 @@ export function Header({ user, homeView, onBackToHome, onLoginClick }: HeaderPro
   // Show credits next to avatar on ALL pages for logged-in users
   const showCredits = !!user && !!creditData;
 
+  // Page title for desktop (shown when sidebar handles logo)
+  const pageTitle = isAssets ? "Assets" : isProfile ? "My Profile" : isSettings ? "Settings" : isTransactions ? "Transactions" : isPricing ? "Pricing & Plans" : "BuzzMove";
+
   return (
     <header className="sticky top-0 z-50" style={{ backgroundColor: "#0B0B0E" }}>
       {/* Header: h56, padding [0,20], space-between, center */}
@@ -62,19 +65,24 @@ export function Header({ user, homeView, onBackToHome, onLoginClick }: HeaderPro
             <span style={{ fontSize: 17, fontWeight: 700, color: "#FAFAF9" }}>{backTitle}</span>
           </button>
         ) : (
-          /* All other pages: clickable logo that goes home */
-          <Link href="/" className="flex items-center" style={{ gap: 8 }}>
-            {/* Logo Icon: 28x28, cornerRadius 8, gradient */}
-            <div
-              className="flex items-center justify-center"
-              style={{ width: 28, height: 28, borderRadius: 8, background: "linear-gradient(135deg, #E8A838, #F0C060)" }}
-            >
-              <Play style={{ width: 14, height: 14, color: "#0B0B0E" }} fill="#0B0B0E" strokeWidth={0} />
-            </div>
-            <span style={{ fontSize: 17, fontWeight: 700, color: "#FAFAF9" }}>
-              {isAssets ? "Assets" : "BuzzMove"}
+          <>
+            {/* Mobile: clickable logo */}
+            <Link href="/" className="flex items-center lg:hidden" style={{ gap: 8 }}>
+              <div
+                className="flex items-center justify-center"
+                style={{ width: 28, height: 28, borderRadius: 8, background: "linear-gradient(135deg, #E8A838, #F0C060)" }}
+              >
+                <Play style={{ width: 14, height: 14, color: "#0B0B0E" }} fill="#0B0B0E" strokeWidth={0} />
+              </div>
+              <span style={{ fontSize: 17, fontWeight: 700, color: "#FAFAF9" }}>
+                {isAssets ? "Assets" : "BuzzMove"}
+              </span>
+            </Link>
+            {/* Desktop: page title only (logo is in sidebar) */}
+            <span className="hidden lg:block" style={{ fontSize: 17, fontWeight: 700, color: "#FAFAF9" }}>
+              {pageTitle}
             </span>
-          </Link>
+          </>
         )}
 
         {/* RIGHT SIDE */}
