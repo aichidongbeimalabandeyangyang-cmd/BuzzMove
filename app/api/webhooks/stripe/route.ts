@@ -23,11 +23,14 @@ export async function POST(req: NextRequest) {
       process.env.STRIPE_WEBHOOK_SECRET!
     );
   } catch (err) {
+    console.error("[stripe] Signature verification failed:", (err as Error).message);
     return NextResponse.json(
       { error: "Webhook signature verification failed" },
       { status: 400 }
     );
   }
+
+  console.log(`[stripe] Received event: ${event.type} (${event.id})`);
 
   // ═══════════════════════════════════════════════════════
   // Layer 1: Event ID dedup (atomic, zero race window)

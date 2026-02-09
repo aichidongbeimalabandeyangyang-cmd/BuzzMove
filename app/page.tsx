@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { Sparkles, Plus } from "lucide-react";
+import Link from "next/link";
+import { Sparkles, Plus, Play } from "lucide-react";
 import { useApp } from "@/components/layout/app-shell";
 import { UploadZone } from "@/components/upload/upload-zone";
 import { trpc } from "@/lib/trpc";
@@ -157,6 +158,123 @@ function useShowcase() {
   return showcase;
 }
 
+function LoggedInHome({ onUpload }: { onUpload: () => void }) {
+  const { data } = trpc.video.list.useQuery(
+    { limit: 6, offset: 0 },
+    {
+      refetchInterval: (query) => {
+        const vids = query.state.data?.videos;
+        if (!vids) return false;
+        return vids.some((v: any) => v.status === "generating" || v.status === "pending") ? 8000 : false;
+      },
+    }
+  );
+  const videos = data?.videos;
+
+  return (
+    <div className="flex w-full flex-1 flex-col overflow-y-auto">
+      {/* Upload button — compact */}
+      <div className="flex flex-col items-center" style={{ gap: 20, padding: "24px 20px 0 20px" }}>
+        <button
+          onClick={onUpload}
+          className="flex flex-col items-center justify-center transition-all active:scale-[0.98] w-full"
+          style={{
+            maxWidth: 340,
+            height: 160,
+            borderRadius: 24,
+            border: "2px dashed #252530",
+            backgroundColor: "#16161A",
+            gap: 12,
+          }}
+        >
+          <div
+            className="flex items-center justify-center"
+            style={{ width: 52, height: 52, borderRadius: 100, backgroundColor: "#E8A83815" }}
+          >
+            <Plus style={{ width: 24, height: 24, color: "#E8A838" }} strokeWidth={1.5} />
+          </div>
+          <div className="flex flex-col items-center" style={{ gap: 4 }}>
+            <span style={{ fontSize: 16, fontWeight: 700, color: "#FAFAF9" }}>Upload a photo</span>
+            <span style={{ fontSize: 12, fontWeight: 400, color: "#6B6B70" }}>JPG, PNG up to 10 MB</span>
+          </div>
+        </button>
+
+        {/* Rotating taglines */}
+        <RotatingTaglines />
+      </div>
+
+      {/* Recent Videos */}
+      {videos && videos.length > 0 && (
+        <div className="flex flex-col" style={{ gap: 12, padding: "8px 20px 24px 20px" }}>
+          <div className="flex items-center justify-between">
+            <span style={{ fontSize: 15, fontWeight: 700, color: "#FAFAF9" }}>Recent Videos</span>
+            <Link href="/dashboard" style={{ fontSize: 13, fontWeight: 500, color: "#6B6B70" }}>
+              View all
+            </Link>
+          </div>
+          <div className="grid grid-cols-3 lg:grid-cols-4" style={{ gap: 10 }}>
+            {videos.slice(0, 6).map((video) => {
+              const isGenerating = video.status === "generating" || video.status === "pending";
+              const isCompleted = video.status === "completed";
+              return (
+                <Link
+                  key={video.id}
+                  href="/dashboard"
+                  className="relative overflow-hidden"
+                  style={{ aspectRatio: "9/16", borderRadius: 14, backgroundColor: "#16161A" }}
+                >
+                  {video.output_video_url ? (
+                    <video
+                      src={video.output_video_url}
+                      className="h-full w-full object-cover"
+                      muted
+                      playsInline
+                      preload="metadata"
+                    />
+                  ) : video.input_image_url ? (
+                    <Image src={video.input_image_url} alt="" fill className="object-cover" unoptimized />
+                  ) : null}
+
+                  {/* Overlay for generating */}
+                  {isGenerating && (
+                    <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+                      <div className="relative" style={{ width: 28, height: 28 }}>
+                        <div className="absolute inset-0 rounded-full" style={{ border: "2px solid #252530" }} />
+                        <div className="absolute inset-0 animate-spin-slow rounded-full" style={{ border: "2px solid transparent", borderTopColor: "#E8A838" }} />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Play icon for completed */}
+                  {isCompleted && video.output_video_url && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div
+                        className="flex items-center justify-center"
+                        style={{ width: 32, height: 32, borderRadius: 100, backgroundColor: "rgba(0,0,0,0.5)" }}
+                      >
+                        <Play style={{ width: 14, height: 14, color: "#FFFFFF", marginLeft: 2 }} fill="#FFFFFF" strokeWidth={0} />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Duration badge */}
+                  <div className="absolute" style={{ bottom: 6, left: 6 }}>
+                    <div style={{ borderRadius: 6, backgroundColor: "#00000080", padding: "2px 6px" }}>
+                      <span style={{ fontSize: 10, fontWeight: 600, color: "#FFFFFF" }}>
+                        0:{String(video.duration || 5).padStart(2, "0")}
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function HomePage() {
   const { homeView, setHomeView, user, openLogin } = useApp();
   const SHOWCASE = useShowcase();
@@ -291,41 +409,7 @@ export default function HomePage() {
 
   // ---- Logged-in Default: Upload-centric homepage ----
   if (isLoggedIn) {
-    return (
-      <div className="flex w-full flex-1 flex-col">
-        {/* Upload hero area */}
-        <div className="flex flex-1 flex-col items-center justify-center" style={{ gap: 24, padding: "40px 20px" }}>
-          {/* Upload button */}
-          <button
-            onClick={() => setHomeView("upload")}
-            className="flex flex-col items-center justify-center transition-all active:scale-[0.98]"
-            style={{
-              width: "100%",
-              maxWidth: 340,
-              height: 280,
-              borderRadius: 24,
-              border: "2px dashed #252530",
-              backgroundColor: "#16161A",
-              gap: 16,
-            }}
-          >
-            <div
-              className="flex items-center justify-center"
-              style={{ width: 64, height: 64, borderRadius: 100, backgroundColor: "#E8A83815" }}
-            >
-              <Plus style={{ width: 28, height: 28, color: "#E8A838" }} strokeWidth={1.5} />
-            </div>
-            <div className="flex flex-col items-center" style={{ gap: 6 }}>
-              <span style={{ fontSize: 17, fontWeight: 700, color: "#FAFAF9" }}>Upload a photo</span>
-              <span style={{ fontSize: 13, fontWeight: 400, color: "#6B6B70" }}>JPG, PNG up to 10 MB</span>
-            </div>
-          </button>
-
-          {/* Rotating taglines */}
-          <RotatingTaglines />
-        </div>
-      </div>
-    );
+    return <LoggedInHome onUpload={() => setHomeView("upload")} />;
   }
 
   // =============================================

@@ -13,7 +13,7 @@ create table public.profiles (
   stripe_customer_id text unique,
   subscription_plan text not null default 'free',
   subscription_status text not null default 'active',
-  credits_balance integer not null default 9000,
+  credits_balance integer not null default 200,
   daily_free_credits integer not null default 300,
   device_key text,
   initial_utm_source text,
@@ -135,7 +135,7 @@ create or replace function public.handle_new_user()
 returns trigger as $$
 begin
   insert into public.profiles (id, email, credits_balance)
-  values (new.id, new.email, 9000);
+  values (new.id, new.email, 200);
   return new;
 end;
 $$ language plpgsql security definer;

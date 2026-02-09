@@ -20,7 +20,12 @@ export async function handleCheckoutCompleted(
 ) {
   const supabase = createSupabaseAdminClient();
   const userId = session.metadata?.supabase_user_id;
-  if (!userId) return;
+  console.log(`[stripe:checkout] metadata:`, JSON.stringify(session.metadata));
+  console.log(`[stripe:checkout] payment_intent: ${session.payment_intent}, userId: ${userId}`);
+  if (!userId) {
+    console.error("[stripe:checkout] No supabase_user_id in metadata — skipping");
+    return;
+  }
 
   if (session.metadata?.type === "credit_pack") {
     await handleCreditPackPurchase(supabase, session, userId);
@@ -37,11 +42,19 @@ async function handleCreditPackPurchase(
   userId: string
 ) {
   const paymentIntentId = session.payment_intent as string;
-  if (!paymentIntentId) return;
+  if (!paymentIntentId) {
+    console.error("[stripe:credit_pack] No payment_intent on session — skipping");
+    return;
+  }
 
   const packId = session.metadata?.pack_id;
   const pack = CREDIT_PACKS.find((p) => p.id === packId);
-  if (!pack) return;
+  if (!pack) {
+    console.error(`[stripe:credit_pack] Unknown pack_id: ${packId} — skipping`);
+    return;
+  }
+
+  console.log(`[stripe:credit_pack] Processing ${pack.name} (${pack.credits} credits) for ${userId}, PI: ${paymentIntentId}`);
 
   // INSERT transaction first — UNIQUE index on stripe_payment_id
   // guarantees this fails on duplicate (Layer 3 safety net).
@@ -64,12 +77,17 @@ async function handleCreditPackPurchase(
   }
 
   // Transaction recorded → safe to add credits
-  await supabase.rpc("refund_credits", {
+  const { data: newBalance, error: rpcError } = await supabase.rpc("refund_credits", {
     p_user_id: userId,
     p_amount: pack.credits,
   });
 
-  console.log(`[stripe:credit_pack] +${pack.credits} credits for ${userId} (${pack.name})`);
+  if (rpcError) {
+    console.error(`[stripe:credit_pack] refund_credits RPC failed:`, rpcError.message);
+    throw new Error(`refund_credits failed: ${rpcError.message}`);
+  }
+
+  console.log(`[stripe:credit_pack] +${pack.credits} credits for ${userId} (${pack.name}), new balance: ${newBalance}`);
 }
 
 // ── Subscription Created ─────────────────────────────────────

@@ -8,6 +8,7 @@ import { getDeviceKey } from "@/components/tracking/device-key-ensurer";
 import { CREDIT_COSTS } from "@/lib/constants";
 import { useApp } from "@/components/layout/app-shell";
 import { trackVideoGenerate } from "@/lib/gtag";
+import { PaywallModal } from "@/components/paywall-modal";
 import { VideoProgress } from "./video-progress";
 import { VideoPlayer } from "./video-player";
 
@@ -25,7 +26,9 @@ export function VideoGenerator({ imageUrl, imagePreview, onReset, onBackHome, in
   const [mode, setMode] = useState<"standard" | "professional">("standard");
   const [videoId, setVideoId] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
+  const [showPaywall, setShowPaywall] = useState(false);
   const { user, openLogin, setHomeView } = useApp();
+  const { data: creditData } = trpc.credit.getBalance.useQuery(undefined, { enabled: !!user });
 
   useEffect(() => {
     if (videoId && status === "completed") setHomeView("result");
@@ -51,8 +54,14 @@ export function VideoGenerator({ imageUrl, imagePreview, onReset, onBackHome, in
   const handleGenerate = () => {
     if (!user) { openLogin(); return; }
 
-    // Optimistic: deduct credits in UI immediately
+    // Check if user has enough credits
     const cost = CREDIT_COSTS[mode][parseInt(duration) as 5 | 10];
+    if (creditData && creditData.balance < cost) {
+      setShowPaywall(true);
+      return;
+    }
+
+    // Optimistic: deduct credits in UI immediately
     utils.credit.getBalance.setData(undefined, (prev) =>
       prev ? { ...prev, balance: Math.max(0, prev.balance - cost) } : prev
     );
@@ -79,9 +88,10 @@ export function VideoGenerator({ imageUrl, imagePreview, onReset, onBackHome, in
     <div className="flex w-full flex-1 flex-col desktop-container">
       {/* Gen Content: two-column on desktop */}
       <div className="flex flex-1 flex-col lg:flex-row lg:items-start" style={{ gap: 16, padding: "0 20px 24px 20px" }}>
-        {/* Image Preview: h280 mobile, fill-height desktop */}
-        <div className="relative w-full overflow-hidden lg:flex-1 lg:sticky lg:top-[72px]" style={{ height: 280, borderRadius: 20, backgroundColor: "#16161A", flexShrink: 0 }}>
-          <Image src={imagePreview} alt="Upload preview" fill className="object-cover" unoptimized />
+        {/* Image Preview: h280 mobile, auto-height desktop */}
+        <div className="relative w-full overflow-hidden lg:flex-1 lg:sticky lg:top-[72px] h-[280px] lg:h-auto" style={{ borderRadius: 20, backgroundColor: "#16161A", flexShrink: 0 }}>
+          <Image src={imagePreview} alt="Upload preview" fill className="object-cover lg:hidden" unoptimized />
+          <img src={imagePreview} alt="Upload preview" className="hidden lg:block w-full h-auto" style={{ borderRadius: 20 }} />
           <button
             onClick={onReset}
             aria-label="Remove image"
@@ -175,6 +185,8 @@ export function VideoGenerator({ imageUrl, imagePreview, onReset, onBackHome, in
           )}
         </div>
       </div>
+
+      <PaywallModal open={showPaywall} onClose={() => setShowPaywall(false)} />
     </div>
   );
 }
