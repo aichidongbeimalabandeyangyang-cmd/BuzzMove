@@ -174,37 +174,32 @@ function LoggedInHome({ onUpload }: { onUpload: () => void }) {
 
   return (
     <div className="flex w-full flex-1 flex-col">
-      {/* Upload button — large when no videos, compact when videos exist */}
+      {/* Upload area — takes remaining space, centers content */}
       <div
-        className={`flex flex-col items-center${hasVideos ? "" : " flex-1 justify-center"}`}
-        style={{ gap: 16, padding: hasVideos ? "16px 20px 0 20px" : "20px 20px 0 20px" }}
+        className="flex flex-1 flex-col items-center justify-center"
+        style={{ gap: 16, padding: "20px 20px 16px 20px" }}
       >
         <button
           onClick={onUpload}
           className="flex flex-col items-center justify-center transition-all active:scale-[0.98] w-full"
           style={{
-            maxWidth: 340,
-            height: hasVideos ? 140 : 220,
+            maxWidth: 380,
+            height: hasVideos ? 180 : 240,
             borderRadius: 24,
             border: "2px dashed #252530",
             backgroundColor: "#16161A",
-            gap: hasVideos ? 10 : 14,
+            gap: 14,
           }}
         >
           <div
             className="flex items-center justify-center"
-            style={{
-              width: hasVideos ? 48 : 56,
-              height: hasVideos ? 48 : 56,
-              borderRadius: 100,
-              backgroundColor: "#E8A83815",
-            }}
+            style={{ width: 56, height: 56, borderRadius: 100, backgroundColor: "#E8A83815" }}
           >
-            <Plus style={{ width: hasVideos ? 22 : 26, height: hasVideos ? 22 : 26, color: "#E8A838" }} strokeWidth={1.5} />
+            <Plus style={{ width: 26, height: 26, color: "#E8A838" }} strokeWidth={1.5} />
           </div>
           <div className="flex flex-col items-center" style={{ gap: 4 }}>
-            <span style={{ fontSize: hasVideos ? 15 : 17, fontWeight: 700, color: "#FAFAF9" }}>Upload a photo</span>
-            <span style={{ fontSize: 12, fontWeight: 400, color: "#6B6B70" }}>JPG, PNG up to 10 MB</span>
+            <span style={{ fontSize: 17, fontWeight: 700, color: "#FAFAF9" }}>Upload a photo</span>
+            <span style={{ fontSize: 13, fontWeight: 400, color: "#6B6B70" }}>JPG, PNG up to 10 MB</span>
           </div>
         </button>
 
@@ -212,9 +207,9 @@ function LoggedInHome({ onUpload }: { onUpload: () => void }) {
         <RotatingTaglines />
       </div>
 
-      {/* Recent Videos — fills remaining space */}
+      {/* Recent Videos — pinned to bottom */}
       {hasVideos && (
-        <div className="flex flex-1 flex-col" style={{ gap: 12, padding: "4px 20px 20px 20px" }}>
+        <div className="flex flex-col" style={{ gap: 12, padding: "0 20px 20px 20px" }}>
           <div className="flex items-center justify-between">
             <span style={{ fontSize: 15, fontWeight: 700, color: "#FAFAF9" }}>Recent Videos</span>
             <Link href="/dashboard" style={{ fontSize: 13, fontWeight: 500, color: "#6B6B70" }}>
