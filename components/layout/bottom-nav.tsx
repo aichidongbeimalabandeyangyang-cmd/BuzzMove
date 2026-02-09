@@ -38,9 +38,9 @@ export function BottomNav({ isLoggedIn, onLoginClick }: BottomNavProps) {
               {hasHighlight && !isActive && (
                 <div
                   className="absolute flex items-center justify-center"
-                  style={{ top: -8, right: -20, borderRadius: 6, backgroundColor: "#EF4444", padding: "1px 4px", whiteSpace: "nowrap" }}
+                  style={{ top: -6, left: 14, borderRadius: 4, backgroundColor: "#EF4444", padding: "1px 5px" }}
                 >
-                  <span style={{ fontSize: 8, fontWeight: 700, color: "#FFFFFF", lineHeight: 1.2 }}>earn credit</span>
+                  <span style={{ fontSize: 8, fontWeight: 700, color: "#FFFFFF", lineHeight: 1 }}>Earn!</span>
                 </div>
               )}
             </div>
