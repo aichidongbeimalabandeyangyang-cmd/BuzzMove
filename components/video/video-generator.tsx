@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
 import { X } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { getDeviceKey } from "@/components/tracking/device-key-ensurer";
@@ -88,10 +87,9 @@ export function VideoGenerator({ imageUrl, imagePreview, onReset, onBackHome, in
     <div className="flex w-full flex-1 flex-col desktop-container">
       {/* Gen Content: two-column on desktop */}
       <div className="flex flex-1 flex-col lg:flex-row lg:items-start" style={{ gap: 16, padding: "0 20px 24px 20px" }}>
-        {/* Image Preview: h280 mobile, auto-height desktop */}
-        <div className="relative w-full overflow-hidden lg:flex-1 lg:sticky lg:top-[72px] h-[280px] lg:h-auto" style={{ borderRadius: 20, backgroundColor: "#16161A", flexShrink: 0 }}>
-          <Image src={imagePreview} alt="Upload preview" fill className="object-cover lg:hidden" unoptimized />
-          <img src={imagePreview} alt="Upload preview" className="hidden lg:block w-full h-auto" style={{ borderRadius: 20 }} />
+        {/* Image Preview: auto-height, max 60vh on mobile */}
+        <div className="relative w-full overflow-hidden lg:flex-1 lg:sticky lg:top-[72px]" style={{ borderRadius: 20, backgroundColor: "#16161A", flexShrink: 0 }}>
+          <img src={imagePreview} alt="Upload preview" className="w-full h-auto max-h-[60vh] object-contain" style={{ borderRadius: 20 }} />
           <button
             onClick={onReset}
             aria-label="Remove image"
