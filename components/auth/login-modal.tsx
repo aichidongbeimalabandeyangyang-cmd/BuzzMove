@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { createSupabaseBrowserClient } from "@/server/supabase/client";
 import { Play, Mail, ArrowLeft } from "lucide-react";
-import { trackSignUp } from "@/lib/gtag";
+import { trackSignUp, trackLoginModalView } from "@/lib/gtag";
 
 interface LoginModalProps {
   open: boolean;
@@ -20,6 +20,7 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
 
   useEffect(() => {
     if (!open) return;
+    trackLoginModalView();
     const handleEsc = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     window.addEventListener("keydown", handleEsc);
     return () => window.removeEventListener("keydown", handleEsc);

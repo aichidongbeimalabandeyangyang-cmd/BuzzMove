@@ -45,7 +45,12 @@ export function trackShareClick() {
   gtag("event", "click_share");
 }
 
-// 7. Paywall shown
+// 7. Login modal opened
+export function trackLoginModalView() {
+  gtag("event", "login_modal_view");
+}
+
+// 8. Paywall shown
 export function trackPaywallView() {
   gtag("event", "paywall_view");
 }
