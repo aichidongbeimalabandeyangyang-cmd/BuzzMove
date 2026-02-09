@@ -200,6 +200,7 @@ export default function HomePage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Upload failed");
       setImageUrl(data.url);
+      (await import("@/lib/gtag")).trackImageUpload();
       // Optimistic: prepend to image list cache so it appears immediately
       utils.image.list.setData({ limit: 8 }, (prev) =>
         prev

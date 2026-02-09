@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { createSupabaseBrowserClient } from "@/server/supabase/client";
 import { Play, Mail, ArrowLeft } from "lucide-react";
+import { trackSignUp } from "@/lib/gtag";
 
 interface LoginModalProps {
   open: boolean;
@@ -38,6 +39,7 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
   if (!open) return null;
 
   const handleGoogleLogin = async () => {
+    trackSignUp("google");
     const supabase = createSupabaseBrowserClient();
     await supabase.auth.signInWithOAuth({
       provider: "google",
@@ -73,6 +75,7 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
         type: "email",
       });
       if (error) throw error;
+      trackSignUp("email");
       onClose();
     } catch (err: any) {
       setError(err.message || "Invalid code. Please try again.");

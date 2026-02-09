@@ -7,6 +7,7 @@ import { trpc } from "@/lib/trpc";
 import { getDeviceKey } from "@/components/tracking/device-key-ensurer";
 import { CREDIT_COSTS } from "@/lib/constants";
 import { useApp } from "@/components/layout/app-shell";
+import { trackVideoGenerate } from "@/lib/gtag";
 import { VideoProgress } from "./video-progress";
 import { VideoPlayer } from "./video-player";
 
@@ -56,6 +57,7 @@ export function VideoGenerator({ imageUrl, imagePreview, onReset, onBackHome, in
       prev ? { ...prev, balance: Math.max(0, prev.balance - cost) } : prev
     );
 
+    trackVideoGenerate({ mode, duration, credits: cost });
     setStatus("submitting");
     generateMutation.mutate({
       imageUrl, prompt: prompt || undefined, duration, mode,

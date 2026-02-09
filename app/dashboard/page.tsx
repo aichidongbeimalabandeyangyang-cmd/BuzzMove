@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
+import { trackPurchase } from "@/lib/gtag";
 import Image from "next/image";
 import { ArrowLeft, Download, Share2, Trash2, X, Lock, CheckCircle, XCircle, Loader2, Copy, Check } from "lucide-react";
 import { trpc } from "@/lib/trpc";
@@ -241,6 +243,13 @@ function PhotosGrid() {
 }
 
 export default function AssetsPage() {
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    if (searchParams.get("payment") === "success") {
+      trackPurchase(0);
+    }
+  }, [searchParams]);
+
   const utils = trpc.useUtils();
   const [tab, setTab] = useState<"videos" | "photos">("videos");
   const [selectedVideoId, setSelectedVideoId] = useState<string | null>(null);

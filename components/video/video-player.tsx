@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Download, Share2, RefreshCw, Lock, Home } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { PaywallModal } from "@/components/paywall-modal";
+import { trackVideoDownload } from "@/lib/gtag";
 
 interface VideoPlayerProps {
   videoId: string;
@@ -40,7 +41,7 @@ export function VideoPlayer({ videoId, onReset, onBackHome, creditCost }: VideoP
       setShowPaywall(true);
       return;
     }
-    // Trigger actual download
+    trackVideoDownload();
     const a = document.createElement("a");
     a.href = video.output_video_url;
     a.download = "";
