@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { trackPurchase } from "@/lib/gtag";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Download, Share2, Trash2, X, Lock, CheckCircle, XCircle, Loader2, Copy, Check, RefreshCw } from "lucide-react";
+import { ArrowLeft, Download, Share2, Trash2, X, Lock, CheckCircle, XCircle, Loader2, Copy, Check, RefreshCw, Pin, Sparkles } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { PaywallModal } from "@/components/paywall-modal";
 
@@ -211,16 +211,115 @@ function VideoDetail({ videoId, onBack }: { videoId: string; onBack: () => void 
   );
 }
 
-// ---- PHOTOS GRID (from image_uploads table) ----
-function PhotosGrid() {
+// ---- PHOTO DETAIL ----
+function PhotoDetail({ photoId, photoUrl, isPinned, onBack }: { photoId: string; photoUrl: string; isPinned: boolean; onBack: () => void }) {
   const utils = trpc.useUtils();
-  const { data: photos, isLoading } = trpc.image.list.useQuery({ limit: 20 });
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const deleteMutation = trpc.image.delete.useMutation({
     onSuccess() {
       utils.image.list.invalidate();
+      onBack();
     },
   });
+
+  const pinMutation = trpc.image.togglePin.useMutation({
+    onSuccess() {
+      utils.image.list.invalidate();
+    },
+  });
+
+  const pinned = pinMutation.data ? pinMutation.data.pinned : isPinned;
+
+  return (
+    <div className="flex w-full flex-1 flex-col">
+      <button onClick={onBack} className="flex items-center" style={{ gap: 8, padding: "0 20px", height: 44 }}>
+        <ArrowLeft style={{ width: 22, height: 22, color: "#FAFAF9" }} strokeWidth={1.5} />
+        <span style={{ fontSize: 17, fontWeight: 700, color: "#FAFAF9" }}>Photo</span>
+      </button>
+
+      <div className="flex flex-1 flex-col desktop-container" style={{ gap: 16, padding: "8px 20px 20px 20px" }}>
+        {/* Full image */}
+        <div className="relative w-full overflow-hidden lg:max-w-2xl lg:mx-auto" style={{ borderRadius: 20 }}>
+          <img src={photoUrl} alt="Photo" className="w-full h-auto max-h-[65vh] object-contain" style={{ borderRadius: 20 }} />
+        </div>
+
+        {/* Actions */}
+        <div className="flex lg:max-w-2xl lg:mx-auto lg:w-full" style={{ gap: 10 }}>
+          {/* Pin / Unpin */}
+          <button
+            onClick={() => pinMutation.mutate({ id: photoId })}
+            disabled={pinMutation.isPending}
+            className="flex flex-1 items-center justify-center transition-all active:scale-[0.98] disabled:opacity-50"
+            style={{
+              height: 48,
+              borderRadius: 14,
+              gap: 8,
+              border: pinned ? "1.5px solid #E8A838" : "1.5px solid #252530",
+              backgroundColor: pinned ? "#E8A83815" : "transparent",
+            }}
+          >
+            <Pin style={{ width: 18, height: 18, color: pinned ? "#E8A838" : "#FAFAF9", transform: pinned ? "none" : "rotate(45deg)" }} strokeWidth={1.5} />
+            <span style={{ fontSize: 15, fontWeight: 600, color: pinned ? "#E8A838" : "#FAFAF9" }}>
+              {pinned ? "Pinned" : "Pin"}
+            </span>
+          </button>
+
+          {/* Use in Generator */}
+          <button
+            onClick={() => {
+              const params = new URLSearchParams();
+              params.set("image", photoUrl);
+              window.location.href = `/?${params.toString()}`;
+            }}
+            className="flex flex-1 items-center justify-center transition-all active:scale-[0.98]"
+            style={{ height: 48, borderRadius: 14, gap: 8, background: "linear-gradient(135deg, #F0C060, #E8A838)", boxShadow: "0 4px 20px #E8A83840" }}
+          >
+            <Sparkles style={{ width: 18, height: 18, color: "#0B0B0E" }} strokeWidth={1.5} />
+            <span style={{ fontSize: 15, fontWeight: 700, color: "#0B0B0E" }}>Generate</span>
+          </button>
+        </div>
+
+        {/* Delete */}
+        <div className="flex lg:max-w-2xl lg:mx-auto lg:w-full" style={{ gap: 10 }}>
+          <button
+            onClick={() => {
+              if (!confirmDelete) { setConfirmDelete(true); return; }
+              deleteMutation.mutate({ id: photoId });
+            }}
+            disabled={deleteMutation.isPending}
+            className="flex flex-1 items-center justify-center transition-all active:scale-[0.98]"
+            style={{
+              height: 48,
+              borderRadius: 14,
+              border: confirmDelete ? "1.5px solid #EF4444" : "1.5px solid #EF444440",
+              backgroundColor: confirmDelete ? "#EF444420" : "transparent",
+              gap: 8,
+            }}
+          >
+            <Trash2 style={{ width: 18, height: 18, color: "#EF4444" }} strokeWidth={1.5} />
+            <span style={{ fontSize: 15, fontWeight: 500, color: "#EF4444" }}>
+              {deleteMutation.isPending ? "Deleting..." : confirmDelete ? "Tap again to confirm" : "Delete Photo"}
+            </span>
+          </button>
+          {confirmDelete && (
+            <button
+              onClick={() => setConfirmDelete(false)}
+              className="flex items-center justify-center transition-all active:scale-[0.98]"
+              style={{ height: 48, borderRadius: 14, border: "1.5px solid #252530", padding: "0 16px" }}
+            >
+              <span style={{ fontSize: 15, fontWeight: 500, color: "#6B6B70" }}>Cancel</span>
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ---- PHOTOS GRID (from image_uploads table) ----
+function PhotosGrid({ onSelectPhoto }: { onSelectPhoto: (photo: { id: string; url: string; is_pinned: boolean }) => void }) {
+  const { data: photos, isLoading } = trpc.image.list.useQuery({ limit: 20 });
 
   if (isLoading) {
     return (
@@ -246,16 +345,21 @@ function PhotosGrid() {
   return (
     <div className="grid grid-cols-3 lg:grid-cols-4 xl:grid-cols-5" style={{ gap: 12 }}>
       {photos.map((photo) => (
-        <div key={photo.id} className="relative overflow-hidden" style={{ height: 150, borderRadius: 14 }}>
+        <button
+          key={photo.id}
+          onClick={() => onSelectPhoto({ id: photo.id, url: photo.url, is_pinned: photo.is_pinned ?? false })}
+          className="relative overflow-hidden text-left"
+          style={{ aspectRatio: "3/4", borderRadius: 14, backgroundColor: "#16161A" }}
+        >
           <Image src={photo.url} alt={photo.filename || "Photo"} fill className="object-cover" unoptimized />
-          <button
-            onClick={() => deleteMutation.mutate({ id: photo.id })}
-            className="absolute flex items-center justify-center"
-            style={{ top: 6, right: 6, width: 24, height: 24, borderRadius: 100, backgroundColor: "rgba(0,0,0,0.6)", zIndex: 10 }}
-          >
-            <X style={{ width: 12, height: 12, color: "#FFFFFF" }} strokeWidth={2} />
-          </button>
-        </div>
+          {photo.is_pinned && (
+            <div className="absolute" style={{ top: 6, left: 6 }}>
+              <div className="flex items-center justify-center" style={{ width: 22, height: 22, borderRadius: 100, backgroundColor: "rgba(0,0,0,0.6)" }}>
+                <Pin style={{ width: 11, height: 11, color: "#E8A838" }} strokeWidth={2} />
+              </div>
+            </div>
+          )}
+        </button>
       ))}
     </div>
   );
@@ -280,6 +384,7 @@ export default function AssetsPage() {
   const utils = trpc.useUtils();
   const [tab, setTab] = useState<"videos" | "photos">("videos");
   const [selectedVideoId, setSelectedVideoId] = useState<string | null>(null);
+  const [selectedPhoto, setSelectedPhoto] = useState<{ id: string; url: string; is_pinned: boolean } | null>(null);
   const { data } = trpc.video.list.useQuery(
     { limit: 20, offset: 0 },
     {
@@ -303,6 +408,21 @@ export default function AssetsPage() {
         onBack={() => {
           setSelectedVideoId(null);
           utils.video.list.refetch();
+        }}
+      />
+    );
+  }
+
+  // ---- PHOTO DETAIL VIEW ----
+  if (selectedPhoto) {
+    return (
+      <PhotoDetail
+        photoId={selectedPhoto.id}
+        photoUrl={selectedPhoto.url}
+        isPinned={selectedPhoto.is_pinned}
+        onBack={() => {
+          setSelectedPhoto(null);
+          utils.image.list.refetch();
         }}
       />
     );
@@ -421,7 +541,7 @@ export default function AssetsPage() {
             </div>
           )
         ) : (
-          <PhotosGrid />
+          <PhotosGrid onSelectPhoto={setSelectedPhoto} />
         )}
       </div>
     </div>

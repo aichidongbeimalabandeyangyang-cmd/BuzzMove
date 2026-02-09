@@ -338,7 +338,7 @@ export default function HomePage() {
       // Optimistic: prepend to image list cache so it appears immediately
       utils.image.list.setData({ limit: 8 }, (prev) =>
         prev
-          ? [{ id: `temp-${Date.now()}`, url: data.url, filename: file.name, created_at: new Date().toISOString() }, ...prev].slice(0, 8)
+          ? [{ id: `temp-${Date.now()}`, url: data.url, filename: file.name, is_pinned: false, created_at: new Date().toISOString() }, ...prev].slice(0, 8)
           : prev
       );
     } catch (err) {

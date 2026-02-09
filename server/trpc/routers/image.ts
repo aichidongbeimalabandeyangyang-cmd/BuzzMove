@@ -3,7 +3,7 @@ import { TRPCError } from "@trpc/server";
 import { router, protectedProcedure } from "../trpc";
 
 export const imageRouter = router({
-  // List user's uploaded images (newest first)
+  // List user's uploaded images (pinned first, then newest)
   list: protectedProcedure
     .input(
       z.object({
@@ -13,8 +13,9 @@ export const imageRouter = router({
     .query(async ({ ctx, input }) => {
       const { data, error } = await ctx.supabase
         .from("image_uploads")
-        .select("id, url, filename, created_at")
+        .select("id, url, filename, is_pinned, created_at")
         .eq("user_id", ctx.user.id)
+        .order("is_pinned", { ascending: false })
         .order("created_at", { ascending: false })
         .limit(input.limit);
 
@@ -39,5 +40,32 @@ export const imageRouter = router({
       }
 
       return { success: true };
+    }),
+
+  // Toggle pin/unpin an image
+  togglePin: protectedProcedure
+    .input(z.object({ id: z.string().uuid() }))
+    .mutation(async ({ ctx, input }) => {
+      // Get current state
+      const { data: image } = await ctx.supabase
+        .from("image_uploads")
+        .select("id, is_pinned")
+        .eq("id", input.id)
+        .eq("user_id", ctx.user.id)
+        .single();
+
+      if (!image) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Image not found" });
+      }
+
+      const { error } = await ctx.supabase
+        .from("image_uploads")
+        .update({ is_pinned: !image.is_pinned })
+        .eq("id", input.id)
+        .eq("user_id", ctx.user.id);
+
+      if (error) throw error;
+
+      return { pinned: !image.is_pinned };
     }),
 });
