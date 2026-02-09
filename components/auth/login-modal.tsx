@@ -215,7 +215,7 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
             <div className="flex w-full flex-col items-center" style={{ gap: 8 }}>
               <h2 style={{ fontSize: 20, fontWeight: 700, color: "#FAFAF9" }}>Check your email</h2>
               <p style={{ fontSize: 14, fontWeight: 400, color: "#6B6B70", textAlign: "center" }}>
-                Enter the 6-digit code sent to <span style={{ color: "#FAFAF9" }}>{email}</span>
+                Enter the code sent to <span style={{ color: "#FAFAF9" }}>{email}</span>
               </p>
             </div>
 
@@ -223,15 +223,15 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
               type="text"
               inputMode="numeric"
               value={otp}
-              onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+              onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 8))}
               onKeyDown={(e) => { if (e.key === "Enter") handleVerifyOtp(); }}
-              placeholder="000000"
+              placeholder="00000000"
               autoFocus
               className="w-full bg-transparent outline-none text-center"
               style={{
                 height: 52, borderRadius: 14, border: "1.5px solid #252530",
                 padding: "0 16px", fontSize: 24, fontWeight: 700, color: "#FAFAF9",
-                letterSpacing: 8,
+                letterSpacing: 6,
               }}
             />
 
@@ -241,7 +241,7 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
 
             <button
               onClick={handleVerifyOtp}
-              disabled={loading || otp.length < 6}
+              disabled={loading || otp.length < 8}
               className="flex w-full items-center justify-center transition-all active:scale-[0.98] disabled:opacity-50"
               style={{ height: 52, borderRadius: 14, background: "linear-gradient(135deg, #F0C060, #E8A838)" }}
             >
