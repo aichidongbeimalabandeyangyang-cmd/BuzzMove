@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { X } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { getDeviceKey } from "@/components/tracking/device-key-ensurer";
@@ -9,7 +10,6 @@ import { useApp } from "@/components/layout/app-shell";
 import { trackVideoGenerate } from "@/lib/gtag";
 import { PaywallModal } from "@/components/paywall-modal";
 import { VideoProgress } from "./video-progress";
-import { VideoPlayer } from "./video-player";
 
 interface VideoGeneratorProps {
   imageUrl: string;
@@ -30,9 +30,8 @@ export function VideoGenerator({ imageUrl, imagePreview, onReset, onBackHome, in
   const { data: creditData } = trpc.credit.getBalance.useQuery(undefined, { enabled: !!user });
 
   useEffect(() => {
-    if (videoId && status === "completed") setHomeView("result");
-    else if (videoId && (status === "generating" || status === "submitting")) setHomeView("progress");
-    else setHomeView("generator");
+    if (videoId && (status === "generating" || status === "submitting")) setHomeView("progress");
+    else if (!videoId || status !== "completed") setHomeView("generator");
   }, [videoId, status, setHomeView]);
 
   const utils = trpc.useUtils();
@@ -73,11 +72,15 @@ export function VideoGenerator({ imageUrl, imagePreview, onReset, onBackHome, in
     });
   };
 
+  const router = useRouter();
   const creditCost = CREDIT_COSTS[mode][parseInt(duration) as 5 | 10];
 
-  if (videoId && status === "completed") {
-    return <VideoPlayer videoId={videoId} onReset={onReset} onBackHome={onBackHome} creditCost={creditCost} />;
-  }
+  // Navigate to dashboard video detail when generation completes
+  useEffect(() => {
+    if (videoId && status === "completed") {
+      router.push(`/dashboard?video=${videoId}`);
+    }
+  }, [videoId, status, router]);
 
   if (videoId && (status === "generating" || status === "submitting")) {
     return <VideoProgress videoId={videoId} imagePreview={imagePreview} onComplete={() => setStatus("completed")} onError={() => setStatus("error")} />;
