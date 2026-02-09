@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Flame, Layers, CircleUser, Crown, Play, Gift } from "lucide-react";
+import { Flame, Layers, CircleUser, Crown, Play, Gift, Shield, FileText } from "lucide-react";
+import { ADMIN_EMAILS } from "@/lib/constants";
 
 interface SidebarProps {
   isLoggedIn: boolean;
+  userEmail?: string | null;
   onLoginClick: () => void;
 }
 
@@ -17,8 +19,14 @@ const NAV_ITEMS = [
   { href: "/pricing", label: "Pricing", icon: Crown, match: (p: string) => p === "/pricing" },
 ] as const;
 
-export function Sidebar({ isLoggedIn, onLoginClick }: SidebarProps) {
+const ADMIN_NAV = [
+  { href: "/admin", label: "Dashboard", icon: Shield, match: (p: string) => p === "/admin" },
+  { href: "/admin/cases", label: "Cases", icon: FileText, match: (p: string) => p.startsWith("/admin/cases") },
+] as const;
+
+export function Sidebar({ isLoggedIn, userEmail, onLoginClick }: SidebarProps) {
   const pathname = usePathname();
+  const isAdmin = !!userEmail && ADMIN_EMAILS.includes(userEmail);
 
   return (
     <aside className="fixed inset-y-0 left-0 z-40 hidden lg:flex flex-col" style={{ width: 240, backgroundColor: "#0B0B0E", borderRight: "1px solid #1A1A1E" }}>
@@ -84,6 +92,36 @@ export function Sidebar({ isLoggedIn, onLoginClick }: SidebarProps) {
           );
         })}
       </nav>
+
+      {/* Admin Section */}
+      {isAdmin && (
+        <nav className="flex flex-col" style={{ padding: "8px 12px", gap: 2, borderTop: "1px solid #1A1A1E" }}>
+          <span style={{ fontSize: 10, fontWeight: 600, color: "#4A4A50", letterSpacing: 1, padding: "4px 12px" }}>ADMIN</span>
+          {ADMIN_NAV.map((item) => {
+            const isActive = item.match(pathname);
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.label}
+                href={item.href}
+                className="flex items-center transition-colors"
+                style={{
+                  gap: 12,
+                  padding: "10px 12px",
+                  borderRadius: 10,
+                  fontSize: 14,
+                  fontWeight: isActive ? 600 : 500,
+                  color: isActive ? "#E8A838" : "#9898A4",
+                  backgroundColor: isActive ? "#E8A83810" : "transparent",
+                }}
+              >
+                <Icon style={{ width: 20, height: 20, color: isActive ? "#E8A838" : "#6B6B70" }} strokeWidth={1.5} />
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+      )}
 
       {/* Bottom: subtle branding */}
       <div style={{ padding: "16px 24px", borderTop: "1px solid #1A1A1E" }}>
