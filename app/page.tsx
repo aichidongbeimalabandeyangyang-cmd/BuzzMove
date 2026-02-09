@@ -160,7 +160,7 @@ function useShowcase() {
 
 function LoggedInHome({ onUpload }: { onUpload: () => void }) {
   const { data } = trpc.video.list.useQuery(
-    { limit: 6, offset: 0 },
+    { limit: 3, offset: 0 },
     {
       refetchInterval: (query) => {
         const vids = query.state.data?.videos;
@@ -221,8 +221,8 @@ function LoggedInHome({ onUpload }: { onUpload: () => void }) {
               View all
             </Link>
           </div>
-          <div className="grid grid-cols-3 lg:grid-cols-4" style={{ gap: 10 }}>
-            {videos.slice(0, 6).map((video) => {
+          <div className="grid grid-cols-3" style={{ gap: 10 }}>
+            {videos.slice(0, 3).map((video) => {
               const isGenerating = video.status === "generating" || video.status === "pending";
               const isCompleted = video.status === "completed";
               return (
@@ -230,7 +230,7 @@ function LoggedInHome({ onUpload }: { onUpload: () => void }) {
                   key={video.id}
                   href="/dashboard"
                   className="relative overflow-hidden"
-                  style={{ aspectRatio: "9/16", borderRadius: 14, backgroundColor: "#16161A" }}
+                  style={{ aspectRatio: "3/4", borderRadius: 14, backgroundColor: "#16161A" }}
                 >
                   {video.output_video_url ? (
                     <video
