@@ -76,7 +76,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
               window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
+              window.gtag = function(){dataLayer.push(arguments);};
               gtag('js', new Date());
               gtag('config', 'G-EBM4MV97XE');
               gtag('config', 'AW-6484653792');
