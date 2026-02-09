@@ -84,11 +84,11 @@ function VideoDetail({ videoId, onBack }: { videoId: string; onBack: () => void 
         <div className="flex flex-col lg:flex-row lg:items-start" style={{ gap: 20 }}>
           {/* Video preview */}
           {videoUrl ? (
-            <div className="relative w-full overflow-hidden lg:flex-1 lg:max-w-2xl" style={{ height: 440, borderRadius: 20, flexShrink: 0 }}>
-              <video src={videoUrl} controls autoPlay loop playsInline className="h-full w-full object-cover" />
+            <div className="relative w-full overflow-hidden lg:flex-1 lg:max-w-2xl" style={{ borderRadius: 20, flexShrink: 0 }}>
+              <video src={videoUrl} controls autoPlay loop playsInline className="w-full h-auto max-h-[65vh] object-contain" style={{ borderRadius: 20 }} />
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center lg:flex-1 lg:max-w-2xl" style={{ height: 440, borderRadius: 20, backgroundColor: "#16161A", gap: 12 }}>
+            <div className="flex flex-col items-center justify-center lg:flex-1 lg:max-w-2xl" style={{ height: 300, borderRadius: 20, backgroundColor: "#16161A", gap: 12 }}>
               {isLoading || video?.status === "generating" ? (
                 <>
                   <div className="relative" style={{ width: 48, height: 48 }}>
