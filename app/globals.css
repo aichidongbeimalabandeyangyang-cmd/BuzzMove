@@ -60,6 +60,14 @@ body {
   .main-with-nav { padding-bottom: 0; }
 }
 
+/* Desktop sidebar offset for main content */
+.sidebar-offset {
+  margin-left: 0;
+}
+@media (min-width: 1024px) {
+  .sidebar-offset { margin-left: 240px; }
+}
+
 /* Desktop content container utility */
 .desktop-container {
   width: 100%;

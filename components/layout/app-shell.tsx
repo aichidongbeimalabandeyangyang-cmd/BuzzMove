@@ -63,7 +63,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <AppContext.Provider value={{ homeView, setHomeView, user, openLogin }}>
       <Sidebar isLoggedIn={!!user} onLoginClick={openLogin} />
-      <div className="flex min-h-screen flex-col lg:ml-[240px]">
+      <div className="flex min-h-screen flex-col sidebar-offset">
         <Header
           user={user}
           homeView={homeView}
