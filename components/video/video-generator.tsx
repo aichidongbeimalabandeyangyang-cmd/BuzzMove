@@ -92,7 +92,7 @@ export function VideoGenerator({ imageUrl, imagePreview, onReset, onBackHome, in
       <div className="flex flex-1 flex-col lg:flex-row lg:items-start" style={{ gap: 16, padding: "0 20px 24px 20px" }}>
         {/* Image Preview: auto-height, max 60vh on mobile */}
         <div className="relative w-full overflow-hidden lg:flex-1 lg:sticky lg:top-[72px]" style={{ borderRadius: 20, backgroundColor: "#16161A", flexShrink: 0 }}>
-          <img src={imagePreview} alt="Upload preview" className="w-full h-auto max-h-[60vh] object-contain" style={{ borderRadius: 20 }} />
+          <img src={imagePreview} alt="Upload preview" className="w-full h-auto max-h-[45vh] object-contain" style={{ borderRadius: 20 }} />
           <button
             onClick={onReset}
             aria-label="Remove image"

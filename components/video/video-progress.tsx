@@ -60,7 +60,7 @@ export function VideoProgress({ videoId, imagePreview, onComplete, onError }: Vi
         {/* Processing Image */}
         {imagePreview && (
           <div className="relative w-full overflow-hidden lg:max-w-lg" style={{ borderRadius: 20 }}>
-            <img src={imagePreview} alt="Processing" className="w-full h-auto max-h-[60vh] object-contain" style={{ borderRadius: 20 }} />
+            <img src={imagePreview} alt="Processing" className="w-full h-auto max-h-[45vh] lg:max-h-[65vh] object-contain" style={{ borderRadius: 20 }} />
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
               <div className="flex items-center" style={{ gap: 8, borderRadius: 100, backgroundColor: "#0B0B0ECC", padding: "8px 16px" }}>
                 <span style={{ fontSize: 14, fontWeight: 600, color: "#FAFAF9" }}>✨ Processing...</span>

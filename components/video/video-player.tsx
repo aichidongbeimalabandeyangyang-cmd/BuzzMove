@@ -54,7 +54,7 @@ export function VideoPlayer({ videoId, onReset, onBackHome, creditCost }: VideoP
       <div className="flex flex-1 flex-col desktop-container" style={{ gap: 20, padding: "8px 20px 20px 20px" }}>
         {/* Video Player */}
         <div className="relative w-full overflow-hidden lg:max-w-2xl lg:mx-auto" style={{ borderRadius: 20, flexShrink: 0 }}>
-          <video src={video.output_video_url} controls autoPlay loop playsInline className="w-full h-auto max-h-[65vh] object-contain" style={{ borderRadius: 20 }} />
+          <video src={video.output_video_url} controls autoPlay loop playsInline className="w-full h-auto max-h-[45vh] lg:max-h-[65vh] object-contain" style={{ borderRadius: 20 }} />
         </div>
 
         {/* Action Row */}

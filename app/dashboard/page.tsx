@@ -85,7 +85,7 @@ function VideoDetail({ videoId, onBack }: { videoId: string; onBack: () => void 
           {/* Video preview */}
           {videoUrl ? (
             <div className="relative w-full overflow-hidden lg:flex-1 lg:max-w-2xl" style={{ borderRadius: 20, flexShrink: 0 }}>
-              <video src={videoUrl} controls autoPlay loop playsInline className="w-full h-auto max-h-[65vh] object-contain" style={{ borderRadius: 20 }} />
+              <video src={videoUrl} controls autoPlay loop playsInline className="w-full h-auto max-h-[45vh] lg:max-h-[65vh] object-contain" style={{ borderRadius: 20 }} />
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center lg:flex-1 lg:max-w-2xl" style={{ height: 300, borderRadius: 20, backgroundColor: "#16161A", gap: 12 }}>
@@ -241,7 +241,7 @@ function PhotoDetail({ photoId, photoUrl, isPinned, onBack }: { photoId: string;
       <div className="flex flex-1 flex-col desktop-container" style={{ gap: 16, padding: "8px 20px 20px 20px" }}>
         {/* Full image */}
         <div className="relative w-full overflow-hidden lg:max-w-2xl lg:mx-auto" style={{ borderRadius: 20 }}>
-          <img src={photoUrl} alt="Photo" className="w-full h-auto max-h-[65vh] object-contain" style={{ borderRadius: 20 }} />
+          <img src={photoUrl} alt="Photo" className="w-full h-auto max-h-[45vh] lg:max-h-[65vh] object-contain" style={{ borderRadius: 20 }} />
         </div>
 
         {/* Actions */}
