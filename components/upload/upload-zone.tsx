@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import Image from "next/image";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Pin } from "lucide-react";
 import { SUPPORTED_FORMATS, MAX_FILE_SIZE } from "@/lib/constants";
 import { trpc } from "@/lib/trpc";
 
@@ -93,7 +93,7 @@ function PhotoCell({
   onClick,
   onDelete,
 }: {
-  item: { id: string; url: string; filename: string | null } | undefined;
+  item: { id: string; url: string; filename: string | null; is_pinned?: boolean } | undefined;
   onClick: (url: string) => void;
   onDelete: (e: React.MouseEvent, id: string) => void;
 }) {
@@ -103,6 +103,12 @@ function PhotoCell({
   return (
     <button onClick={() => onClick(item.url)} className="relative overflow-hidden" style={{ height: 150, borderRadius: 14 }}>
       <Image src={item.url} alt={item.filename || "Upload"} fill className="object-cover" unoptimized />
+      {/* Pin badge */}
+      {item.is_pinned && (
+        <div className="absolute flex items-center justify-center" style={{ top: 6, left: 6, width: 22, height: 22, borderRadius: 100, backgroundColor: "rgba(0,0,0,0.6)", zIndex: 10 }}>
+          <Pin style={{ width: 11, height: 11, color: "#E8A838" }} strokeWidth={2} />
+        </div>
+      )}
       {/* Delete button */}
       <div
         onClick={(e) => onDelete(e, item.id)}
