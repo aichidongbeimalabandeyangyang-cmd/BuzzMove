@@ -4,6 +4,43 @@ import { router, protectedProcedure } from "../trpc";
 import { createImageToVideo, getTaskStatus } from "@/server/kling/client";
 import { resolveContentPolicy } from "@/server/services/content-policy";
 import { CREDIT_COSTS } from "@/lib/constants";
+import { createSupabaseAdminClient } from "@/server/supabase/server";
+import { after } from "next/server";
+
+/**
+ * Download video from Kling URL and persist to Supabase Storage.
+ * Fire-and-forget — errors are silently logged, Kling URL remains as fallback.
+ */
+async function persistVideoToStorage(videoId: string, klingUrl: string) {
+  try {
+    const res = await fetch(klingUrl);
+    if (!res.ok) throw new Error(`Download failed: ${res.status}`);
+    const buffer = Buffer.from(await res.arrayBuffer());
+
+    const adminSupabase = createSupabaseAdminClient();
+    const fileName = `${videoId}-${Date.now()}.mp4`;
+    const { data, error } = await adminSupabase.storage
+      .from("uploads")
+      .upload(`videos/${fileName}`, buffer, {
+        contentType: "video/mp4",
+        cacheControl: "31536000",
+        upsert: false,
+      });
+
+    if (error) throw error;
+
+    const {
+      data: { publicUrl },
+    } = adminSupabase.storage.from("uploads").getPublicUrl(data.path);
+
+    await adminSupabase
+      .from("videos")
+      .update({ output_video_url: publicUrl })
+      .eq("id", videoId);
+  } catch (err) {
+    console.error(`[persistVideo] Failed for ${videoId}:`, err);
+  }
+}
 
 export const videoRouter = router({
   // Generate a video from an image
@@ -177,6 +214,9 @@ export const videoRouter = router({
               })
               .eq("id", video.id);
 
+            // Persist to Supabase Storage after response is sent
+            after(() => persistVideoToStorage(video.id, videoUrl));
+
             return { ...video, status: "completed", output_video_url: videoUrl };
           }
 
@@ -237,6 +277,10 @@ export const videoRouter = router({
                     completed_at: new Date().toISOString(),
                   })
                   .eq("id", v.id);
+
+                // Fire-and-forget: persist to Supabase Storage
+                persistVideoToStorage(v.id, videoUrl);
+
                 v.status = "completed";
                 v.output_video_url = videoUrl;
               } else if (klingStatus === "failed") {
