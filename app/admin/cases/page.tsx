@@ -105,24 +105,24 @@ export default function CasesPage() {
                 {/* Media: input image + output video side by side */}
                 <div className="flex" style={{ height: 180 }}>
                   {c.inputImage ? (
-                    <div className="flex-1 relative overflow-hidden" style={{ borderRight: "1px solid #1E1E22" }}>
+                    <a href={c.inputImage} target="_blank" rel="noopener noreferrer" className="flex-1 relative overflow-hidden block" style={{ borderRight: "1px solid #1E1E22" }}>
                       <img src={c.inputImage} alt="Input" className="w-full h-full object-cover" />
                       <div className="absolute" style={{ bottom: 4, left: 4, borderRadius: 4, backgroundColor: "#00000080", padding: "1px 6px" }}>
                         <span style={{ fontSize: 9, fontWeight: 600, color: "#FFFFFF" }}>INPUT</span>
                       </div>
-                    </div>
+                    </a>
                   ) : (
                     <div className="flex-1 flex items-center justify-center" style={{ backgroundColor: "#0B0B0E" }}>
                       <span style={{ fontSize: 11, color: "#4A4A50" }}>No image</span>
                     </div>
                   )}
                   {c.outputVideo ? (
-                    <div className="flex-1 relative overflow-hidden">
+                    <a href={c.outputVideo} target="_blank" rel="noopener noreferrer" className="flex-1 relative overflow-hidden block">
                       <video src={c.outputVideo} className="w-full h-full object-cover" muted playsInline preload="metadata" />
                       <div className="absolute" style={{ bottom: 4, left: 4, borderRadius: 4, backgroundColor: "#00000080", padding: "1px 6px" }}>
                         <span style={{ fontSize: 9, fontWeight: 600, color: "#FFFFFF" }}>OUTPUT</span>
                       </div>
-                    </div>
+                    </a>
                   ) : (
                     <div className="flex-1 flex items-center justify-center" style={{ backgroundColor: "#0B0B0E" }}>
                       <span style={{ fontSize: 11, color: c.status === "failed" ? "#EF4444" : "#4A4A50" }}>
