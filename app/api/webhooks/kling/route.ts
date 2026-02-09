@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { after } from "next/server";
 import { createSupabaseAdminClient } from "@/server/supabase/server";
+import { persistVideoToStorage } from "@/server/services/video-persist";
 import type { KlingCallbackPayload } from "@/server/kling/types";
 
 export async function POST(req: NextRequest) {
@@ -34,9 +36,13 @@ export async function POST(req: NextRequest) {
       .update({
         status: "completed",
         output_video_url: videoUrl,
+        kling_video_url: videoUrl,
         completed_at: new Date().toISOString(),
       })
       .eq("id", video.id);
+
+    // Persist to Supabase Storage after response is sent
+    after(() => persistVideoToStorage(video.id, videoUrl));
   } else if (payload.task_status === "failed") {
     await supabase
       .from("videos")
