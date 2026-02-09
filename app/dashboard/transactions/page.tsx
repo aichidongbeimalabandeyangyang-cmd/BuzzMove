@@ -2,7 +2,7 @@
 
 import { trpc } from "@/lib/trpc";
 import { formatCredits } from "@/lib/utils";
-import { ArrowUpRight, ArrowDownLeft, CreditCard, RefreshCw } from "lucide-react";
+import { ArrowUpRight, ArrowDownLeft, CreditCard, RefreshCw, Gift } from "lucide-react";
 
 function getTypeInfo(type: string) {
   switch (type) {
@@ -14,6 +14,8 @@ function getTypeInfo(type: string) {
       return { label: "Video Generation", icon: ArrowDownLeft, color: "#EF4444", sign: "-" };
     case "refund":
       return { label: "Refund", icon: RefreshCw, color: "#3B82F6", sign: "+" };
+    case "referral":
+      return { label: "Referral Reward", icon: Gift, color: "#E8A838", sign: "+" };
     default:
       return { label: type, icon: CreditCard, color: "#6B6B70", sign: "" };
   }

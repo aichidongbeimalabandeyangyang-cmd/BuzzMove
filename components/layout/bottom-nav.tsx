@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Flame, Layers, CircleUser } from "lucide-react";
+import { Flame, Layers, CircleUser, Gift } from "lucide-react";
 
 interface BottomNavProps {
   isLoggedIn: boolean;
@@ -12,6 +12,7 @@ interface BottomNavProps {
 const TABS = [
   { href: "/", label: "Move", icon: Flame, match: (p: string) => p === "/" },
   { href: "/dashboard", label: "Assets", icon: Layers, match: (p: string) => p === "/dashboard" || p === "/dashboard/" },
+  { href: "/dashboard/referrals", label: "Referrals", icon: Gift, match: (p: string) => p.startsWith("/dashboard/referrals") },
   { href: "/dashboard/profile", label: "My Profile", icon: CircleUser, match: (p: string) => p.startsWith("/dashboard/profile") || p.startsWith("/dashboard/settings") || p.startsWith("/pricing") },
 ] as const;
 
@@ -30,7 +31,7 @@ export function BottomNav({ isLoggedIn, onLoginClick }: BottomNavProps) {
           const color = isActive ? "#E8A838" : "#6B6B70";
           const weight = isActive ? 600 : 500;
 
-          if ((tab.label === "My Profile" || tab.label === "Assets") && !isLoggedIn) {
+          if ((tab.label === "My Profile" || tab.label === "Assets" || tab.label === "Referrals") && !isLoggedIn) {
             return (
               <button
                 key={tab.label}

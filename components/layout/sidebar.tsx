@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Flame, Layers, CircleUser, Crown, Play } from "lucide-react";
+import { Flame, Layers, CircleUser, Crown, Play, Gift } from "lucide-react";
 
 interface SidebarProps {
   isLoggedIn: boolean;
@@ -13,6 +13,7 @@ const NAV_ITEMS = [
   { href: "/", label: "Move", icon: Flame, match: (p: string) => p === "/" },
   { href: "/dashboard", label: "Assets", icon: Layers, match: (p: string) => p === "/dashboard" || p === "/dashboard/" },
   { href: "/dashboard/profile", label: "My Profile", icon: CircleUser, match: (p: string) => p.startsWith("/dashboard/profile") || p.startsWith("/dashboard/settings") || p.startsWith("/dashboard/transactions") },
+  { href: "/dashboard/referrals", label: "Referrals", icon: Gift, match: (p: string) => p.startsWith("/dashboard/referrals") },
   { href: "/pricing", label: "Pricing", icon: Crown, match: (p: string) => p === "/pricing" },
 ] as const;
 
@@ -37,7 +38,7 @@ export function Sidebar({ isLoggedIn, onLoginClick }: SidebarProps) {
         {NAV_ITEMS.map((item) => {
           const isActive = item.match(pathname);
           const Icon = item.icon;
-          const needsAuth = (item.label === "Assets" || item.label === "My Profile") && !isLoggedIn;
+          const needsAuth = (item.label === "Assets" || item.label === "My Profile" || item.label === "Referrals") && !isLoggedIn;
 
           if (needsAuth) {
             return (

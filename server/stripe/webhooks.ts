@@ -1,6 +1,6 @@
 import type Stripe from "stripe";
 import { createSupabaseAdminClient } from "@/server/supabase/server";
-import { CREDIT_PACKS, PLANS } from "@/lib/constants";
+import { CREDIT_PACKS, PLANS, REFERRAL_REWARD_CREDITS } from "@/lib/constants";
 
 // ═══════════════════════════════════════════════════════════════
 // Layer 2: Resource-level idempotency
@@ -32,6 +32,9 @@ export async function handleCheckoutCompleted(
   } else {
     await handleSubscriptionCreated(supabase, session, userId);
   }
+
+  // Referral reward: if this user was referred and this is their first payment
+  await processReferralReward(supabase, userId);
 }
 
 // ── Credit Pack Purchase ─────────────────────────────────────
@@ -237,4 +240,54 @@ export async function handleSubscriptionDeleted(
     .eq("id", updated.user_id);
 
   console.log(`[stripe:cancel] Subscription cancelled for ${updated.user_id}`);
+}
+
+// ── Referral Reward ──────────────────────────────────────────
+
+async function processReferralReward(
+  supabase: ReturnType<typeof createSupabaseAdminClient>,
+  refereeId: string
+) {
+  // Find pending referral for this user
+  const { data: referral } = await supabase
+    .from("referrals")
+    .select("id, referrer_id, reward_credits")
+    .eq("referee_id", refereeId)
+    .eq("status", "pending")
+    .single();
+
+  if (!referral) return; // Not referred or already rewarded
+
+  // Atomically mark as rewarded (optimistic lock prevents double-reward)
+  const { data: updated } = await supabase
+    .from("referrals")
+    .update({ status: "rewarded", rewarded_at: new Date().toISOString() })
+    .eq("id", referral.id)
+    .eq("status", "pending")
+    .select("id")
+    .single();
+
+  if (!updated) return; // Already rewarded by concurrent webhook
+
+  // Add credits to referrer
+  const { error: rpcError } = await supabase.rpc("refund_credits", {
+    p_user_id: referral.referrer_id,
+    p_amount: referral.reward_credits,
+  });
+
+  if (rpcError) {
+    console.error(`[referral] refund_credits failed for referrer ${referral.referrer_id}:`, rpcError.message);
+    return;
+  }
+
+  // Log transaction
+  await supabase.from("credit_transactions").insert({
+    user_id: referral.referrer_id,
+    amount: referral.reward_credits,
+    type: "referral",
+    description: "Referral reward - friend made first purchase",
+    stripe_payment_id: `referral_${referral.id}`,
+  });
+
+  console.log(`[referral] +${referral.reward_credits} credits to referrer ${referral.referrer_id} for referee ${refereeId}`);
 }

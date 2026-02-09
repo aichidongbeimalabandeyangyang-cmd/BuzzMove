@@ -75,6 +75,9 @@ export const HERO_EXAMPLES = [
   },
 ] as const;
 
+// Referral reward
+export const REFERRAL_REWARD_CREDITS = 500;
+
 // Supported upload formats
 export const SUPPORTED_FORMATS = ["image/jpeg", "image/png", "image/webp"];
 export const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB

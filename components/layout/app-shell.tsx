@@ -6,6 +6,7 @@ import { Header } from "./header";
 import { BottomNav } from "./bottom-nav";
 import { Sidebar } from "./sidebar";
 import { LoginModal } from "@/components/auth/login-modal";
+import { ReferralLinker } from "@/components/tracking/referral-linker";
 
 // ---------- HomeView Context ----------
 type HomeView = "home" | "upload" | "generator" | "progress" | "result";
@@ -75,6 +76,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       </div>
       <BottomNav isLoggedIn={!!user} onLoginClick={openLogin} />
       <LoginModal open={showLogin} onClose={() => setShowLogin(false)} />
+      {user && <ReferralLinker userId={user.id} />}
     </AppContext.Provider>
   );
 }

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { createSupabaseAdminClient } from "@/server/supabase/server";
+import { REFERRAL_REWARD_CREDITS } from "@/lib/constants";
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
@@ -55,6 +57,32 @@ export async function GET(request: NextRequest) {
             email: user.email,
             credits_balance: 200,
           });
+        }
+
+        // Link referral from cookie (set by UtmTracker before OAuth redirect)
+        const refCode = request.cookies.get("buzzmove_ref")?.value;
+        if (refCode && user) {
+          try {
+            const admin = createSupabaseAdminClient();
+            const { data: referrer } = await admin
+              .from("profiles")
+              .select("id")
+              .eq("referral_code", refCode)
+              .single();
+
+            if (referrer && referrer.id !== user.id) {
+              await admin.from("referrals").insert({
+                referrer_id: referrer.id,
+                referee_id: user.id,
+                status: "pending",
+                reward_credits: REFERRAL_REWARD_CREDITS,
+              });
+            }
+          } catch {
+            // Ignore errors (duplicate, missing table, etc.)
+          }
+          // Clear the ref cookie
+          response.cookies.set("buzzmove_ref", "", { path: "/", maxAge: 0 });
         }
       }
 

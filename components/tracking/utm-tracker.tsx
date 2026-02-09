@@ -41,6 +41,11 @@ export function UtmTracker() {
 
     localStorage.setItem(UTM_STORAGE_KEY, JSON.stringify(utmData));
 
+    // Set ref cookie for OAuth redirect (server-side can read it)
+    if (utmData.ref) {
+      document.cookie = `buzzmove_ref=${utmData.ref}; path=/; max-age=${30 * 24 * 60 * 60}; SameSite=Lax`;
+    }
+
     // Wait for device key to be available
     const checkDeviceKey = () => {
       const deviceKey = localStorage.getItem("vv_device_key");

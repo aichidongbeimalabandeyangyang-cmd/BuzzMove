@@ -23,6 +23,7 @@ export function Header({ user, homeView, onBackToHome, onLoginClick }: HeaderPro
   const isProfile = pathname === "/dashboard/profile";
   const isSettings = pathname === "/dashboard/settings";
   const isTransactions = pathname === "/dashboard/transactions";
+  const isReferrals = pathname === "/dashboard/referrals";
   const isPricing = pathname === "/pricing";
 
   const isGenerator = isHome && homeView === "generator";
@@ -56,7 +57,7 @@ export function Header({ user, homeView, onBackToHome, onLoginClick }: HeaderPro
   const showCredits = !!user && !!creditData;
 
   // Page title for desktop (shown when sidebar handles logo)
-  const pageTitle = isAssets ? "Assets" : isProfile ? "My Profile" : isSettings ? "Settings" : isTransactions ? "Transactions" : isPricing ? "Pricing & Plans" : "BuzzMove";
+  const pageTitle = isAssets ? "Assets" : isProfile ? "My Profile" : isSettings ? "Settings" : isTransactions ? "Transactions" : isReferrals ? "Referrals" : isPricing ? "Pricing & Plans" : "BuzzMove";
 
   return (
     <header className="sticky top-0 z-50" style={{ backgroundColor: "#0B0B0E" }}>
