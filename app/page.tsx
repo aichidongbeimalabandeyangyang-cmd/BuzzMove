@@ -223,7 +223,7 @@ function LoggedInHome({ onUpload }: { onUpload: () => void }) {
               return (
                 <Link
                   key={video.id}
-                  href="/dashboard"
+                  href={`/dashboard?video=${video.id}`}
                   className="relative overflow-hidden"
                   style={{ aspectRatio: "3/4", borderRadius: 14, backgroundColor: "#16161A" }}
                 >

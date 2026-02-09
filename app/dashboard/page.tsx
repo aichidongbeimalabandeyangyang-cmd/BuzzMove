@@ -261,11 +261,16 @@ function PhotosGrid() {
   );
 }
 
-function PaymentTracker() {
+function SearchParamsHandler({ onVideoId }: { onVideoId: (id: string) => void }) {
   const searchParams = useSearchParams();
   useEffect(() => {
     if (searchParams.get("payment") === "success") {
       trackPurchase(0);
+    }
+    const videoId = searchParams.get("video");
+    if (videoId) {
+      onVideoId(videoId);
+      window.history.replaceState({}, "", "/dashboard");
     }
   }, [searchParams]);
   return null;
@@ -306,7 +311,7 @@ export default function AssetsPage() {
   // ---- ASSETS GRID ----
   return (
     <div className="flex w-full flex-1 flex-col desktop-container">
-      <Suspense><PaymentTracker /></Suspense>
+      <Suspense><SearchParamsHandler onVideoId={setSelectedVideoId} /></Suspense>
       {/* Tab Switcher */}
       <div className="flex" style={{ gap: 4, padding: "0 16px 8px 16px" }}>
         {(["videos", "photos"] as const).map((t) => (
