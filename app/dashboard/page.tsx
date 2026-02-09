@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { trackPurchase } from "@/lib/gtag";
+import { trackPurchase, trackVideoDownload, trackShareClick } from "@/lib/gtag";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Download, Share2, Trash2, X, Lock, CheckCircle, XCircle, Loader2, Copy, Check, RefreshCw, Pin, Sparkles } from "lucide-react";
@@ -41,6 +41,7 @@ function VideoDetail({ videoId, onBack }: { videoId: string; onBack: () => void 
 
   const handleShare = async () => {
     if (!videoUrl) return;
+    trackShareClick();
     if (navigator.share) {
       try { await navigator.share({ title: "Check out my AI video!", url: videoUrl }); } catch {}
     } else {
@@ -54,6 +55,7 @@ function VideoDetail({ videoId, onBack }: { videoId: string; onBack: () => void 
       setShowPaywall(true);
       return;
     }
+    trackVideoDownload();
     const a = document.createElement("a");
     a.href = videoUrl;
     a.download = "";

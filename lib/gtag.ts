@@ -39,3 +39,8 @@ export function trackPurchase(value: number) {
 export function trackVideoDownload() {
   gtag("event", "video_download_click");
 }
+
+// 6. Share click
+export function trackShareClick() {
+  gtag("event", "click_share");
+}

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Download, Share2, RefreshCw, Lock, Home } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { PaywallModal } from "@/components/paywall-modal";
-import { trackVideoDownload } from "@/lib/gtag";
+import { trackVideoDownload, trackShareClick } from "@/lib/gtag";
 
 interface VideoPlayerProps {
   videoId: string;
@@ -29,6 +29,7 @@ export function VideoPlayer({ videoId, onReset, onBackHome, creditCost }: VideoP
   }
 
   const handleShare = async () => {
+    trackShareClick();
     if (navigator.share) {
       try { await navigator.share({ title: "Check out my AI video!", url: video.output_video_url }); } catch {}
     } else {
