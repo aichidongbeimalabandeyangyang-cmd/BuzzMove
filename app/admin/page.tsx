@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { trpc } from "@/lib/trpc";
-import { Users, Video, DollarSign, TrendingUp, UserPlus, CreditCard } from "lucide-react";
+import { Users, Video, DollarSign, UserPlus, CreditCard, FileText } from "lucide-react";
 
 function formatMoney(cents: number) {
   return `$${(cents / 100).toFixed(2)}`;
@@ -58,7 +59,14 @@ export default function AdminPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 style={{ fontSize: 22, fontWeight: 700, color: "#FAFAF9" }}>Admin Dashboard</h1>
-        <span style={{ fontSize: 12, fontWeight: 400, color: "#6B6B70" }}>Last 30 days</span>
+        <Link
+          href="/admin/cases"
+          className="flex items-center transition-all active:scale-[0.97]"
+          style={{ gap: 6, borderRadius: 8, backgroundColor: "#16161A", padding: "6px 14px" }}
+        >
+          <FileText style={{ width: 14, height: 14, color: "#E8A838" }} strokeWidth={1.5} />
+          <span style={{ fontSize: 13, fontWeight: 600, color: "#FAFAF9" }}>Cases</span>
+        </Link>
       </div>
 
       {/* Today Stats */}
@@ -85,6 +93,32 @@ export default function AdminPage() {
         </div>
       </div>
 
+      {/* 30-day Source Breakdown */}
+      {totals.sourceBreakdown && Object.keys(totals.sourceBreakdown).length > 0 && (
+        <div>
+          <span style={{ fontSize: 13, fontWeight: 600, color: "#6B6B70", letterSpacing: 1 }}>ACQUISITION SOURCES (30 DAYS)</span>
+          <div className="flex flex-wrap" style={{ gap: 8, marginTop: 8 }}>
+            {Object.entries(totals.sourceBreakdown)
+              .sort(([, a], [, b]) => b - a)
+              .map(([source, count]) => (
+                <div
+                  key={source}
+                  className="flex items-center"
+                  style={{ borderRadius: 10, backgroundColor: "#16161A", padding: "8px 14px", gap: 8 }}
+                >
+                  <span style={{ fontSize: 13, fontWeight: 600, color: source === "google" ? "#4285F4" : source === "referral" ? "#E8A838" : "#FAFAF9" }}>
+                    {source}
+                  </span>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: "#FAFAF9" }}>{count}</span>
+                  <span style={{ fontSize: 11, color: "#6B6B70" }}>
+                    ({totals.newUsers > 0 ? Math.round((count / totals.newUsers) * 100) : 0}%)
+                  </span>
+                </div>
+              ))}
+          </div>
+        </div>
+      )}
+
       {/* Daily Breakdown Table */}
       <div>
         <span style={{ fontSize: 13, fontWeight: 600, color: "#6B6B70", letterSpacing: 1 }}>DAILY BREAKDOWN</span>
@@ -93,7 +127,7 @@ export default function AdminPage() {
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr style={{ borderBottom: "1px solid #1E1E22" }}>
-                  {["Date", "New Users", "Active", "Videos", "Paid", "Revenue", "Breakdown"].map((h) => (
+                  {["Date", "New Users", "Source", "Active", "Videos", "Paid", "Revenue", "Breakdown"].map((h) => (
                     <th key={h} style={{ padding: "10px 12px", fontSize: 11, fontWeight: 600, color: "#6B6B70", textAlign: "left", whiteSpace: "nowrap" }}>
                       {h}
                     </th>
@@ -108,6 +142,9 @@ export default function AdminPage() {
                     </td>
                     <td style={{ padding: "10px 12px", fontSize: 13, color: day.newUsers > 0 ? "#3B82F6" : "#4A4A50" }}>
                       {day.newUsers}
+                    </td>
+                    <td style={{ padding: "10px 12px", fontSize: 11, color: "#6B6B70" }}>
+                      {Object.entries(day.sourceBreakdown).map(([k, v]) => `${k}:${v}`).join(" ") || "-"}
                     </td>
                     <td style={{ padding: "10px 12px", fontSize: 13, color: day.activeUsers > 0 ? "#22C55E" : "#4A4A50" }}>
                       {day.activeUsers}
