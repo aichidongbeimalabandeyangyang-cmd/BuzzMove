@@ -44,8 +44,12 @@ export function Header({ user, homeView, onBackToHome, onLoginClick }: HeaderPro
           : "BuzzMove";
 
   const handleBack = () => {
-    if (isSubView) onBackToHome();
-    else router.back();
+    if (isSubView) {
+      window.dispatchEvent(new Event("navigate-home"));
+      onBackToHome();
+    } else {
+      router.back();
+    }
   };
 
   // Show credits next to avatar on ALL pages for logged-in users

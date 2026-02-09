@@ -49,6 +49,11 @@ export function BottomNav({ isLoggedIn, onLoginClick }: BottomNavProps) {
             <Link
               key={tab.label}
               href={tab.href}
+              onClick={() => {
+                if (tab.href === "/" && pathname === "/") {
+                  window.dispatchEvent(new Event("navigate-home"));
+                }
+              }}
               className="flex flex-col items-center justify-center"
               style={{ gap: 3, minWidth: 64, minHeight: 44 }}
             >

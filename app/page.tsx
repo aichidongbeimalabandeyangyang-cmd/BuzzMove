@@ -224,6 +224,23 @@ export default function HomePage() {
     setHomeView("upload");
   };
 
+  const handleBackHome = () => {
+    setImageUrl(null);
+    if (imagePreview) URL.revokeObjectURL(imagePreview);
+    setImagePreview(null);
+    setInitialPrompt("");
+    setUploadError(null);
+    setShowcase("idle");
+    setHomeView("home");
+  };
+
+  // Listen for navigate-home event (from header back / bottom nav)
+  useEffect(() => {
+    const handler = () => handleBackHome();
+    window.addEventListener("navigate-home", handler);
+    return () => window.removeEventListener("navigate-home", handler);
+  });
+
   // =============================================
   // LOGGED-IN FLOWS
   // =============================================
@@ -235,6 +252,7 @@ export default function HomePage() {
         imageUrl={imageUrl}
         imagePreview={imagePreview}
         onReset={handleReset}
+        onBackHome={handleBackHome}
         initialPrompt={initialPrompt}
       />
     );
@@ -374,6 +392,15 @@ export default function HomePage() {
               }}
             >
               <span style={{ fontSize: 16, fontWeight: 700, color: "#0B0B0E" }}>Try with your own photo</span>
+            </button>
+
+            {/* Back to Home */}
+            <button
+              onClick={handleBackHome}
+              className="flex w-full items-center justify-center transition-all active:scale-[0.98]"
+              style={{ height: 48, borderRadius: 14, gap: 8 }}
+            >
+              <span style={{ fontSize: 15, fontWeight: 600, color: "#6B6B70" }}>Back to Home</span>
             </button>
 
             {/* Rotating taglines to reinforce CTA */}
