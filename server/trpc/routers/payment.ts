@@ -4,6 +4,35 @@ import { router, protectedProcedure } from "../trpc";
 import { stripe } from "@/server/stripe/client";
 import { PLANS, CREDIT_PACKS } from "@/lib/constants";
 
+/** Validate or recreate Stripe customer. Handles stale/invalid customer IDs. */
+async function ensureStripeCustomer(
+  supabase: any,
+  userId: string,
+  existingCustomerId: string | null,
+  email: string | null | undefined,
+): Promise<string> {
+  if (existingCustomerId) {
+    try {
+      const existing = await stripe.customers.retrieve(existingCustomerId);
+      if (!existing.deleted) return existingCustomerId;
+    } catch {
+      // Customer doesn't exist in Stripe — fall through to create
+    }
+  }
+
+  const customer = await stripe.customers.create({
+    email: email || undefined,
+    metadata: { supabase_user_id: userId },
+  });
+
+  await supabase
+    .from("profiles")
+    .update({ stripe_customer_id: customer.id })
+    .eq("id", userId);
+
+  return customer.id;
+}
+
 export const paymentRouter = router({
   // Create a Stripe Checkout session for subscription
   createSubscriptionCheckout: protectedProcedure
@@ -22,23 +51,10 @@ export const paymentRouter = router({
 
       if (!profile) throw new TRPCError({ code: "NOT_FOUND" });
 
-      // Get or create Stripe customer
-      let customerId = profile.stripe_customer_id;
-      if (!customerId) {
-        const customer = await stripe.customers.create({
-          email: profile.email || ctx.user.email,
-          metadata: { supabase_user_id: ctx.user.id },
-        });
-        customerId = customer.id;
+      const customerId = await ensureStripeCustomer(
+        ctx.supabase, ctx.user.id, profile.stripe_customer_id, profile.email || ctx.user.email
+      );
 
-        await ctx.supabase
-          .from("profiles")
-          .update({ stripe_customer_id: customerId })
-          .eq("id", ctx.user.id);
-      }
-
-      // Create checkout session
-      // In production, you'd use actual Stripe Price IDs stored in env vars
       const session = await stripe.checkout.sessions.create({
         customer: customerId,
         mode: "subscription",
@@ -87,19 +103,9 @@ export const paymentRouter = router({
 
       if (!profile) throw new TRPCError({ code: "NOT_FOUND" });
 
-      let customerId = profile.stripe_customer_id;
-      if (!customerId) {
-        const customer = await stripe.customers.create({
-          email: profile.email || ctx.user.email,
-          metadata: { supabase_user_id: ctx.user.id },
-        });
-        customerId = customer.id;
-
-        await ctx.supabase
-          .from("profiles")
-          .update({ stripe_customer_id: customerId })
-          .eq("id", ctx.user.id);
-      }
+      const customerId = await ensureStripeCustomer(
+        ctx.supabase, ctx.user.id, profile.stripe_customer_id, profile.email || ctx.user.email
+      );
 
       const session = await stripe.checkout.sessions.create({
         customer: customerId,
