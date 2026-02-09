@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, Search, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 
 const PAGE_SIZE = 30;
@@ -11,6 +11,7 @@ export default function CasesPage() {
   const [emailFilter, setEmailFilter] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const [page, setPage] = useState(0);
+  const [lightbox, setLightbox] = useState<{ type: "image" | "video"; url: string } | null>(null);
 
   const { data, isLoading, error } = trpc.admin.getCases.useQuery({
     email: emailFilter || undefined,
@@ -105,24 +106,24 @@ export default function CasesPage() {
                 {/* Media: input image + output video side by side */}
                 <div className="flex" style={{ height: 180 }}>
                   {c.inputImage ? (
-                    <a href={c.inputImage} target="_blank" rel="noopener noreferrer" className="flex-1 relative overflow-hidden block" style={{ borderRight: "1px solid #1E1E22" }}>
+                    <button onClick={() => setLightbox({ type: "image", url: c.inputImage! })} className="flex-1 relative overflow-hidden cursor-pointer" style={{ borderRight: "1px solid #1E1E22" }}>
                       <img src={c.inputImage} alt="Input" className="w-full h-full object-cover" />
                       <div className="absolute" style={{ bottom: 4, left: 4, borderRadius: 4, backgroundColor: "#00000080", padding: "1px 6px" }}>
                         <span style={{ fontSize: 9, fontWeight: 600, color: "#FFFFFF" }}>INPUT</span>
                       </div>
-                    </a>
+                    </button>
                   ) : (
                     <div className="flex-1 flex items-center justify-center" style={{ backgroundColor: "#0B0B0E" }}>
                       <span style={{ fontSize: 11, color: "#4A4A50" }}>No image</span>
                     </div>
                   )}
                   {c.outputVideo ? (
-                    <a href={c.outputVideo} target="_blank" rel="noopener noreferrer" className="flex-1 relative overflow-hidden block">
+                    <button onClick={() => setLightbox({ type: "video", url: c.outputVideo! })} className="flex-1 relative overflow-hidden cursor-pointer">
                       <video src={c.outputVideo} className="w-full h-full object-cover" muted playsInline preload="metadata" />
                       <div className="absolute" style={{ bottom: 4, left: 4, borderRadius: 4, backgroundColor: "#00000080", padding: "1px 6px" }}>
                         <span style={{ fontSize: 9, fontWeight: 600, color: "#FFFFFF" }}>OUTPUT</span>
                       </div>
-                    </a>
+                    </button>
                   ) : (
                     <div className="flex-1 flex items-center justify-center" style={{ backgroundColor: "#0B0B0E" }}>
                       <span style={{ fontSize: 11, color: c.status === "failed" ? "#EF4444" : "#4A4A50" }}>
@@ -189,6 +190,29 @@ export default function CasesPage() {
             </div>
           )}
         </>
+      )}
+      {/* Lightbox */}
+      {lightbox && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          style={{ backgroundColor: "#000000E6" }}
+          onClick={() => setLightbox(null)}
+        >
+          <button
+            onClick={() => setLightbox(null)}
+            className="absolute flex items-center justify-center"
+            style={{ top: 16, right: 16, width: 40, height: 40, borderRadius: 10, backgroundColor: "#16161A" }}
+          >
+            <X style={{ width: 20, height: 20, color: "#FAFAF9" }} strokeWidth={1.5} />
+          </button>
+          <div onClick={(e) => e.stopPropagation()} style={{ maxWidth: "90vw", maxHeight: "85vh" }}>
+            {lightbox.type === "image" ? (
+              <img src={lightbox.url} alt="Preview" style={{ maxWidth: "90vw", maxHeight: "85vh", objectFit: "contain", borderRadius: 12 }} />
+            ) : (
+              <video src={lightbox.url} controls autoPlay loop playsInline style={{ maxWidth: "90vw", maxHeight: "85vh", objectFit: "contain", borderRadius: 12 }} />
+            )}
+          </div>
+        </div>
       )}
     </div>
   );
