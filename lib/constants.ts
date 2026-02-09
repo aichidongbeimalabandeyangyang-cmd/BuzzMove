@@ -1,15 +1,17 @@
 // Credit costs per video generation
+// Base unit: std 5s = 100 credits ($0.50 at Pro subscription rate)
+// std 10s = 2x, pro 5s = 2x, pro 10s = 4x
 export const CREDIT_COSTS = {
   standard: { 5: 100, 10: 200 },
-  professional: { 5: 350, 10: 700 },
+  professional: { 5: 200, 10: 400 },
 } as const;
 
-// Subscription plans
+// Subscription plans (prices in cents)
 export const PLANS = {
   free: {
     name: "Free",
-    credits_per_month: 9000,
-    daily_free_credits: 300,
+    credits_per_month: 500,
+    daily_free_credits: 0,
     max_concurrent: 1,
     watermark: true,
     max_quality: "480p",
@@ -17,41 +19,32 @@ export const PLANS = {
   },
   pro: {
     name: "Pro",
-    price_monthly: 3900, // cents
-    price_yearly: 34800,
-    credits_per_month: 30000,
-    max_concurrent: 5,
+    price_monthly: 1999, // $19.99
+    price_yearly: 19190, // $191.90 (-20%)
+    credits_per_month: 4000, // 40 std 5s videos, $0.50/video
+    max_concurrent: 3,
     watermark: false,
     max_quality: "1080p",
     commercial_license: true,
   },
   premium: {
     name: "Premium",
-    price_monthly: 9900,
-    price_yearly: 94800,
-    credits_per_month: 100000,
+    price_monthly: 6999, // $69.99
+    price_yearly: 83990, // $839.90 (-20%)
+    credits_per_month: 17500, // 175 std 5s videos, $0.40/video
     max_concurrent: 10,
-    watermark: false,
-    max_quality: "1080p",
-    commercial_license: true,
-  },
-  creator: {
-    name: "Creator",
-    price_weekly: 499,
-    credits_per_week: 2300,
-    max_concurrent: 3,
     watermark: false,
     max_quality: "1080p",
     commercial_license: true,
   },
 } as const;
 
-// Credit packs (one-time purchase)
+// Credit packs (one-time purchase, prices in cents)
 export const CREDIT_PACKS = [
-  { id: "mini", name: "Mini", credits: 1500, price: 499 },
-  { id: "starter", name: "Starter", credits: 5000, price: 999 },
-  { id: "creator", name: "Creator", credits: 20000, price: 2900 },
-  { id: "studio", name: "Studio", credits: 50000, price: 6900 },
+  { id: "mini", name: "Mini Pack", credits: 700, price: 499, perVideo: "$0.70" },       // 7 videos
+  { id: "starter", name: "Starter Pack", credits: 1500, price: 999, perVideo: "$0.65" }, // 15 videos
+  { id: "creator", name: "Creator Pack", credits: 5000, price: 2999, perVideo: "$0.60" }, // 50 videos
+  { id: "pro", name: "Pro Pack", credits: 20000, price: 9999, perVideo: "$0.50" },       // 200 videos
 ] as const;
 
 // High-risk countries that force strict content policy

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { trpc } from "@/lib/trpc";
 import { formatCredits } from "@/lib/utils";
 import { createSupabaseBrowserClient } from "@/server/supabase/client";
-import { User, Crown, Settings, LifeBuoy, LogOut } from "lucide-react";
+import { User, Crown, Settings, LifeBuoy, LogOut, Receipt } from "lucide-react";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -62,7 +62,17 @@ export default function ProfilePage() {
             <span style={{ fontSize: 15, fontWeight: 500, color: "#FAFAF9" }}>Pricing & Plans</span>
           </Link>
 
-          {/* m2: Settings — gap 12, padding [14,16], icon 20x20 #9898A4, text 15/500 #FAFAF9 */}
+          {/* m2: Transaction History — gap 12, padding [14,16], icon 20x20 #9898A4, text 15/500 #FAFAF9 */}
+          <Link
+            href="/dashboard/transactions"
+            className="flex w-full items-center"
+            style={{ gap: 12, padding: "14px 16px" }}
+          >
+            <Receipt style={{ width: 20, height: 20, color: "#9898A4", flexShrink: 0 }} strokeWidth={1.5} />
+            <span style={{ fontSize: 15, fontWeight: 500, color: "#FAFAF9" }}>Transaction History</span>
+          </Link>
+
+          {/* m3: Settings — gap 12, padding [14,16], icon 20x20 #9898A4, text 15/500 #FAFAF9 */}
           <Link
             href="/dashboard/settings"
             className="flex w-full items-center"

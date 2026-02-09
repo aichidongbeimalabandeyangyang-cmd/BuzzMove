@@ -36,22 +36,25 @@ export function VideoGenerator({ imageUrl, imagePreview, onReset, initialPrompt 
     onSuccess(data) {
       setVideoId(data.videoId);
       setStatus("generating");
-      // Sync with actual backend balance
-      utils.credit.getBalance.invalidate();
+      // Force refetch balance from backend (not just invalidate)
+      utils.credit.getBalance.refetch();
     },
     onError() {
       setStatus("error");
       // Roll back optimistic credit deduction
-      utils.credit.getBalance.invalidate();
+      utils.credit.getBalance.refetch();
     },
   });
 
   const handleGenerate = () => {
     if (!user) { openLogin(); return; }
+
     // Optimistic: deduct credits in UI immediately
+    const cost = CREDIT_COSTS[mode][parseInt(duration) as 5 | 10];
     utils.credit.getBalance.setData(undefined, (prev) =>
-      prev ? { ...prev, balance: Math.max(0, prev.balance - creditCost) } : prev
+      prev ? { ...prev, balance: Math.max(0, prev.balance - cost) } : prev
     );
+
     setStatus("submitting");
     generateMutation.mutate({
       imageUrl, prompt: prompt || undefined, duration, mode,

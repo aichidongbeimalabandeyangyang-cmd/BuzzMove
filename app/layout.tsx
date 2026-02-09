@@ -5,6 +5,8 @@ import { AppShell } from "@/components/layout/app-shell";
 import { Footer } from "@/components/layout/footer";
 import "./globals.css";
 
+const SITE_URL = "https://buzzmove.me";
+
 const dmSans = DM_Sans({
   subsets: ["latin"],
   variable: "--font-dm-sans",
@@ -13,24 +15,41 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "BuzzMove - AI Video Generator",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "BuzzMove - AI Photo to Video Generator",
+    template: "%s | BuzzMove",
+  },
   description:
-    "Turn your photos into stunning AI videos. Create cinematic motion from any image in seconds.",
+    "Turn any photo into a stunning AI video in seconds. Upload an image, describe the motion, and watch it come alive.",
+  keywords: ["AI video generator", "photo to video", "AI animation", "image to video", "AI video maker"],
   openGraph: {
-    title: "BuzzMove - AI Video Generator",
+    title: "BuzzMove - AI Photo to Video Generator",
     description:
-      "Turn your photos into stunning AI videos. Create cinematic motion from any image in seconds.",
-    url: "https://buzzmove.art",
+      "Turn any photo into a stunning AI video in seconds. Upload an image, describe the motion, and watch it come alive.",
+    url: SITE_URL,
     siteName: "BuzzMove",
     type: "website",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "BuzzMove - Turn photos into AI videos",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "BuzzMove - AI Video Generator",
+    title: "BuzzMove - AI Photo to Video Generator",
     description:
-      "Turn your photos into stunning AI videos. Create cinematic motion from any image in seconds.",
+      "Turn any photo into a stunning AI video in seconds. Upload an image, describe the motion, and watch it come alive.",
+    images: ["/og-image.png"],
   },
   robots: { index: true, follow: true },
+  alternates: {
+    canonical: SITE_URL,
+  },
 };
 
 export const viewport: Viewport = {
@@ -79,6 +98,49 @@ export default function RootLayout({
         )}
       </head>
       <body className="flex min-h-screen flex-col antialiased">
+        {/* JSON-LD Structured Data */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@graph": [
+                {
+                  "@type": "Organization",
+                  name: "BuzzMove",
+                  url: SITE_URL,
+                  logo: `${SITE_URL}/og-image.png`,
+                  sameAs: [],
+                },
+                {
+                  "@type": "WebApplication",
+                  name: "BuzzMove",
+                  url: SITE_URL,
+                  applicationCategory: "MultimediaApplication",
+                  operatingSystem: "Web",
+                  description:
+                    "Turn any photo into a stunning AI video in seconds.",
+                  offers: {
+                    "@type": "Offer",
+                    price: "0",
+                    priceCurrency: "USD",
+                    description: "Free tier available",
+                  },
+                },
+                {
+                  "@type": "WebSite",
+                  url: SITE_URL,
+                  name: "BuzzMove",
+                  potentialAction: {
+                    "@type": "SearchAction",
+                    target: `${SITE_URL}/?q={search_term_string}`,
+                    "query-input": "required name=search_term_string",
+                  },
+                },
+              ],
+            }),
+          }}
+        />
         <Providers>
           <AppShell>{children}</AppShell>
           <Footer />

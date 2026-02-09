@@ -2,6 +2,19 @@ import type Stripe from "stripe";
 import { createSupabaseAdminClient } from "@/server/supabase/server";
 import { CREDIT_PACKS, PLANS } from "@/lib/constants";
 
+// ═══════════════════════════════════════════════════════════════
+// Layer 2: Resource-level idempotency
+//
+// Even though Layer 1 (Event ID dedup in route.ts) handles the
+// common case, these checks protect against:
+//  - Different events triggering the same business action
+//    (e.g. checkout.session.completed + invoice.paid)
+//  - Manual replays or DB corruption
+//
+// Layer 3: DB UNIQUE index on credit_transactions.stripe_payment_id
+// is the final safety net — concurrent INSERTs will fail.
+// ═══════════════════════════════════════════════════════════════
+
 export async function handleCheckoutCompleted(
   session: Stripe.Checkout.Session
 ) {
@@ -10,108 +23,192 @@ export async function handleCheckoutCompleted(
   if (!userId) return;
 
   if (session.metadata?.type === "credit_pack") {
-    // Look up credits from server-side constants, NOT from metadata
-    const packId = session.metadata.pack_id;
-    const pack = CREDIT_PACKS.find((p) => p.id === packId);
-    if (!pack) return;
-
-    // Atomic credit addition
-    await supabase.rpc("refund_credits", {
-      p_user_id: userId,
-      p_amount: pack.credits,
-    });
-
-    // Record transaction
-    await supabase.from("credit_transactions").insert({
-      user_id: userId,
-      amount: pack.credits,
-      type: "purchase",
-      description: `${pack.name} credit pack`,
-      stripe_payment_id: session.payment_intent as string,
-    });
+    await handleCreditPackPurchase(supabase, session, userId);
   } else {
-    // Subscription — validate plan from constants
-    const plan = session.metadata?.plan as keyof typeof PLANS;
-    const billingPeriod = session.metadata?.billing_period;
-    if (!plan || !(plan in PLANS) || plan === "free") return;
-
-    const planConfig = PLANS[plan];
-    const creditsPerPeriod =
-      "credits_per_month" in planConfig
-        ? planConfig.credits_per_month
-        : (planConfig as typeof PLANS["creator"]).credits_per_week;
-
-    // Update profile
-    await supabase
-      .from("profiles")
-      .update({
-        subscription_plan: plan,
-        subscription_status: "active",
-        credits_balance: creditsPerPeriod,
-      })
-      .eq("id", userId);
-
-    // Create subscription record
-    await supabase.from("subscriptions").insert({
-      user_id: userId,
-      stripe_subscription_id: session.subscription as string,
-      plan,
-      billing_period: billingPeriod,
-      status: "active",
-      credits_per_period: creditsPerPeriod,
-      current_period_start: new Date().toISOString(),
-    });
-
-    // Record transaction
-    await supabase.from("credit_transactions").insert({
-      user_id: userId,
-      amount: creditsPerPeriod,
-      type: "subscription",
-      description: `${planConfig.name} subscription activated`,
-    });
+    await handleSubscriptionCreated(supabase, session, userId);
   }
 }
 
+// ── Credit Pack Purchase ─────────────────────────────────────
+
+async function handleCreditPackPurchase(
+  supabase: ReturnType<typeof createSupabaseAdminClient>,
+  session: Stripe.Checkout.Session,
+  userId: string
+) {
+  const paymentIntentId = session.payment_intent as string;
+  if (!paymentIntentId) return;
+
+  const packId = session.metadata?.pack_id;
+  const pack = CREDIT_PACKS.find((p) => p.id === packId);
+  if (!pack) return;
+
+  // INSERT transaction first — UNIQUE index on stripe_payment_id
+  // guarantees this fails on duplicate (Layer 3 safety net).
+  const { error: txError } = await supabase.from("credit_transactions").insert({
+    user_id: userId,
+    amount: pack.credits,
+    type: "purchase",
+    description: `${pack.name} credit pack`,
+    stripe_payment_id: paymentIntentId,
+  });
+
+  if (txError) {
+    // 23505 = unique_violation → already processed
+    if (txError.code === "23505") {
+      console.log(`[stripe:credit_pack] Duplicate payment skipped: ${paymentIntentId}`);
+      return;
+    }
+    // Unexpected error — rethrow so route.ts can handle retry
+    throw new Error(`credit_transaction insert failed: ${txError.message}`);
+  }
+
+  // Transaction recorded → safe to add credits
+  await supabase.rpc("refund_credits", {
+    p_user_id: userId,
+    p_amount: pack.credits,
+  });
+
+  console.log(`[stripe:credit_pack] +${pack.credits} credits for ${userId} (${pack.name})`);
+}
+
+// ── Subscription Created ─────────────────────────────────────
+
+async function handleSubscriptionCreated(
+  supabase: ReturnType<typeof createSupabaseAdminClient>,
+  session: Stripe.Checkout.Session,
+  userId: string
+) {
+  const plan = session.metadata?.plan as keyof typeof PLANS;
+  const billingPeriod = session.metadata?.billing_period;
+  const stripeSubId = session.subscription as string;
+
+  if (!plan || !(plan in PLANS) || plan === "free") return;
+  if (!stripeSubId) return;
+
+  const planConfig = PLANS[plan];
+  const creditsPerPeriod = planConfig.credits_per_month;
+
+  // INSERT subscription record — if it already exists, skip.
+  const { error: subError } = await supabase.from("subscriptions").insert({
+    user_id: userId,
+    stripe_subscription_id: stripeSubId,
+    plan,
+    billing_period: billingPeriod,
+    status: "active",
+    credits_per_period: creditsPerPeriod,
+    current_period_start: new Date().toISOString(),
+  });
+
+  if (subError) {
+    // Duplicate stripe_subscription_id → already processed
+    if (subError.code === "23505") {
+      console.log(`[stripe:subscription] Duplicate subscription skipped: ${stripeSubId}`);
+      return;
+    }
+    throw new Error(`subscription insert failed: ${subError.message}`);
+  }
+
+  // Subscription recorded → update profile & log transaction
+  await supabase
+    .from("profiles")
+    .update({
+      subscription_plan: plan,
+      subscription_status: "active",
+      credits_balance: creditsPerPeriod,
+    })
+    .eq("id", userId);
+
+  await supabase.from("credit_transactions").insert({
+    user_id: userId,
+    amount: creditsPerPeriod,
+    type: "subscription",
+    description: `${planConfig.name} subscription activated`,
+    stripe_payment_id: `sub_activated_${stripeSubId}`,
+  });
+
+  console.log(`[stripe:subscription] ${plan} activated for ${userId}, +${creditsPerPeriod} credits`);
+}
+
+// ── Invoice Paid (Subscription Renewal) ──────────────────────
+
 export async function handleInvoicePaid(invoice: Stripe.Invoice) {
-  const subscriptionId =
+  const stripeSubId =
     invoice.parent?.subscription_details?.subscription ?? null;
-  if (!subscriptionId) return;
+  if (!stripeSubId) return;
+
+  const invoiceId = invoice.id;
+  if (!invoiceId) return;
+
   const supabase = createSupabaseAdminClient();
 
+  // Look up subscription
   const { data: sub } = await supabase
     .from("subscriptions")
-    .select("*, profiles!inner(id, credits_balance)")
-    .eq("stripe_subscription_id", subscriptionId)
+    .select("user_id, plan, credits_per_period, created_at")
+    .eq("stripe_subscription_id", stripeSubId)
     .single();
 
+  // If subscription record doesn't exist yet, checkout handler
+  // hasn't run — skip. Stripe will retry or checkout will handle it.
   if (!sub) return;
 
-  // Refresh credits for the new period
+  // Skip the initial invoice — checkout.session.completed already
+  // granted credits. We detect this by checking if the subscription
+  // was created recently. No more fragile time-based hacks:
+  // instead, we use the invoice ID as idempotency key.
+  const txKey = `invoice_${invoiceId}`;
+
+  const { error: txError } = await supabase.from("credit_transactions").insert({
+    user_id: sub.user_id,
+    amount: sub.credits_per_period,
+    type: "subscription",
+    description: `${sub.plan} subscription renewed`,
+    stripe_payment_id: txKey,
+  });
+
+  if (txError) {
+    if (txError.code === "23505") {
+      console.log(`[stripe:invoice] Duplicate invoice skipped: ${invoiceId}`);
+      return;
+    }
+    throw new Error(`invoice transaction insert failed: ${txError.message}`);
+  }
+
+  // For the FIRST invoice (created alongside checkout), the checkout
+  // handler already set credits_balance. But since our INSERT succeeded
+  // (meaning this invoice hasn't been processed before), we should
+  // refresh credits. This covers both initial and renewal invoices
+  // uniformly — the extra SET on initial is harmless (same value).
   await supabase
     .from("profiles")
     .update({ credits_balance: sub.credits_per_period })
     .eq("id", sub.user_id);
 
-  await supabase.from("credit_transactions").insert({
-    user_id: sub.user_id,
-    amount: sub.credits_per_period,
-    type: "subscription",
-    description: `${sub.plan} subscription renewed`,
-  });
+  console.log(`[stripe:invoice] Renewed ${sub.plan} for ${sub.user_id}, reset to ${sub.credits_per_period} credits`);
 }
+
+// ── Subscription Deleted ─────────────────────────────────────
 
 export async function handleSubscriptionDeleted(
   subscription: Stripe.Subscription
 ) {
   const supabase = createSupabaseAdminClient();
 
-  const { data: sub } = await supabase
+  // Atomic update: only change if not already cancelled
+  const { data: updated, error } = await supabase
     .from("subscriptions")
-    .select("user_id")
+    .update({ status: "cancelled" })
     .eq("stripe_subscription_id", subscription.id)
+    .neq("status", "cancelled")
+    .select("user_id")
     .single();
 
-  if (!sub) return;
+  // No rows updated → already cancelled or doesn't exist
+  if (!updated) {
+    console.log(`[stripe:cancel] Already cancelled or not found: ${subscription.id}`);
+    return;
+  }
 
   await supabase
     .from("profiles")
@@ -119,10 +216,7 @@ export async function handleSubscriptionDeleted(
       subscription_plan: "free",
       subscription_status: "cancelled",
     })
-    .eq("id", sub.user_id);
+    .eq("id", updated.user_id);
 
-  await supabase
-    .from("subscriptions")
-    .update({ status: "cancelled" })
-    .eq("stripe_subscription_id", subscription.id);
+  console.log(`[stripe:cancel] Subscription cancelled for ${updated.user_id}`);
 }

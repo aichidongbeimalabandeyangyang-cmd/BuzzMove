@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: "BuzzMove for Ads - Turn One Image into 10 Ad-Ready Videos",
   description:
     "Generate high-performing video ads from a single product image. Designed for ROAS. Minutes, not days.",
+  alternates: { canonical: "https://buzzmove.me/ads" },
 };
 
 export default function AdsPage() {

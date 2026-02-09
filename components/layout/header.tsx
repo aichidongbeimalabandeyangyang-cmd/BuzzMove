@@ -22,6 +22,7 @@ export function Header({ user, homeView, onBackToHome, onLoginClick }: HeaderPro
   const isAssets = pathname === "/dashboard" || pathname === "/dashboard/";
   const isProfile = pathname === "/dashboard/profile";
   const isSettings = pathname === "/dashboard/settings";
+  const isTransactions = pathname === "/dashboard/transactions";
   const isPricing = pathname === "/pricing";
 
   const isGenerator = isHome && homeView === "generator";
@@ -30,24 +31,25 @@ export function Header({ user, homeView, onBackToHome, onLoginClick }: HeaderPro
   const isUpload = isHome && homeView === "upload";
   const isSubView = isGenerator || isProgress || isResult;
 
-  const hasBackArrow = isSettings || isPricing || isSubView;
-  const showLogo = (isHome && !isSubView) || isUpload;
-  const showBuzzMoveText = isProfile;
+  const hasBackArrow = isSettings || isPricing || isSubView || isTransactions;
 
   const backTitle = isSettings
     ? "Settings"
     : isPricing
       ? "Pricing & Plans"
-      : isResult
-        ? "Result"
-        : "BuzzMove";
-
-  const showCredits = (isAssets || isGenerator || isProgress) && user && creditData;
+      : isTransactions
+        ? "Transactions"
+        : isResult
+          ? "Result"
+          : "BuzzMove";
 
   const handleBack = () => {
     if (isSubView) onBackToHome();
     else router.back();
   };
+
+  // Show credits next to avatar on ALL pages for logged-in users
+  const showCredits = !!user && !!creditData;
 
   return (
     <header className="sticky top-0 z-50" style={{ backgroundColor: "#0B0B0E" }}>
@@ -59,7 +61,8 @@ export function Header({ user, homeView, onBackToHome, onLoginClick }: HeaderPro
             <ArrowLeft style={{ width: 22, height: 22, color: "#FAFAF9" }} strokeWidth={1.5} />
             <span style={{ fontSize: 17, fontWeight: 700, color: "#FAFAF9" }}>{backTitle}</span>
           </button>
-        ) : showLogo ? (
+        ) : (
+          /* All other pages: clickable logo that goes home */
           <Link href="/" className="flex items-center" style={{ gap: 8 }}>
             {/* Logo Icon: 28x28, cornerRadius 8, gradient */}
             <div
@@ -68,24 +71,26 @@ export function Header({ user, homeView, onBackToHome, onLoginClick }: HeaderPro
             >
               <Play style={{ width: 14, height: 14, color: "#0B0B0E" }} fill="#0B0B0E" strokeWidth={0} />
             </div>
-            <span style={{ fontSize: 17, fontWeight: 700, color: "#FAFAF9" }}>BuzzMove</span>
+            <span style={{ fontSize: 17, fontWeight: 700, color: "#FAFAF9" }}>
+              {isAssets ? "Assets" : "BuzzMove"}
+            </span>
           </Link>
-        ) : showBuzzMoveText ? (
-          <span style={{ fontSize: 17, fontWeight: 700, color: "#FAFAF9" }}>BuzzMove</span>
-        ) : isAssets ? (
-          <span style={{ fontSize: 20, fontWeight: 700, color: "#FAFAF9" }}>Assets</span>
-        ) : null}
+        )}
 
         {/* RIGHT SIDE */}
         <div className="flex items-center" style={{ gap: 10 }}>
-          {/* Credit Badge: cornerRadius 100, fill #16161A, padding [6,12], gap 6 */}
+          {/* Credit Badge: always visible for logged-in users */}
           {showCredits && (
-            <div className="flex items-center" style={{ gap: 6, borderRadius: 100, backgroundColor: "#16161A", padding: "6px 12px" }}>
+            <Link
+              href="/pricing"
+              className="flex items-center"
+              style={{ gap: 6, borderRadius: 100, backgroundColor: "#16161A", padding: "6px 12px" }}
+            >
               <div style={{ width: 6, height: 6, borderRadius: 100, backgroundColor: "#E8A838" }} />
               <span style={{ fontSize: 13, fontWeight: 600, color: "#FAFAF9" }}>
                 {formatCredits(creditData.balance)}
               </span>
-            </div>
+            </Link>
           )}
           {/* Avatar: 32x32, cornerRadius 100, fill #1E1E22 */}
           {user ? (

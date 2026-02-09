@@ -20,4 +20,4 @@ Disallow: /
 User-agent: Bytespider
 Disallow: /
 
-Sitemap: https://buzzmove.art/sitemap.xml
+Sitemap: https://buzzmove.me/sitemap.xml

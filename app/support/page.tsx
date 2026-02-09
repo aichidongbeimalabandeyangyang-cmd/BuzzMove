@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Support - BuzzMove" };
+export const metadata: Metadata = {
+  title: "Support",
+  description: "Get help with BuzzMove. Contact our support team for questions about AI video generation, billing, and account management.",
+  alternates: { canonical: "https://buzzmove.me/support" },
+};
 
 export default function SupportPage() {
   return (

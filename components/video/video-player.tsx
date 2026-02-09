@@ -1,7 +1,9 @@
 "use client";
 
-import { Download, Share2, RefreshCw } from "lucide-react";
+import { useState } from "react";
+import { Download, Share2, RefreshCw, Lock } from "lucide-react";
 import { trpc } from "@/lib/trpc";
+import { PaywallModal } from "@/components/paywall-modal";
 
 interface VideoPlayerProps {
   videoId: string;
@@ -11,6 +13,10 @@ interface VideoPlayerProps {
 
 export function VideoPlayer({ videoId, onReset, creditCost }: VideoPlayerProps) {
   const { data: video } = trpc.video.getStatus.useQuery({ videoId });
+  const { data: creditData } = trpc.credit.getBalance.useQuery();
+  const [showPaywall, setShowPaywall] = useState(false);
+
+  const isPaid = creditData?.hasPurchased ?? false;
 
   if (!video?.output_video_url) {
     return (
@@ -28,6 +34,18 @@ export function VideoPlayer({ videoId, onReset, creditCost }: VideoPlayerProps) 
     }
   };
 
+  const handleDownload = () => {
+    if (!isPaid) {
+      setShowPaywall(true);
+      return;
+    }
+    // Trigger actual download
+    const a = document.createElement("a");
+    a.href = video.output_video_url;
+    a.download = "";
+    a.click();
+  };
+
   return (
     <div className="flex w-full flex-1 flex-col">
       {/* Result Body: h-fill, vertical, gap 20, padding [8,20,20,20] */}
@@ -40,15 +58,18 @@ export function VideoPlayer({ videoId, onReset, creditCost }: VideoPlayerProps) 
         {/* Action Row: gap 10 */}
         <div className="flex" style={{ gap: 10 }}>
           {/* Download: h48, cornerRadius 14, gradient + shadow, gap 8 */}
-          <a
-            href={video.output_video_url}
-            download
+          <button
+            onClick={handleDownload}
             className="flex flex-1 items-center justify-center transition-all active:scale-[0.98]"
             style={{ height: 48, borderRadius: 14, gap: 8, background: "linear-gradient(135deg, #F0C060, #E8A838)", boxShadow: "0 4px 20px #E8A83840" }}
           >
-            <Download style={{ width: 20, height: 20, color: "#0B0B0E" }} strokeWidth={1.5} />
+            {isPaid ? (
+              <Download style={{ width: 20, height: 20, color: "#0B0B0E" }} strokeWidth={1.5} />
+            ) : (
+              <Lock style={{ width: 18, height: 18, color: "#0B0B0E" }} strokeWidth={1.5} />
+            )}
             <span style={{ fontSize: 15, fontWeight: 700, color: "#0B0B0E" }}>Download</span>
-          </a>
+          </button>
           {/* Share: h48, cornerRadius 14, stroke 1.5px #252530, gap 8 */}
           <button
             onClick={handleShare}
@@ -72,6 +93,8 @@ export function VideoPlayer({ videoId, onReset, creditCost }: VideoPlayerProps) 
           </button>
         )}
       </div>
+
+      <PaywallModal open={showPaywall} onClose={() => setShowPaywall(false)} />
     </div>
   );
 }

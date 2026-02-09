@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Refund Policy - BuzzMove" };
+export const metadata: Metadata = {
+  title: "Refund Policy",
+  description: "BuzzMove refund policy. Learn about our credit refund process, eligibility, and how to request a refund for unused credits.",
+  alternates: { canonical: "https://buzzmove.me/refund-policy" },
+};
 
 export default function RefundPolicyPage() {
   return (

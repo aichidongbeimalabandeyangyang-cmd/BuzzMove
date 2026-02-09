@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { ArrowLeft, Download, Share2, Trash2, X } from "lucide-react";
+import { ArrowLeft, Download, Share2, Trash2, X, Lock, CheckCircle, XCircle, Loader2, Copy, Check } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { removeRecentUpload } from "@/components/upload/upload-zone";
+import { PaywallModal } from "@/components/paywall-modal";
 
 // ---- VIDEO DETAIL (uses getStatus to poll & resolve video URL) ----
 function VideoDetail({ videoId, onBack }: { videoId: string; onBack: () => void }) {
@@ -19,6 +20,12 @@ function VideoDetail({ videoId, onBack }: { videoId: string; onBack: () => void 
       },
     }
   );
+  const { data: creditData } = trpc.credit.getBalance.useQuery();
+  const [showPaywall, setShowPaywall] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const isPaid = creditData?.hasPurchased ?? false;
 
   const deleteMutation = trpc.video.delete.useMutation({
     onSuccess() {
@@ -38,10 +45,24 @@ function VideoDetail({ videoId, onBack }: { videoId: string; onBack: () => void 
     }
   };
 
-  const handleDelete = () => {
-    if (confirm("Delete this video?")) {
-      deleteMutation.mutate({ videoId });
+  const handleDownload = () => {
+    if (!videoUrl) return;
+    if (!isPaid) {
+      setShowPaywall(true);
+      return;
     }
+    const a = document.createElement("a");
+    a.href = videoUrl;
+    a.download = "";
+    a.click();
+  };
+
+  const handleDelete = () => {
+    if (!confirmDelete) {
+      setConfirmDelete(true);
+      return;
+    }
+    deleteMutation.mutate({ videoId });
   };
 
   return (
@@ -76,17 +97,42 @@ function VideoDetail({ videoId, onBack }: { videoId: string; onBack: () => void 
           </div>
         )}
 
+        {/* Prompt display with copy */}
+        {video?.prompt && (
+          <button
+            onClick={() => {
+              navigator.clipboard.writeText(video.prompt!);
+              setCopied(true);
+              setTimeout(() => setCopied(false), 2000);
+            }}
+            className="flex w-full items-start transition-all active:scale-[0.99]"
+            style={{ borderRadius: 14, backgroundColor: "#16161A", padding: "12px 14px", gap: 10, textAlign: "left" }}
+          >
+            <p className="flex-1" style={{ fontSize: 13, fontWeight: 400, lineHeight: 1.5, color: "#9898A4" }}>
+              {video.prompt}
+            </p>
+            {copied ? (
+              <Check style={{ width: 16, height: 16, color: "#22C55E", flexShrink: 0, marginTop: 2 }} strokeWidth={1.5} />
+            ) : (
+              <Copy style={{ width: 16, height: 16, color: "#6B6B70", flexShrink: 0, marginTop: 2 }} strokeWidth={1.5} />
+            )}
+          </button>
+        )}
+
         {videoUrl && (
           <div className="flex" style={{ gap: 10 }}>
-            <a
-              href={videoUrl}
-              download
+            <button
+              onClick={handleDownload}
               className="flex flex-1 items-center justify-center transition-all active:scale-[0.98]"
               style={{ height: 48, borderRadius: 14, gap: 8, background: "linear-gradient(135deg, #F0C060, #E8A838)", boxShadow: "0 4px 20px #E8A83840" }}
             >
-              <Download style={{ width: 20, height: 20, color: "#0B0B0E" }} strokeWidth={1.5} />
+              {isPaid ? (
+                <Download style={{ width: 20, height: 20, color: "#0B0B0E" }} strokeWidth={1.5} />
+              ) : (
+                <Lock style={{ width: 18, height: 18, color: "#0B0B0E" }} strokeWidth={1.5} />
+              )}
               <span style={{ fontSize: 15, fontWeight: 700, color: "#0B0B0E" }}>Download</span>
-            </a>
+            </button>
             <button
               onClick={handleShare}
               className="flex flex-1 items-center justify-center transition-all active:scale-[0.98]"
@@ -98,19 +144,38 @@ function VideoDetail({ videoId, onBack }: { videoId: string; onBack: () => void 
           </div>
         )}
 
-        {/* Delete button */}
-        <button
-          onClick={handleDelete}
-          disabled={deleteMutation.isPending}
-          className="flex w-full items-center justify-center transition-all active:scale-[0.98]"
-          style={{ height: 48, borderRadius: 14, border: "1.5px solid #EF444440", gap: 8 }}
-        >
-          <Trash2 style={{ width: 18, height: 18, color: "#EF4444" }} strokeWidth={1.5} />
-          <span style={{ fontSize: 15, fontWeight: 500, color: "#EF4444" }}>
-            {deleteMutation.isPending ? "Deleting..." : "Delete Video"}
-          </span>
-        </button>
+        {/* Delete button — two-tap confirm */}
+        <div className="flex" style={{ gap: 10 }}>
+          <button
+            onClick={handleDelete}
+            disabled={deleteMutation.isPending}
+            className="flex flex-1 items-center justify-center transition-all active:scale-[0.98]"
+            style={{
+              height: 48,
+              borderRadius: 14,
+              border: confirmDelete ? "1.5px solid #EF4444" : "1.5px solid #EF444440",
+              backgroundColor: confirmDelete ? "#EF444420" : "transparent",
+              gap: 8,
+            }}
+          >
+            <Trash2 style={{ width: 18, height: 18, color: "#EF4444" }} strokeWidth={1.5} />
+            <span style={{ fontSize: 15, fontWeight: 500, color: "#EF4444" }}>
+              {deleteMutation.isPending ? "Deleting..." : confirmDelete ? "Tap again to confirm" : "Delete Video"}
+            </span>
+          </button>
+          {confirmDelete && (
+            <button
+              onClick={() => setConfirmDelete(false)}
+              className="flex items-center justify-center transition-all active:scale-[0.98]"
+              style={{ height: 48, borderRadius: 14, border: "1.5px solid #252530", padding: "0 16px" }}
+            >
+              <span style={{ fontSize: 15, fontWeight: 500, color: "#6B6B70" }}>Cancel</span>
+            </button>
+          )}
+        </div>
       </div>
+
+      <PaywallModal open={showPaywall} onClose={() => setShowPaywall(false)} />
     </div>
   );
 }
@@ -161,9 +226,22 @@ function PhotosGrid() {
 }
 
 export default function AssetsPage() {
+  const utils = trpc.useUtils();
   const [tab, setTab] = useState<"videos" | "photos">("videos");
   const [selectedVideoId, setSelectedVideoId] = useState<string | null>(null);
-  const { data } = trpc.video.list.useQuery({ limit: 20, offset: 0 });
+  const { data } = trpc.video.list.useQuery(
+    { limit: 20, offset: 0 },
+    {
+      refetchInterval: (query) => {
+        const vids = query.state.data?.videos;
+        if (!vids) return false;
+        const hasGenerating = vids.some(
+          (v: any) => v.status === "generating" || v.status === "pending"
+        );
+        return hasGenerating ? 8000 : false;
+      },
+    }
+  );
   const videos = data?.videos;
 
   // ---- VIDEO DETAIL VIEW ----
@@ -171,7 +249,10 @@ export default function AssetsPage() {
     return (
       <VideoDetail
         videoId={selectedVideoId}
-        onBack={() => setSelectedVideoId(null)}
+        onBack={() => {
+          setSelectedVideoId(null);
+          utils.video.list.refetch();
+        }}
       />
     );
   }
@@ -208,35 +289,80 @@ export default function AssetsPage() {
             <div className="flex flex-col" style={{ gap: 12 }}>
               {Array.from({ length: Math.ceil(videos.length / 2) }).map((_, rowIdx) => (
                 <div key={rowIdx} className="grid grid-cols-2" style={{ gap: 12 }}>
-                  {videos.slice(rowIdx * 2, rowIdx * 2 + 2).map((video) => (
-                    <button
-                      key={video.id}
-                      onClick={() => setSelectedVideoId(video.id)}
-                      className="relative overflow-hidden text-left"
-                      style={{ height: 210, borderRadius: 16, backgroundColor: "#16161A" }}
-                    >
-                      {video.output_video_url ? (
-                        <video
-                          src={video.output_video_url}
-                          className="h-full w-full object-cover"
-                          muted
-                          playsInline
-                          preload="metadata"
-                        />
-                      ) : video.input_image_url ? (
-                        <Image src={video.input_image_url} alt="" fill className="object-cover" unoptimized />
-                      ) : null}
-                      {/* Duration Badge */}
-                      <div
-                        className="absolute"
-                        style={{ bottom: 8, left: 8, borderRadius: 8, backgroundColor: "#00000080", padding: "3px 8px" }}
+                  {videos.slice(rowIdx * 2, rowIdx * 2 + 2).map((video) => {
+                    const isFailed = video.status === "failed";
+                    const isGenerating = video.status === "generating" || video.status === "pending";
+                    const isCompleted = video.status === "completed";
+
+                    return (
+                      <button
+                        key={video.id}
+                        onClick={() => setSelectedVideoId(video.id)}
+                        className="relative overflow-hidden text-left"
+                        style={{ height: 210, borderRadius: 16, backgroundColor: "#16161A" }}
                       >
-                        <span style={{ fontSize: 11, fontWeight: 600, color: "#FFFFFF" }}>
-                          0:{String(video.duration || 5).padStart(2, "0")}
-                        </span>
-                      </div>
-                    </button>
-                  ))}
+                        {video.output_video_url ? (
+                          <video
+                            src={video.output_video_url}
+                            className="h-full w-full object-cover"
+                            muted
+                            playsInline
+                            preload="metadata"
+                          />
+                        ) : video.input_image_url ? (
+                          <>
+                            <Image src={video.input_image_url} alt="Video thumbnail" fill className="object-cover" unoptimized />
+                            {/* Overlay for non-completed */}
+                            {!isCompleted && (
+                              <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+                                {isGenerating && (
+                                  <div className="flex flex-col items-center" style={{ gap: 6 }}>
+                                    <Loader2 style={{ width: 24, height: 24, color: "#E8A838", animation: "spin 1.5s linear infinite" }} strokeWidth={2} />
+                                    <span style={{ fontSize: 11, fontWeight: 600, color: "#E8A838" }}>Processing</span>
+                                  </div>
+                                )}
+                                {isFailed && (
+                                  <div className="flex flex-col items-center" style={{ gap: 6 }}>
+                                    <XCircle style={{ width: 24, height: 24, color: "#EF4444" }} strokeWidth={1.5} />
+                                    <span style={{ fontSize: 11, fontWeight: 600, color: "#EF4444" }}>Failed</span>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </>
+                        ) : null}
+
+                        {/* Bottom row: duration + status */}
+                        <div className="absolute flex items-center" style={{ bottom: 8, left: 8, right: 8, gap: 4 }}>
+                          {/* Duration Badge */}
+                          <div style={{ borderRadius: 8, backgroundColor: "#00000080", padding: "3px 8px" }}>
+                            <span style={{ fontSize: 11, fontWeight: 600, color: "#FFFFFF" }}>
+                              0:{String(video.duration || 5).padStart(2, "0")}
+                            </span>
+                          </div>
+                          {/* Status Badge */}
+                          {isCompleted && (
+                            <div className="flex items-center" style={{ borderRadius: 8, backgroundColor: "#22C55E30", padding: "3px 8px", gap: 3 }}>
+                              <CheckCircle style={{ width: 10, height: 10, color: "#22C55E" }} strokeWidth={2} />
+                              <span style={{ fontSize: 10, fontWeight: 600, color: "#22C55E" }}>Done</span>
+                            </div>
+                          )}
+                          {isFailed && (
+                            <div className="flex items-center" style={{ borderRadius: 8, backgroundColor: "#EF444430", padding: "3px 8px", gap: 3 }}>
+                              <XCircle style={{ width: 10, height: 10, color: "#EF4444" }} strokeWidth={2} />
+                              <span style={{ fontSize: 10, fontWeight: 600, color: "#EF4444" }}>Failed</span>
+                            </div>
+                          )}
+                          {isGenerating && (
+                            <div className="flex items-center" style={{ borderRadius: 8, backgroundColor: "#E8A83830", padding: "3px 8px", gap: 3 }}>
+                              <Loader2 style={{ width: 10, height: 10, color: "#E8A838" }} strokeWidth={2} />
+                              <span style={{ fontSize: 10, fontWeight: 600, color: "#E8A838" }}>Processing</span>
+                            </div>
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               ))}
             </div>

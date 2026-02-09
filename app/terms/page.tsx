@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 
-export const metadata: Metadata = { title: "Terms of Service - BuzzMove" };
+export const metadata: Metadata = {
+  title: "Terms of Service",
+  description: "Read the BuzzMove Terms of Service. Learn about usage rules, content policies, and user responsibilities for our AI video generation platform.",
+  alternates: { canonical: "https://buzzmove.me/terms" },
+};
 
 export default function TermsPage() {
   return (

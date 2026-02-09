@@ -85,11 +85,11 @@ export const videoRouter = router({
         });
       }
 
-      // 5. Record credit transaction
-      await ctx.supabase.from("credit_transactions").insert({
+      // 5. Record credit transaction (use admin to bypass RLS)
+      await ctx.adminSupabase.from("credit_transactions").insert({
         user_id: ctx.user.id,
         amount: -creditCost,
-        type: "consume",
+        type: "deduction",
         description: `Video generation: ${input.mode} ${duration}s`,
         video_id: video.id,
       });
@@ -212,7 +212,48 @@ export const videoRouter = router({
         .range(input.offset, input.offset + input.limit - 1);
 
       if (error) throw error;
-      return { videos: data || [], total: count || 0 };
+
+      const videos = data || [];
+
+      // Batch-update any still-generating videos by polling Kling
+      const generating = videos.filter(
+        (v) => v.status === "generating" && v.kling_task_id
+      );
+
+      if (generating.length > 0) {
+        await Promise.allSettled(
+          generating.map(async (v) => {
+            try {
+              const taskResult = await getTaskStatus(v.kling_task_id!);
+              const klingStatus = taskResult.data.task_status;
+
+              if (klingStatus === "succeed" && taskResult.data.task_result?.videos?.[0]) {
+                const videoUrl = taskResult.data.task_result.videos[0].url;
+                await ctx.supabase
+                  .from("videos")
+                  .update({
+                    status: "completed",
+                    output_video_url: videoUrl,
+                    completed_at: new Date().toISOString(),
+                  })
+                  .eq("id", v.id);
+                v.status = "completed";
+                v.output_video_url = videoUrl;
+              } else if (klingStatus === "failed") {
+                await ctx.supabase
+                  .from("videos")
+                  .update({ status: "failed" })
+                  .eq("id", v.id);
+                v.status = "failed";
+              }
+            } catch {
+              // Polling error — skip, return stale status
+            }
+          })
+        );
+      }
+
+      return { videos, total: count || 0 };
     }),
 
   // List public videos for Explorer page
@@ -253,17 +294,18 @@ export const videoRouter = router({
         throw new TRPCError({ code: "NOT_FOUND", message: "Video not found" });
       }
 
-      // Delete associated credit transactions
-      await ctx.supabase
+      // Delete associated credit transactions (use admin to bypass RLS)
+      await ctx.adminSupabase
         .from("credit_transactions")
         .delete()
         .eq("video_id", video.id);
 
-      // Delete the video record
-      const { error } = await ctx.supabase
+      // Delete the video record (use admin to bypass FK issues)
+      const { error } = await ctx.adminSupabase
         .from("videos")
         .delete()
-        .eq("id", video.id);
+        .eq("id", video.id)
+        .eq("user_id", ctx.user.id); // still enforce ownership
 
       if (error) {
         throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to delete video" });
