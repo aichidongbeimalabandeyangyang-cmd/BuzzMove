@@ -12,7 +12,7 @@ interface BottomNavProps {
 const TABS = [
   { href: "/", label: "Move", icon: Flame, match: (p: string) => p === "/" },
   { href: "/dashboard", label: "Assets", icon: Layers, match: (p: string) => p === "/dashboard" || p === "/dashboard/" },
-  { href: "/dashboard/referrals", label: "Earn 500", icon: Gift, match: (p: string) => p.startsWith("/dashboard/referrals"), highlight: true },
+  { href: "/dashboard/referrals", label: "Referrals", icon: Gift, match: (p: string) => p.startsWith("/dashboard/referrals"), highlight: true },
 ] as const;
 
 export function BottomNav({ isLoggedIn, onLoginClick }: BottomNavProps) {
@@ -36,12 +36,17 @@ export function BottomNav({ isLoggedIn, onLoginClick }: BottomNavProps) {
             <div className="relative">
               <Icon style={{ width: 22, height: 22, color: hasHighlight && !isActive ? "#E8A838" : color }} strokeWidth={1.5} />
               {hasHighlight && !isActive && (
-                <div className="absolute animate-pulse" style={{ top: -2, right: -4, width: 7, height: 7, borderRadius: 100, backgroundColor: "#EF4444", border: "1.5px solid #0B0B0E" }} />
+                <div
+                  className="absolute flex items-center justify-center"
+                  style={{ top: -8, right: -20, borderRadius: 6, backgroundColor: "#EF4444", padding: "1px 4px", whiteSpace: "nowrap" }}
+                >
+                  <span style={{ fontSize: 8, fontWeight: 700, color: "#FFFFFF", lineHeight: 1.2 }}>earn credit</span>
+                </div>
               )}
             </div>
           );
 
-          if ((tab.label === "Assets" || tab.label === "Earn 500") && !isLoggedIn) {
+          if ((tab.label === "Assets" || tab.label === "Referrals") && !isLoggedIn) {
             return (
               <button
                 key={tab.label}
