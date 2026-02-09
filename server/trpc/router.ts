@@ -6,6 +6,7 @@ import { paymentRouter } from "./routers/payment";
 import { creditRouter } from "./routers/credit";
 import { trackingRouter } from "./routers/tracking";
 import { referralRouter } from "./routers/referral";
+import { adminRouter } from "./routers/admin";
 
 export const appRouter = router({
   user: userRouter,
@@ -15,6 +16,7 @@ export const appRouter = router({
   credit: creditRouter,
   tracking: trackingRouter,
   referral: referralRouter,
+  admin: adminRouter,
 });
 
 export type AppRouter = typeof appRouter;

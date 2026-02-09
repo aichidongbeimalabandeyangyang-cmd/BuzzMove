@@ -75,6 +75,9 @@ export const HERO_EXAMPLES = [
   },
 ] as const;
 
+// Admin whitelist
+export const ADMIN_EMAILS = ["billccb.8128@gmail.com"];
+
 // Referral reward
 export const REFERRAL_REWARD_CREDITS = 500;
 
