@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { trackPurchase } from "@/lib/gtag";
 import Image from "next/image";
@@ -242,14 +242,17 @@ function PhotosGrid() {
   );
 }
 
-export default function AssetsPage() {
+function PaymentTracker() {
   const searchParams = useSearchParams();
   useEffect(() => {
     if (searchParams.get("payment") === "success") {
       trackPurchase(0);
     }
   }, [searchParams]);
+  return null;
+}
 
+export default function AssetsPage() {
   const utils = trpc.useUtils();
   const [tab, setTab] = useState<"videos" | "photos">("videos");
   const [selectedVideoId, setSelectedVideoId] = useState<string | null>(null);
@@ -284,6 +287,7 @@ export default function AssetsPage() {
   // ---- ASSETS GRID ----
   return (
     <div className="flex w-full flex-1 flex-col desktop-container">
+      <Suspense><PaymentTracker /></Suspense>
       {/* Tab Switcher */}
       <div className="flex" style={{ gap: 4, padding: "0 16px 8px 16px" }}>
         {(["videos", "photos"] as const).map((t) => (
