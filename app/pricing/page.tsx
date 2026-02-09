@@ -168,7 +168,7 @@ export default function PricingPage() {
               onClick={() => handleSubscribe("premium")}
               disabled={subCheckout.isPending}
               className="flex w-full items-center justify-center transition-all active:scale-[0.98] disabled:opacity-50"
-              style={{ height: 48, borderRadius: 14, border: "1.5px solid #252530" }}
+              style={{ height: 48, borderRadius: 14, backgroundColor: "#1E1E24", border: "1.5px solid #E8A83850" }}
             >
               <span style={{ fontSize: 16, fontWeight: 700, color: "#FAFAF9" }}>
                 {subCheckout.isPending ? "Loading..." : "Upgrade to Premium"}
