@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
+
 import { Flame } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 
@@ -59,8 +59,8 @@ export function VideoProgress({ videoId, imagePreview, onComplete, onError }: Vi
       <div className="flex flex-1 flex-col items-center justify-center desktop-container" style={{ gap: 24, padding: "0 20px" }}>
         {/* Processing Image */}
         {imagePreview && (
-          <div className="relative w-full overflow-hidden lg:max-w-lg" style={{ height: 280, borderRadius: 20 }}>
-            <Image src={imagePreview} alt="Processing" fill className="object-cover" unoptimized />
+          <div className="relative w-full overflow-hidden lg:max-w-lg" style={{ borderRadius: 20 }}>
+            <img src={imagePreview} alt="Processing" className="w-full h-auto max-h-[60vh] object-contain" style={{ borderRadius: 20 }} />
             <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
               <div className="flex items-center" style={{ gap: 8, borderRadius: 100, backgroundColor: "#0B0B0ECC", padding: "8px 16px" }}>
                 <span style={{ fontSize: 14, fontWeight: 600, color: "#FAFAF9" }}>✨ Processing...</span>
