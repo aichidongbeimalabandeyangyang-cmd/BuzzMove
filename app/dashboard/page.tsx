@@ -333,12 +333,10 @@ function PhotosGrid({ onSelectPhoto }: { onSelectPhoto: (photo: { id: string; ur
 
   if (isLoading) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center" style={{ gap: 8 }}>
-        <div className="relative" style={{ width: 32, height: 32 }}>
-          <div className="absolute inset-0 rounded-full" style={{ border: "2px solid #252530" }} />
-          <div className="absolute inset-0 animate-spin rounded-full" style={{ border: "2px solid transparent", borderTopColor: "#E8A838" }} />
-        </div>
-        <span style={{ fontSize: 13, color: "#6B6B70" }}>Loading...</span>
+      <div className="grid grid-cols-3 lg:grid-cols-4 xl:grid-cols-5" style={{ gap: 12 }}>
+        {Array.from({ length: 9 }).map((_, i) => (
+          <div key={i} className="shimmer" style={{ aspectRatio: "3/4", borderRadius: 14, backgroundColor: "#16161A" }} />
+        ))}
       </div>
     );
   }
@@ -426,7 +424,7 @@ export default function AssetsPage() {
   const [tab, setTab] = useState<"videos" | "photos">("videos");
   const [selectedVideoId, setSelectedVideoId] = useState<string | null>(null);
   const [selectedPhoto, setSelectedPhoto] = useState<{ id: string; url: string; is_pinned: boolean } | null>(null);
-  const { data } = trpc.video.list.useQuery(
+  const { data, isLoading: videosLoading } = trpc.video.list.useQuery(
     { limit: 20, offset: 0 },
     {
       refetchInterval: (query) => {
@@ -498,7 +496,13 @@ export default function AssetsPage() {
       {/* Content Grid */}
       <div className="flex flex-1 flex-col overflow-y-auto" style={{ gap: 12, padding: "8px 16px 16px 16px" }}>
         {tab === "videos" ? (
-          videos && videos.length > 0 ? (
+          videosLoading ? (
+            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" style={{ gap: 12 }}>
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="shimmer" style={{ height: 210, borderRadius: 16, backgroundColor: "#16161A" }} />
+              ))}
+            </div>
+          ) : videos && videos.length > 0 ? (
             <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" style={{ gap: 12 }}>
               {videos.map((video) => {
                 const isFailed = video.status === "failed";
