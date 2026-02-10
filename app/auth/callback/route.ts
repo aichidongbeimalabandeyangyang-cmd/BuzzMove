@@ -6,6 +6,7 @@ import { REFERRAL_REWARD_CREDITS } from "@/lib/constants";
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
+  const redirectTo = searchParams.get("redirectTo");
 
   const forwardedHost = request.headers.get("x-forwarded-host");
   const isLocalEnv = process.env.NODE_ENV === "development";
@@ -16,7 +17,8 @@ export async function GET(request: NextRequest) {
       : origin;
 
   if (code) {
-    const response = NextResponse.redirect(`${baseUrl}/dashboard`);
+    const destination = redirectTo && redirectTo.startsWith("/") ? redirectTo : "/dashboard";
+    const response = NextResponse.redirect(`${baseUrl}${destination}`);
 
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,

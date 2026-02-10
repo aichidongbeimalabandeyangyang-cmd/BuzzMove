@@ -9,9 +9,10 @@ import { logEvent } from "@/lib/events";
 interface LoginModalProps {
   open: boolean;
   onClose: () => void;
+  redirectTo?: string | null;
 }
 
-export function LoginModal({ open, onClose }: LoginModalProps) {
+export function LoginModal({ open, onClose, redirectTo }: LoginModalProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
   const [step, setStep] = useState<"main" | "email" | "otp">("main");
   const [email, setEmail] = useState("");
@@ -43,9 +44,11 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
   const handleGoogleLogin = async () => {
     // trackSignUp fires in auth callback, not here (user may cancel OAuth)
     const supabase = createSupabaseBrowserClient();
+    const callbackUrl = new URL("/auth/callback", window.location.origin);
+    if (redirectTo) callbackUrl.searchParams.set("redirectTo", redirectTo);
     await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: { redirectTo: callbackUrl.toString() },
     });
   };
 
@@ -82,6 +85,9 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
       logEvent("otp_verify_ok", { email: email.trim() });
       trackSignUp("email");
       onClose();
+      if (redirectTo) {
+        window.location.href = redirectTo;
+      }
     } catch (err: any) {
       logEvent("otp_verify_fail", { email: email.trim(), error: err.message });
       setError(err.message || "Invalid code. Please try again.");

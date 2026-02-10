@@ -61,10 +61,12 @@ export function AppShell({ children }: { children: ReactNode }) {
     return () => window.removeEventListener("open-login", handler);
   }, []);
 
-  // Check ?login=1 query param
+  // Check ?login=1 query param & capture redirectTo
+  const [redirectTo, setRedirectTo] = useState<string | null>(null);
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("login") === "1") setShowLogin(true);
+    if (params.get("redirectTo")) setRedirectTo(params.get("redirectTo"));
   }, []);
 
   const openLogin = () => setShowLogin(true);
@@ -83,7 +85,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <main className="flex flex-1 flex-col main-with-nav">{children}</main>
       </div>
       <BottomNav isLoggedIn={!!user} onLoginClick={openLogin} />
-      <LoginModal open={showLogin} onClose={() => setShowLogin(false)} />
+      <LoginModal open={showLogin} onClose={() => setShowLogin(false)} redirectTo={redirectTo} />
       {user && <ReferralLinker userId={user.id} />}
       {user && <UtmLinker userId={user.id} />}
       <SwRegister />
