@@ -1,14 +1,13 @@
-import Link from "next/link";
+import { LandingCtaButton } from "./landing-cta-button";
 
 interface LandingHeroProps {
   badge?: string;
   title: React.ReactNode;
   subtitle: string;
   ctaText: string;
-  ctaHref?: string;
 }
 
-export function LandingHero({ badge, title, subtitle, ctaText, ctaHref = "/" }: LandingHeroProps) {
+export function LandingHero({ badge, title, subtitle, ctaText }: LandingHeroProps) {
   return (
     <div style={{ marginBottom: 64, textAlign: "center" }}>
       {badge && (
@@ -33,21 +32,7 @@ export function LandingHero({ badge, title, subtitle, ctaText, ctaHref = "/" }: 
       <p style={{ maxWidth: 560, margin: "0 auto 32px auto", fontSize: 16, lineHeight: 1.6, color: "#9898A4" }}>
         {subtitle}
       </p>
-      <Link
-        href={ctaHref}
-        style={{
-          display: "inline-block",
-          borderRadius: 12,
-          padding: "14px 32px",
-          fontSize: 16,
-          fontWeight: 600,
-          background: "linear-gradient(135deg, #F0C060, #E8A838)",
-          color: "#0B0B0E",
-          textDecoration: "none",
-        }}
-      >
-        {ctaText}
-      </Link>
+      <LandingCtaButton text={ctaText} />
     </div>
   );
 }

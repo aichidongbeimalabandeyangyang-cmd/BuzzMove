@@ -1,13 +1,12 @@
-import Link from "next/link";
+import { LandingCtaButton } from "./landing-cta-button";
 
 interface CtaSectionProps {
   title: string;
   subtitle: string;
   ctaText: string;
-  ctaHref?: string;
 }
 
-export function CtaSection({ title, subtitle, ctaText, ctaHref = "/" }: CtaSectionProps) {
+export function CtaSection({ title, subtitle, ctaText }: CtaSectionProps) {
   return (
     <div
       style={{
@@ -23,20 +22,7 @@ export function CtaSection({ title, subtitle, ctaText, ctaHref = "/" }: CtaSecti
       <p style={{ marginBottom: 24, color: "rgba(11,11,14,0.7)" }}>
         {subtitle}
       </p>
-      <Link
-        href={ctaHref}
-        style={{
-          display: "inline-block",
-          borderRadius: 12,
-          padding: "12px 32px",
-          fontWeight: 600,
-          backgroundColor: "#0B0B0E",
-          color: "#FAFAF9",
-          textDecoration: "none",
-        }}
-      >
-        {ctaText}
-      </Link>
+      <LandingCtaButton text={ctaText} variant="secondary" />
     </div>
   );
 }

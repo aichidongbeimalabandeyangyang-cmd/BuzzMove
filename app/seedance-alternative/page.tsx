@@ -1,5 +1,6 @@
 import { LandingHero } from "@/components/landing/landing-hero";
 import { ComparisonTable } from "@/components/landing/comparison-table";
+import { ShowcaseDemo } from "@/components/landing/showcase-demo";
 import { CtaSection } from "@/components/landing/cta-section";
 
 export default function SeedanceAlternativePage() {
@@ -26,6 +27,8 @@ export default function SeedanceAlternativePage() {
         subtitle="Seedance 2.0 has a waitlist and strict content filters. BuzzMove lets you generate AI videos from photos instantly — with AI audio, no restrictions, and no waiting."
         ctaText="Try BuzzMove Free"
       />
+
+      <ShowcaseDemo />
 
       <ComparisonTable
         competitorName="Seedance 2.0"

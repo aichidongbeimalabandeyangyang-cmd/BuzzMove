@@ -1,4 +1,5 @@
 import { LandingHero } from "@/components/landing/landing-hero";
+import { ShowcaseDemo } from "@/components/landing/showcase-demo";
 import { ComparisonTable } from "@/components/landing/comparison-table";
 import { CtaSection } from "@/components/landing/cta-section";
 
@@ -24,6 +25,11 @@ export default function SeedanceUnrestrictedPage() {
         }
         subtitle="Tired of content policy rejections on Seedance, Sora, or Runway? BuzzMove lets you create AI videos without restrictions — with built-in audio."
         ctaText="Start Creating Freely"
+      />
+
+      <ShowcaseDemo
+        title="Create Without Limits"
+        subtitle="No content filters. No prompt rejections. Just your creativity."
       />
 
       {/* Pain points */}
