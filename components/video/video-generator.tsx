@@ -168,9 +168,11 @@ export function VideoGenerator({ imageUrl, imagePreview, onReset, onBackHome, in
           <div className="flex-1 lg:hidden" />
 
           {/* Audio hint */}
-          <p style={{ fontSize: 12, color: "#6B6B70", lineHeight: 1.5 }}>
-            With audio on, you can prompt like: <span style={{ color: "#E8A838" }}>&quot;Smile and says: hello darling&quot;</span>
-          </p>
+          {mode === "audio" && (
+            <p style={{ fontSize: 12, color: "#6B6B70", lineHeight: 1.5 }}>
+              With audio on, you can prompt like: <span style={{ color: "#E8A838" }}>&quot;Smile and says: hello darling&quot;</span>
+            </p>
+          )}
 
           {/* Generate Button */}
           <button
