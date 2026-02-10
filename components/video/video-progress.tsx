@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 
 import { Flame } from "lucide-react";
 import { trpc } from "@/lib/trpc";
@@ -20,7 +20,7 @@ const PROGRESS_STAGES = [
   { label: "Almost there...", threshold: 100 },
 ];
 
-export function VideoProgress({ videoId, imagePreview, onComplete, onError }: VideoProgressProps) {
+export const VideoProgress = memo(function VideoProgress({ videoId, imagePreview, onComplete, onError }: VideoProgressProps) {
   const [progress, setProgress] = useState(0);
 
   const { data: video } = trpc.video.getStatus.useQuery(
@@ -41,20 +41,28 @@ export function VideoProgress({ videoId, imagePreview, onComplete, onError }: Vi
 
   // Tab title flashing when video completes while tab is hidden
   useEffect(() => {
+    const originalTitle = document.title;
+    let interval: ReturnType<typeof setInterval> | null = null;
+    let listener: (() => void) | null = null;
+    let cleaned = false;
+
+    const cleanup = () => {
+      if (cleaned) return;
+      cleaned = true;
+      if (interval) clearInterval(interval);
+      if (listener) document.removeEventListener("visibilitychange", listener);
+      document.title = originalTitle;
+    };
+
     if (video?.status === "completed") {
       if (document.hidden) {
-        const originalTitle = document.title;
         let flash = true;
-        const interval = setInterval(() => {
+        interval = setInterval(() => {
           document.title = flash ? "✅ Video Ready! — BuzzMove" : originalTitle;
           flash = !flash;
         }, 1000);
-        const restore = () => {
-          clearInterval(interval);
-          document.title = originalTitle;
-          document.removeEventListener("visibilitychange", restore);
-        };
-        document.addEventListener("visibilitychange", restore);
+        listener = () => { cleanup(); };
+        document.addEventListener("visibilitychange", listener);
       }
       onComplete();
       window.dispatchEvent(new Event("show-install-prompt"));
@@ -62,14 +70,13 @@ export function VideoProgress({ videoId, imagePreview, onComplete, onError }: Vi
     if (video?.status === "failed") {
       if (document.hidden) {
         document.title = "❌ Generation Failed — BuzzMove";
-        const restore = () => {
-          document.title = "BuzzMove";
-          document.removeEventListener("visibilitychange", restore);
-        };
-        document.addEventListener("visibilitychange", restore);
+        listener = () => { cleanup(); };
+        document.addEventListener("visibilitychange", listener);
       }
       onError();
     }
+
+    return cleanup;
   }, [video?.status]);
 
   // Slower progress for professional/10s to avoid stalling at 92%
@@ -145,4 +152,4 @@ export function VideoProgress({ videoId, imagePreview, onComplete, onError }: Vi
       )}
     </div>
   );
-}
+});

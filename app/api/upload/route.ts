@@ -52,12 +52,16 @@ export async function POST(request: NextRequest) {
   } = supabase.storage.from("uploads").getPublicUrl(data.path);
 
   // Record in image_uploads table (ignore duplicate — UNIQUE index handles it)
-  await supabase.from("image_uploads").insert({
+  const { error: insertError } = await supabase.from("image_uploads").insert({
     user_id: user.id,
     url: publicUrl,
     filename: file.name,
     size_bytes: file.size,
   });
+
+  if (insertError) {
+    logServerEvent("upload_db_insert_fail", { userId: user.id, metadata: { error: insertError.message, url: publicUrl } });
+  }
 
   return NextResponse.json({ url: publicUrl });
 }

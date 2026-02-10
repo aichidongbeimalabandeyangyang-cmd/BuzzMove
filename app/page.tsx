@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, memo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Sparkles, Plus, Play } from "lucide-react";
@@ -22,7 +22,7 @@ const TAGLINES = [
 const ROW_H = 30;
 const VISIBLE_ROWS = 3; // top + center + bottom
 
-function RotatingTaglines() {
+const RotatingTaglines = memo(function RotatingTaglines() {
   const [active, setActive] = useState(0);
   const [animate, setAnimate] = useState(true);
   const count = TAGLINES.length;
@@ -99,7 +99,7 @@ function RotatingTaglines() {
       </div>
     </div>
   );
-}
+});
 
 // ---- Showcase content variants ----
 const SHOWCASE_DEFAULT = {
@@ -158,7 +158,7 @@ function useShowcase() {
   return showcase;
 }
 
-function LoggedInHome({ onUpload }: { onUpload: () => void }) {
+const LoggedInHome = memo(function LoggedInHome({ onUpload }: { onUpload: () => void }) {
   const { data } = trpc.video.list.useQuery(
     { limit: 3, offset: 0 },
     {
@@ -277,7 +277,7 @@ function LoggedInHome({ onUpload }: { onUpload: () => void }) {
       )}
     </div>
   );
-}
+});
 
 export default function HomePage() {
   const { homeView, setHomeView, user, openLogin } = useApp();
@@ -294,6 +294,15 @@ export default function HomePage() {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const isLoggedIn = !!user;
+
+  // Cleanup blob URL on unmount or when imagePreview changes
+  useEffect(() => {
+    return () => {
+      if (imagePreview && imagePreview.startsWith("blob:")) {
+        URL.revokeObjectURL(imagePreview);
+      }
+    };
+  }, [imagePreview]);
 
   // Handle refine params from Assets page (e.g. /?image=...&prompt=...)
   useEffect(() => {

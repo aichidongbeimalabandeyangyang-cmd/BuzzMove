@@ -268,8 +268,8 @@ export const videoRouter = router({
 
             return { ...video, status: "failed" };
           }
-        } catch {
-          // Polling error — just return current status
+        } catch (err) {
+          console.error(`[video.getStatus] Polling failed for video=${video.id} task=${video.kling_task_id}:`, err instanceof Error ? err.message : err);
         }
       }
 
@@ -355,8 +355,8 @@ export const videoRouter = router({
 
                 v.status = "failed";
               }
-            } catch {
-              // Polling error — skip, return stale status
+            } catch (err) {
+              console.error(`[video.list] Polling failed for video=${v.id} task=${v.kling_task_id}:`, err instanceof Error ? err.message : err);
             }
           })
         );

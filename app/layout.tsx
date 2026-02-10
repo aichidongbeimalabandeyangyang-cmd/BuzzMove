@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { DM_Sans } from "next/font/google";
 import { Providers } from "@/components/providers";
 import { AppShell } from "@/components/layout/app-shell";
+import { ErrorBoundary } from "@/components/layout/error-boundary";
 import { Footer } from "@/components/layout/footer";
 import "./globals.css";
 
@@ -150,7 +151,9 @@ export default function RootLayout({
           }}
         />
         <Providers>
-          <AppShell>{children}</AppShell>
+          <ErrorBoundary>
+            <AppShell>{children}</AppShell>
+          </ErrorBoundary>
           <Footer />
         </Providers>
       </body>
