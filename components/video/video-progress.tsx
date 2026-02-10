@@ -35,7 +35,11 @@ export function VideoProgress({ videoId, imagePreview, onComplete, onError }: Vi
   );
 
   useEffect(() => {
-    if (video?.status === "completed") onComplete();
+    if (video?.status === "completed") {
+      onComplete();
+      // Trigger PWA install prompt after first successful video
+      window.dispatchEvent(new Event("show-install-prompt"));
+    }
     if (video?.status === "failed") onError();
   }, [video?.status]);
 

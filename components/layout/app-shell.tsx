@@ -9,6 +9,8 @@ import { LoginModal } from "@/components/auth/login-modal";
 import { ReferralLinker } from "@/components/tracking/referral-linker";
 import { UtmLinker } from "@/components/tracking/utm-linker";
 import { trackSignUp } from "@/lib/gtag";
+import { SwRegister } from "@/components/pwa/sw-register";
+import { InstallPrompt } from "@/components/pwa/install-prompt";
 
 // ---------- HomeView Context ----------
 type HomeView = "home" | "upload" | "generator" | "progress" | "result";
@@ -84,6 +86,8 @@ export function AppShell({ children }: { children: ReactNode }) {
       <LoginModal open={showLogin} onClose={() => setShowLogin(false)} />
       {user && <ReferralLinker userId={user.id} />}
       {user && <UtmLinker userId={user.id} />}
+      <SwRegister />
+      <InstallPrompt />
     </AppContext.Provider>
   );
 }
