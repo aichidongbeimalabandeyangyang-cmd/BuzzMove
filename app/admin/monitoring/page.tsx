@@ -154,7 +154,7 @@ export default function MonitoringPage() {
     );
   }
 
-  const { healthChecks, videoStats, creditStats, stuckVideos, recentFailures, totals } = data;
+  const { healthChecks, videoStats, creditStats, stuckVideos, recentFailures, totals, eventStats } = data;
 
   return (
     <div
@@ -347,6 +347,124 @@ export default function MonitoringPage() {
           )}
         </div>
       </div>
+
+      {/* Auth & System Events (24h) */}
+      <div className="flex flex-col" style={{ gap: 12 }}>
+        <SectionTitle>Events (24h)</SectionTitle>
+        <div className="flex flex-wrap" style={{ gap: 12 }}>
+          <StatCard
+            label="OTP Sent"
+            value={eventStats.last24h["otp_send_ok"] ?? 0}
+            icon={CheckCircle2}
+            color="#22C55E"
+          />
+          <StatCard
+            label="OTP Send Fail"
+            value={eventStats.last24h["otp_send_fail"] ?? 0}
+            icon={XCircle}
+            color="#EF4444"
+          />
+          <StatCard
+            label="OTP Verified"
+            value={eventStats.last24h["otp_verify_ok"] ?? 0}
+            icon={CheckCircle2}
+            color="#22C55E"
+          />
+          <StatCard
+            label="OTP Verify Fail"
+            value={eventStats.last24h["otp_verify_fail"] ?? 0}
+            icon={XCircle}
+            color="#EF4444"
+          />
+          {(eventStats.last24h["upload_fail"] ?? 0) > 0 && (
+            <StatCard
+              label="Upload Fail"
+              value={eventStats.last24h["upload_fail"]}
+              icon={XCircle}
+              color="#EF4444"
+            />
+          )}
+          {(eventStats.last24h["video_generate_fail"] ?? 0) > 0 && (
+            <StatCard
+              label="Generate Fail"
+              value={eventStats.last24h["video_generate_fail"]}
+              icon={XCircle}
+              color="#EF4444"
+            />
+          )}
+        </div>
+      </div>
+
+      {/* Recent Events Log */}
+      {eventStats.recentEvents.length > 0 && (
+        <div className="flex flex-col" style={{ gap: 12 }}>
+          <SectionTitle>Recent Event Log (24h)</SectionTitle>
+          <div style={{ borderRadius: 14, backgroundColor: "#16161A", overflow: "hidden" }}>
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                <thead>
+                  <tr>
+                    {["Event", "Email", "Detail", "Time"].map((h) => (
+                      <th
+                        key={h}
+                        style={{
+                          textAlign: "left",
+                          padding: "10px 12px",
+                          fontWeight: 500,
+                          color: "#6B6B70",
+                          borderBottom: "1px solid #252530",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {eventStats.recentEvents.map((e: any, i: number) => {
+                    const isFail = e.event.includes("fail");
+                    return (
+                      <tr key={i} style={{ borderBottom: "1px solid #1E1E22" }}>
+                        <td style={{ padding: "8px 12px" }}>
+                          <span
+                            style={{
+                              fontSize: 12,
+                              fontWeight: 500,
+                              padding: "2px 8px",
+                              borderRadius: 6,
+                              backgroundColor: isFail ? "#EF444415" : "#22C55E15",
+                              color: isFail ? "#EF4444" : "#22C55E",
+                            }}
+                          >
+                            {e.event}
+                          </span>
+                        </td>
+                        <td style={{ padding: "8px 12px", color: "#FAFAF9" }}>{e.email || "—"}</td>
+                        <td
+                          style={{
+                            padding: "8px 12px",
+                            color: "#6B6B70",
+                            maxWidth: 300,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {e.metadata?.error || "—"}
+                        </td>
+                        <td style={{ padding: "8px 12px", color: "#6B6B70", whiteSpace: "nowrap" }}>
+                          {formatTime(e.created_at)}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Overall */}
       <div className="flex flex-col" style={{ gap: 12 }}>

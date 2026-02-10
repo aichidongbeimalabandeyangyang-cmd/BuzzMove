@@ -6,6 +6,7 @@ import { resolveContentPolicy } from "@/server/services/content-policy";
 import { CREDIT_COSTS } from "@/lib/constants";
 import { persistVideoToStorage } from "@/server/services/video-persist";
 import { after } from "next/server";
+import { logServerEvent } from "@/server/services/events";
 
 export const videoRouter = router({
   // Generate a video from an image
@@ -121,6 +122,11 @@ export const videoRouter = router({
           status: "generating",
         };
       } catch (err) {
+        logServerEvent("video_generate_fail", {
+          userId: ctx.user.id,
+          metadata: { videoId: video.id, mode: input.mode, duration, error: err instanceof Error ? err.message : "Unknown" },
+        });
+
         // Mark as failed, refund credits atomically
         await ctx.supabase
           .from("videos")

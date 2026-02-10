@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { createSupabaseBrowserClient } from "@/server/supabase/client";
 import { Play, Mail, ArrowLeft } from "lucide-react";
 import { trackSignUp, trackLoginModalView } from "@/lib/gtag";
+import { logEvent } from "@/lib/events";
 
 interface LoginModalProps {
   open: boolean;
@@ -56,8 +57,10 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
       const supabase = createSupabaseBrowserClient();
       const { error } = await supabase.auth.signInWithOtp({ email: email.trim() });
       if (error) throw error;
+      logEvent("otp_send_ok", { email: email.trim() });
       setStep("otp");
     } catch (err: any) {
+      logEvent("otp_send_fail", { email: email.trim(), error: err.message });
       setError(err.message || "Failed to send code. Please try again.");
     } finally {
       setLoading(false);
@@ -76,9 +79,11 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
         type: "email",
       });
       if (error) throw error;
+      logEvent("otp_verify_ok", { email: email.trim() });
       trackSignUp("email");
       onClose();
     } catch (err: any) {
+      logEvent("otp_verify_fail", { email: email.trim(), error: err.message });
       setError(err.message || "Invalid code. Please try again.");
     } finally {
       setLoading(false);

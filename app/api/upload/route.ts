@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/server/supabase/server";
 import { SUPPORTED_FORMATS, MAX_FILE_SIZE } from "@/lib/constants";
+import { logServerEvent } from "@/server/services/events";
 
 export async function POST(request: NextRequest) {
   const supabase = await createSupabaseServerClient();
@@ -42,6 +43,7 @@ export async function POST(request: NextRequest) {
     });
 
   if (error) {
+    logServerEvent("upload_fail", { userId: user.id, metadata: { error: error.message, filename: file.name } });
     return NextResponse.json({ error: "Upload failed" }, { status: 500 });
   }
 

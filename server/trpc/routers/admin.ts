@@ -338,6 +338,26 @@ export const adminRouter = router({
       }
     }
 
+    // System events (24h + 7d)
+    const [events24hRes, events7dRes] = await Promise.all([
+      supabase.from("system_events").select("event, metadata, email, created_at").gte("created_at", since24h).order("created_at", { ascending: false }),
+      supabase.from("system_events").select("event").gte("created_at", since7d),
+    ]);
+
+    function countByEvent(events: { event: string }[]) {
+      const counts: Record<string, number> = {};
+      for (const e of events) {
+        counts[e.event] = (counts[e.event] || 0) + 1;
+      }
+      return counts;
+    }
+
+    const eventStats = {
+      last24h: countByEvent(events24hRes.data ?? []),
+      last7d: countByEvent(events7dRes.data ?? []),
+      recentEvents: (events24hRes.data ?? []).slice(0, 30),
+    };
+
     // Totals
     const [totalUsersRes, totalVideosRes] = await Promise.all([
       supabase.from("profiles").select("id", { count: "exact", head: true }),
@@ -361,6 +381,7 @@ export const adminRouter = router({
         users: totalUsersRes.count ?? 0,
         videos: totalVideosRes.count ?? 0,
       },
+      eventStats,
       checkedAt: now.toISOString(),
     };
   }),
