@@ -26,17 +26,35 @@ function extractTitle(content: string): string {
   return "分析报告";
 }
 
-/** Extract a preview snippet (skip title, get first paragraph) */
-function extractPreview(content: string): string {
+/** Extract executive summary section content */
+function extractSummary(content: string): string {
   const lines = content.split("\n");
-  let skippedTitle = false;
+  let inSummary = false;
+  const summaryLines: string[] = [];
+
   for (const line of lines) {
     const trimmed = line.trim();
-    if (!skippedTitle && trimmed.startsWith("#")) { skippedTitle = true; continue; }
-    if (trimmed.length > 20) {
-      const clean = trimmed.replace(/\*\*/g, "").replace(/^[-*]\s*/, "");
-      return clean.slice(0, 120) + (clean.length > 120 ? "..." : "");
+    // Detect summary/摘要 heading
+    if (/^#{1,3}\s*.*(summary|摘要|概述|总结)/i.test(trimmed)) {
+      inSummary = true;
+      continue;
     }
+    // Stop at next heading
+    if (inSummary && /^#{1,3}\s/.test(trimmed)) break;
+    if (inSummary && trimmed.length > 0) {
+      summaryLines.push(trimmed.replace(/\*\*/g, "").replace(/^[-*]\s*/, ""));
+    }
+  }
+
+  const text = summaryLines.join(" ").trim();
+  if (text.length > 0) return text.slice(0, 300) + (text.length > 300 ? "..." : "");
+
+  // Fallback: first non-heading paragraph
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (trimmed.startsWith("#") || trimmed.length < 20) continue;
+    const clean = trimmed.replace(/\*\*/g, "").replace(/^[-*]\s*/, "");
+    return clean.slice(0, 300) + (clean.length > 300 ? "..." : "");
   }
   return "";
 }
@@ -164,10 +182,10 @@ export default function AdminReportsPage() {
         </div>
       ) : (
         <>
-          <div className="flex flex-col" style={{ gap: 12 }}>
+          <div className="flex flex-col" style={{ gap: 16 }}>
             {listData.reports.map((report: any) => {
               const title = report.report_content ? extractTitle(report.report_content) : "分析报告";
-              const preview = report.report_content ? extractPreview(report.report_content) : "";
+              const summary = report.report_content ? extractSummary(report.report_content) : "";
 
               return (
                 <button
@@ -175,58 +193,54 @@ export default function AdminReportsPage() {
                   onClick={() => setSelectedId(report.id)}
                   className="flex w-full flex-col transition-all active:scale-[0.98]"
                   style={{
-                    borderRadius: 16,
+                    borderRadius: 18,
                     backgroundColor: "#16161A",
-                    padding: "18px 20px",
-                    gap: 12,
+                    padding: "24px 24px 20px",
+                    gap: 16,
                     border: "1px solid #1E1E24",
                     textAlign: "left",
+                    minHeight: 180,
                   }}
                 >
-                  {/* Card Header */}
-                  <div className="flex w-full items-start justify-between">
+                  {/* Top row: badge + date range */}
+                  <div className="flex items-center" style={{ gap: 10 }}>
+                    <span
+                      style={{
+                        fontSize: 10, fontWeight: 700, letterSpacing: 0.5,
+                        borderRadius: 6, padding: "3px 8px",
+                        color: report.report_type === "manual" ? "#A855F7" : "#22C55E",
+                        backgroundColor: report.report_type === "manual" ? "#A855F720" : "#22C55E20",
+                      }}
+                    >
+                      {report.report_type === "manual" ? "手动" : "自动"}
+                    </span>
+                    <span style={{ fontSize: 12, color: "#4A4A50" }}>
+                      {formatDate(report.created_at)} {formatTime(report.created_at)}
+                    </span>
+                  </div>
+
+                  {/* Title + period */}
+                  <div className="flex w-full items-start justify-between" style={{ gap: 12 }}>
                     <div className="flex flex-col" style={{ gap: 6, flex: 1, minWidth: 0 }}>
-                      <div className="flex items-center" style={{ gap: 8 }}>
-                        <span
-                          style={{
-                            fontSize: 10, fontWeight: 700, letterSpacing: 0.5,
-                            borderRadius: 6, padding: "3px 8px",
-                            color: report.report_type === "manual" ? "#A855F7" : "#22C55E",
-                            backgroundColor: report.report_type === "manual" ? "#A855F720" : "#22C55E20",
-                          }}
-                        >
-                          {report.report_type === "manual" ? "手动" : "自动"}
-                        </span>
-                        <div className="flex items-center" style={{ gap: 4 }}>
-                          <Calendar style={{ width: 11, height: 11, color: "#4A4A50" }} strokeWidth={1.5} />
-                          <span style={{ fontSize: 11, color: "#4A4A50" }}>
-                            {formatDate(report.period_start)} — {formatDate(report.period_end)}
-                          </span>
-                        </div>
-                      </div>
-                      <span style={{ fontSize: 16, fontWeight: 600, color: "#FAFAF9" }}>
+                      <span style={{ fontSize: 18, fontWeight: 700, color: "#FAFAF9", lineHeight: 1.3 }}>
                         {title}
                       </span>
-                    </div>
-                    <ChevronRight style={{ width: 18, height: 18, color: "#4A4A50", flexShrink: 0, marginTop: 4 }} strokeWidth={1.5} />
-                  </div>
-
-                  {/* Preview Snippet */}
-                  {preview && (
-                    <p style={{ fontSize: 13, lineHeight: 1.6, color: "#6B6B70", margin: 0 }}>
-                      {preview}
-                    </p>
-                  )}
-
-                  {/* Card Footer */}
-                  <div className="flex items-center" style={{ gap: 12 }}>
-                    <div className="flex items-center" style={{ gap: 4 }}>
-                      <Clock style={{ width: 11, height: 11, color: "#4A4A50" }} strokeWidth={1.5} />
-                      <span style={{ fontSize: 11, color: "#4A4A50" }}>
-                        {formatDate(report.created_at)} {formatTime(report.created_at)}
+                      <span style={{ fontSize: 13, color: "#6B6B70" }}>
+                        {formatDate(report.period_start)} — {formatDate(report.period_end)}
                       </span>
                     </div>
+                    <ChevronRight style={{ width: 20, height: 20, color: "#4A4A50", flexShrink: 0, marginTop: 2 }} strokeWidth={1.5} />
                   </div>
+
+                  {/* Executive Summary preview */}
+                  {summary && (
+                    <p style={{
+                      fontSize: 13, lineHeight: 1.7, color: "#7A7A82", margin: 0,
+                      display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden",
+                    }}>
+                      {summary}
+                    </p>
+                  )}
                 </button>
               );
             })}
