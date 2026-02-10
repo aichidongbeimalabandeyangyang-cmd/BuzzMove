@@ -85,9 +85,7 @@ export function LoginModal({ open, onClose, redirectTo }: LoginModalProps) {
       logEvent("otp_verify_ok", { email: email.trim() });
       trackSignUp("email");
       onClose();
-      if (redirectTo) {
-        window.location.href = redirectTo;
-      }
+      window.location.href = redirectTo || "/";
     } catch (err: any) {
       logEvent("otp_verify_fail", { email: email.trim(), error: err.message });
       setError(err.message || "Invalid code. Please try again.");

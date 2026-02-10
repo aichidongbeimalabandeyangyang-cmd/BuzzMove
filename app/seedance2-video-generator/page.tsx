@@ -1,5 +1,6 @@
 import { LandingHero } from "@/components/landing/landing-hero";
 import { ShowcaseDemo } from "@/components/landing/showcase-demo";
+import { LandingGenerator } from "@/components/landing/landing-generator";
 import { StepsSection } from "@/components/landing/steps-section";
 import { CtaSection } from "@/components/landing/cta-section";
 
@@ -31,6 +32,8 @@ export default function Seedance2VideoGeneratorPage() {
         title="From Photo to Video in Seconds"
         subtitle="Upload a photo, write a prompt, and get a stunning AI video."
       />
+
+      <LandingGenerator />
 
       {/* Features */}
       <div style={{ marginBottom: 64 }}>

@@ -13,7 +13,7 @@ export function LandingCtaButton({ text, variant = "primary" }: LandingCtaButton
   if (variant === "secondary") {
     return (
       <button
-        onClick={openLogin}
+        onClick={() => openLogin()}
         style={{
           display: "inline-block",
           borderRadius: 12,
@@ -32,7 +32,7 @@ export function LandingCtaButton({ text, variant = "primary" }: LandingCtaButton
 
   return (
     <button
-      onClick={openLogin}
+      onClick={() => openLogin()}
       style={{
         display: "inline-block",
         borderRadius: 12,

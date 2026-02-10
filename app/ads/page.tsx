@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { LandingHero } from "@/components/landing/landing-hero";
 import { ShowcaseDemo } from "@/components/landing/showcase-demo";
+import { LandingGenerator } from "@/components/landing/landing-generator";
 import { CtaSection } from "@/components/landing/cta-section";
 
 export const metadata: Metadata = {
@@ -38,6 +39,8 @@ export default function AdsPage() {
         title="See the Quality"
         subtitle="One product photo becomes a scroll-stopping video ad."
       />
+
+      <LandingGenerator />
 
       {/* Use cases */}
       <div

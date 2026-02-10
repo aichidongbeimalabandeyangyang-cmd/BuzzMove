@@ -19,7 +19,7 @@ interface AppContextType {
   homeView: HomeView;
   setHomeView: (v: HomeView) => void;
   user: any;
-  openLogin: () => void;
+  openLogin: (redirectTo?: string) => void;
 }
 
 const AppContext = createContext<AppContextType>({
@@ -69,22 +69,25 @@ export function AppShell({ children }: { children: ReactNode }) {
     if (params.get("redirectTo")) setRedirectTo(params.get("redirectTo"));
   }, []);
 
-  const openLogin = () => setShowLogin(true);
+  const openLogin = (redirect?: string) => {
+    if (redirect) setRedirectTo(redirect);
+    setShowLogin(true);
+  };
 
   return (
     <AppContext.Provider value={{ homeView, setHomeView, user, openLogin }}>
-      <Sidebar isLoggedIn={!!user} userEmail={user?.email} onLoginClick={openLogin} />
+      <Sidebar isLoggedIn={!!user} userEmail={user?.email} onLoginClick={() => openLogin()} />
       <div className="flex min-h-screen flex-col sidebar-offset">
         <Header
           user={user}
           homeView={homeView}
           onBackToHome={() => setHomeView("home")}
-          onLoginClick={openLogin}
+          onLoginClick={() => openLogin()}
         />
         {/* Main: pb must clear BottomNav (1px sep + 64px content + safe-area-inset-bottom) */}
         <main className="flex flex-1 flex-col main-with-nav">{children}</main>
       </div>
-      <BottomNav isLoggedIn={!!user} onLoginClick={openLogin} />
+      <BottomNav isLoggedIn={!!user} onLoginClick={() => openLogin()} />
       <LoginModal open={showLogin} onClose={() => setShowLogin(false)} redirectTo={redirectTo} />
       {user && <ReferralLinker userId={user.id} />}
       {user && <UtmLinker userId={user.id} />}

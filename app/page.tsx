@@ -304,15 +304,19 @@ export default function HomePage() {
     };
   }, [imagePreview]);
 
-  // Handle refine params from Assets page (e.g. /?image=...&prompt=...)
+  // Handle params from Assets page (/?image=...&prompt=...) or landing pages (/?prompt=...)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const image = params.get("image");
+    const prompt = params.get("prompt");
     if (image) {
       setImageUrl(image);
       setImagePreview(image);
-      const prompt = params.get("prompt");
       if (prompt) setInitialPrompt(prompt);
+      window.history.replaceState({}, "", "/");
+    } else if (prompt) {
+      setInitialPrompt(prompt);
+      setHomeView("upload");
       window.history.replaceState({}, "", "/");
     }
   }, []);
@@ -587,7 +591,7 @@ export default function HomePage() {
 
         {/* Secondary CTA: upload → login */}
         <button
-          onClick={openLogin}
+          onClick={() => openLogin()}
           className="flex w-full items-center justify-center transition-all active:scale-[0.98]"
           style={{ height: 48, borderRadius: 14, border: "1.5px solid #2A2A2E" }}
         >

@@ -1,5 +1,6 @@
 import { LandingHero } from "@/components/landing/landing-hero";
 import { ShowcaseDemo } from "@/components/landing/showcase-demo";
+import { LandingGenerator } from "@/components/landing/landing-generator";
 import { ComparisonTable } from "@/components/landing/comparison-table";
 import { CtaSection } from "@/components/landing/cta-section";
 
@@ -31,6 +32,8 @@ export default function SeedanceUnrestrictedPage() {
         title="Create Without Limits"
         subtitle="No content filters. No prompt rejections. Just your creativity."
       />
+
+      <LandingGenerator />
 
       {/* Pain points */}
       <div style={{ marginBottom: 64 }}>

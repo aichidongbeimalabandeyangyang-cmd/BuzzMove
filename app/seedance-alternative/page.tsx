@@ -1,6 +1,7 @@
 import { LandingHero } from "@/components/landing/landing-hero";
-import { ComparisonTable } from "@/components/landing/comparison-table";
 import { ShowcaseDemo } from "@/components/landing/showcase-demo";
+import { LandingGenerator } from "@/components/landing/landing-generator";
+import { ComparisonTable } from "@/components/landing/comparison-table";
 import { CtaSection } from "@/components/landing/cta-section";
 
 export default function SeedanceAlternativePage() {
@@ -29,6 +30,8 @@ export default function SeedanceAlternativePage() {
       />
 
       <ShowcaseDemo />
+
+      <LandingGenerator />
 
       <ComparisonTable
         competitorName="Seedance 2.0"

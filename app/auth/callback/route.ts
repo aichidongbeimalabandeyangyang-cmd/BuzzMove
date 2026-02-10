@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
       : origin;
 
   if (code) {
-    const destination = redirectTo && redirectTo.startsWith("/") ? redirectTo : "/dashboard";
+    const destination = redirectTo && redirectTo.startsWith("/") ? redirectTo : "/";
     const response = NextResponse.redirect(`${baseUrl}${destination}`);
 
     const supabase = createServerClient(
