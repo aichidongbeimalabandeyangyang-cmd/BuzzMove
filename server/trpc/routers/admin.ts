@@ -3,6 +3,8 @@ import { router, adminProcedure } from "../trpc";
 import { CREDIT_PACKS, PLANS } from "@/lib/constants";
 import { collectAnalyticsData } from "@/server/services/analytics-data";
 import { generateReport } from "@/server/services/report-generator";
+import { getStripe } from "@/server/stripe/client";
+import { generateToken as generateKlingToken } from "@/server/kling/client";
 
 // Map transaction descriptions to revenue (cents)
 function getRevenueCents(type: string, description: string): number {
@@ -238,5 +240,128 @@ export const adminRouter = router({
 
     if (error) throw new Error(`Failed to save report: ${error.message}`);
     return { id: inserted.id };
+  }),
+
+  // ---- Infrastructure Monitoring ----
+  getMonitoringData: adminProcedure.query(async ({ ctx }) => {
+    const supabase = ctx.adminSupabase;
+    const now = new Date();
+    const since24h = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
+    const since7d = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+
+    // Health Checks (parallel, 5s timeout each)
+    const [dbCheck, klingCheck, stripeCheck] = await Promise.allSettled([
+      supabase.from("profiles").select("id", { count: "exact", head: true }),
+      fetch("https://api.klingai.com/v1/videos/image2video", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${generateKlingToken()}`,
+        },
+        signal: AbortSignal.timeout(5000),
+      }),
+      getStripe().balance.retrieve(),
+    ]);
+
+    const healthChecks = {
+      supabase: dbCheck.status === "fulfilled" && !dbCheck.value.error,
+      kling: klingCheck.status === "fulfilled",
+      stripe: stripeCheck.status === "fulfilled",
+    };
+
+    // Video stats by status
+    const [videos24hRes, videos7dRes] = await Promise.all([
+      supabase.from("videos").select("status").gte("created_at", since24h),
+      supabase.from("videos").select("status").gte("created_at", since7d),
+    ]);
+
+    function countByStatus(videos: { status: string }[]) {
+      const counts = { pending: 0, generating: 0, completed: 0, failed: 0 };
+      for (const v of videos) {
+        if (v.status in counts) counts[v.status as keyof typeof counts]++;
+      }
+      const total = videos.length;
+      const successRate = total > 0 ? Math.round((counts.completed / total) * 100) : 0;
+      const failRate = total > 0 ? Math.round((counts.failed / total) * 100) : 0;
+      return { ...counts, total, successRate, failRate };
+    }
+
+    const videoStats = {
+      last24h: countByStatus(videos24hRes.data ?? []),
+      last7d: countByStatus(videos7dRes.data ?? []),
+    };
+
+    // Credit transaction breakdown (7d)
+    const { data: txData } = await supabase
+      .from("credit_transactions")
+      .select("type, amount, created_at")
+      .gte("created_at", since7d);
+
+    const creditStats: Record<string, number> = {};
+    for (const tx of txData ?? []) {
+      creditStats[tx.type] = (creditStats[tx.type] || 0) + 1;
+    }
+
+    // Stuck videos (generating > 30 min)
+    const thirtyMinAgo = new Date(now.getTime() - 30 * 60 * 1000).toISOString();
+    const { data: stuckVideos } = await supabase
+      .from("videos")
+      .select("id, user_id, created_at, mode, duration")
+      .eq("status", "generating")
+      .lt("created_at", thirtyMinAgo)
+      .order("created_at", { ascending: true })
+      .limit(10);
+
+    // Recent failures (last 20)
+    const { data: recentFailures } = await supabase
+      .from("videos")
+      .select("id, user_id, mode, duration, created_at, prompt")
+      .eq("status", "failed")
+      .order("created_at", { ascending: false })
+      .limit(20);
+
+    // Get emails for failed + stuck video users
+    const allUserIds = [
+      ...new Set([
+        ...(recentFailures ?? []).map((v) => v.user_id),
+        ...(stuckVideos ?? []).map((v) => v.user_id),
+      ]),
+    ];
+    let emailMap: Record<string, string> = {};
+    if (allUserIds.length > 0) {
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, email")
+        .in("id", allUserIds);
+      for (const p of profiles ?? []) {
+        emailMap[p.id] = p.email ?? "";
+      }
+    }
+
+    // Totals
+    const [totalUsersRes, totalVideosRes] = await Promise.all([
+      supabase.from("profiles").select("id", { count: "exact", head: true }),
+      supabase.from("videos").select("id", { count: "exact", head: true }),
+    ]);
+
+    return {
+      healthChecks,
+      videoStats,
+      creditStats,
+      stuckVideos: (stuckVideos ?? []).map((v) => ({
+        ...v,
+        email: emailMap[v.user_id] ?? "",
+        minutesStuck: Math.round((now.getTime() - new Date(v.created_at).getTime()) / 60000),
+      })),
+      recentFailures: (recentFailures ?? []).map((v) => ({
+        ...v,
+        email: emailMap[v.user_id] ?? "",
+      })),
+      totals: {
+        users: totalUsersRes.count ?? 0,
+        videos: totalVideosRes.count ?? 0,
+      },
+      checkedAt: now.toISOString(),
+    };
   }),
 });

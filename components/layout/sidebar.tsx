@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Flame, Layers, CircleUser, Crown, Play, Gift, Shield, FileText, BarChart3 } from "lucide-react";
+import { Flame, Layers, CircleUser, Crown, Play, Gift, Shield, FileText, BarChart3, Activity } from "lucide-react";
 import { ADMIN_EMAILS } from "@/lib/constants";
 
 interface SidebarProps {
@@ -23,6 +23,7 @@ const ADMIN_NAV = [
   { href: "/admin", label: "Dashboard", icon: Shield, match: (p: string) => p === "/admin" },
   { href: "/admin/cases", label: "Cases", icon: FileText, match: (p: string) => p.startsWith("/admin/cases") },
   { href: "/admin/reports", label: "Reports", icon: BarChart3, match: (p: string) => p.startsWith("/admin/reports") },
+  { href: "/admin/monitoring", label: "Monitoring", icon: Activity, match: (p: string) => p.startsWith("/admin/monitoring") },
 ] as const;
 
 export function Sidebar({ isLoggedIn, userEmail, onLoginClick }: SidebarProps) {

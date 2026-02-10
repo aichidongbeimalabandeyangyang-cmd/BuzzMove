@@ -7,7 +7,7 @@ import type {
 
 const KLING_API_BASE = "https://api.klingai.com";
 
-function generateToken(): string {
+export function generateToken(): string {
   const ak = process.env.KLING_ACCESS_KEY!;
   const sk = process.env.KLING_SECRET_KEY!;
 
