@@ -198,7 +198,8 @@ export const videoRouter = router({
 
           if (klingStatus === "succeed" && taskResult.data.task_result?.videos?.[0]) {
             const videoUrl = taskResult.data.task_result.videos[0].url;
-            await ctx.supabase
+            // Optimistic lock: only update if still generating
+            const { data: updated } = await ctx.supabase
               .from("videos")
               .update({
                 status: "completed",
@@ -206,10 +207,14 @@ export const videoRouter = router({
                 kling_video_url: videoUrl,
                 completed_at: new Date().toISOString(),
               })
-              .eq("id", video.id);
+              .eq("id", video.id)
+              .eq("status", "generating")
+              .select("id")
+              .single();
 
-            // Persist to Supabase Storage after response is sent
-            after(() => persistVideoToStorage(video.id, videoUrl));
+            if (updated) {
+              after(() => persistVideoToStorage(video.id, videoUrl));
+            }
 
             return { ...video, status: "completed", output_video_url: videoUrl };
           }
@@ -218,7 +223,8 @@ export const videoRouter = router({
             await ctx.supabase
               .from("videos")
               .update({ status: "failed" })
-              .eq("id", video.id);
+              .eq("id", video.id)
+              .eq("status", "generating");
             return { ...video, status: "failed" };
           }
         } catch {
@@ -263,7 +269,8 @@ export const videoRouter = router({
 
               if (klingStatus === "succeed" && taskResult.data.task_result?.videos?.[0]) {
                 const videoUrl = taskResult.data.task_result.videos[0].url;
-                await ctx.supabase
+                // Optimistic lock: only update if still generating
+                const { data: updated } = await ctx.supabase
                   .from("videos")
                   .update({
                     status: "completed",
@@ -271,10 +278,14 @@ export const videoRouter = router({
                     kling_video_url: videoUrl,
                     completed_at: new Date().toISOString(),
                   })
-                  .eq("id", v.id);
+                  .eq("id", v.id)
+                  .eq("status", "generating")
+                  .select("id")
+                  .single();
 
-                // Persist to Supabase Storage after response is sent
-                after(() => persistVideoToStorage(v.id, videoUrl));
+                if (updated) {
+                  after(() => persistVideoToStorage(v.id, videoUrl));
+                }
 
                 v.status = "completed";
                 v.output_video_url = videoUrl;
@@ -282,7 +293,8 @@ export const videoRouter = router({
                 await ctx.supabase
                   .from("videos")
                   .update({ status: "failed" })
-                  .eq("id", v.id);
+                  .eq("id", v.id)
+                  .eq("status", "generating");
                 v.status = "failed";
               }
             } catch {
