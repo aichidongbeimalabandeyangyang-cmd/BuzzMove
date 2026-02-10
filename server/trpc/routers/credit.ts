@@ -23,10 +23,18 @@ export const creditRouter = router({
       hasPurchased = (count ?? 0) > 0;
     }
 
+    // Count completed videos (used for blur paywall — 1st video free, rest locked)
+    const { count: completedVideoCount } = await ctx.supabase
+      .from("videos")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", ctx.user.id)
+      .eq("status", "completed");
+
     return {
       balance: data?.credits_balance ?? 0,
       plan,
       hasPurchased,
+      completedVideoCount: completedVideoCount ?? 0,
     };
   }),
 

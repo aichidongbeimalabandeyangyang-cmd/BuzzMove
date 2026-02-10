@@ -11,7 +11,7 @@ import { trpc } from "@/lib/trpc";
 import { PaywallModal } from "@/components/paywall-modal";
 
 // ---- VIDEO DETAIL (uses getStatus to poll & resolve video URL) ----
-function VideoDetail({ videoId, onBack }: { videoId: string; onBack: () => void }) {
+function VideoDetail({ videoId, onBack, isFirstCompletedVideo }: { videoId: string; onBack: () => void; isFirstCompletedVideo?: boolean }) {
   const router = useRouter();
   const utils = trpc.useUtils();
   const { data: video, isLoading } = trpc.video.getStatus.useQuery(
@@ -30,6 +30,8 @@ function VideoDetail({ videoId, onBack }: { videoId: string; onBack: () => void 
   const [copied, setCopied] = useState(false);
 
   const isPaid = creditData?.hasPurchased ?? false;
+  // Only apply blur once we have enough data to decide (avoid flash of blur)
+  const shouldBlur = creditData !== undefined && !isPaid && isFirstCompletedVideo === false;
 
   const deleteMutation = trpc.video.delete.useMutation({
     onSuccess() {
@@ -90,7 +92,38 @@ function VideoDetail({ videoId, onBack }: { videoId: string; onBack: () => void 
           {/* Video preview */}
           {videoUrl ? (
             <div className="relative w-full overflow-hidden lg:flex-1 lg:max-w-2xl" style={{ borderRadius: 20, flexShrink: 0 }}>
-              <video src={videoUrl} controls autoPlay loop playsInline className="w-full h-auto max-h-[45vh] lg:max-h-[65vh] object-contain" style={{ borderRadius: 20 }} />
+              <video
+                src={videoUrl}
+                controls={!shouldBlur}
+                autoPlay
+                loop
+                playsInline
+                muted={shouldBlur}
+                className="w-full h-auto max-h-[45vh] lg:max-h-[65vh] object-contain"
+                style={{ borderRadius: 20, filter: shouldBlur ? "blur(24px)" : undefined, transform: shouldBlur ? "scale(1.05)" : undefined }}
+              />
+              {shouldBlur && (
+                <div
+                  className="absolute inset-0 flex flex-col items-center justify-center"
+                  style={{ borderRadius: 20, background: "rgba(5,5,5,0.3)", gap: 16, zIndex: 2 }}
+                >
+                  <div className="flex items-center justify-center" style={{ width: 64, height: 64, borderRadius: "50%", background: "rgba(232,168,56,0.15)", border: "1.5px solid rgba(232,168,56,0.3)" }}>
+                    <Lock style={{ width: 28, height: 28, color: "#E8A838" }} strokeWidth={1.5} />
+                  </div>
+                  <span style={{ fontFamily: "Sora, sans-serif", fontSize: 18, fontWeight: 700, color: "#FAFAF9" }}>Video Locked</span>
+                  <span style={{ fontSize: 13, color: "#9898A4", textAlign: "center", maxWidth: 240, lineHeight: 1.5 }}>
+                    Purchase credits or subscribe to unlock all your videos
+                  </span>
+                  <button
+                    onClick={() => setShowPaywall(true)}
+                    className="flex items-center justify-center transition-all active:scale-[0.98]"
+                    style={{ height: 48, padding: "0 32px", borderRadius: 14, border: "none", background: "linear-gradient(135deg, #F0C060, #E8A838)", boxShadow: "0 4px 20px rgba(232,168,56,0.25)", gap: 8 }}
+                  >
+                    <Lock style={{ width: 18, height: 18, color: "#0B0B0E" }} strokeWidth={1.5} />
+                    <span style={{ fontSize: 15, fontWeight: 700, color: "#0B0B0E" }}>Unlock Now</span>
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center lg:flex-1 lg:max-w-2xl" style={{ height: 300, borderRadius: 20, backgroundColor: "#16161A", gap: 12 }}>
@@ -139,7 +172,7 @@ function VideoDetail({ videoId, onBack }: { videoId: string; onBack: () => void 
             {videoUrl && (
               <div className="flex" style={{ gap: 10 }}>
                 <button
-                  onClick={handleDownload}
+                  onClick={shouldBlur ? () => setShowPaywall(true) : handleDownload}
                   className="flex flex-1 items-center justify-center transition-all active:scale-[0.98]"
                   style={{ height: 48, borderRadius: 14, gap: 8, background: "linear-gradient(135deg, #F0C060, #E8A838)", boxShadow: "0 4px 20px #E8A83840" }}
                 >
@@ -150,19 +183,21 @@ function VideoDetail({ videoId, onBack }: { videoId: string; onBack: () => void 
                   )}
                   <span style={{ fontSize: 15, fontWeight: 700, color: "#0B0B0E" }}>Download</span>
                 </button>
-                <button
-                  onClick={handleShare}
-                  className="flex flex-1 items-center justify-center transition-all active:scale-[0.98]"
-                  style={{ height: 48, borderRadius: 14, border: "1.5px solid #252530", gap: 8 }}
-                >
-                  <Share2 style={{ width: 20, height: 20, color: "#FAFAF9" }} strokeWidth={1.5} />
-                  <span style={{ fontSize: 15, fontWeight: 600, color: "#FAFAF9" }}>Share</span>
-                </button>
+                {!shouldBlur && (
+                  <button
+                    onClick={handleShare}
+                    className="flex flex-1 items-center justify-center transition-all active:scale-[0.98]"
+                    style={{ height: 48, borderRadius: 14, border: "1.5px solid #252530", gap: 8 }}
+                  >
+                    <Share2 style={{ width: 20, height: 20, color: "#FAFAF9" }} strokeWidth={1.5} />
+                    <span style={{ fontSize: 15, fontWeight: 600, color: "#FAFAF9" }}>Share</span>
+                  </button>
+                )}
               </div>
             )}
 
             {/* Refine button — go back to generator with same image + prompt */}
-            {video?.input_image_url && (
+            {video?.input_image_url && !shouldBlur && (
               <button
                 onClick={() => {
                   const params = new URLSearchParams();
@@ -438,12 +473,20 @@ export default function AssetsPage() {
     }
   );
   const videos = data?.videos;
+  const { data: creditData } = trpc.credit.getBalance.useQuery();
+  const isPaid = creditData?.hasPurchased ?? false;
+
+  // Find the first (oldest) completed video to allow it to be viewed for free
+  const firstCompletedVideoId = videos
+    ? [...videos].reverse().find((v) => v.status === "completed")?.id
+    : undefined;
 
   // ---- VIDEO DETAIL VIEW ----
   if (selectedVideoId) {
     return (
       <VideoDetail
         videoId={selectedVideoId}
+        isFirstCompletedVideo={videos ? (firstCompletedVideoId === undefined || selectedVideoId === firstCompletedVideoId) : undefined}
         onBack={() => {
           setSelectedVideoId(null);
           utils.video.list.refetch();
@@ -508,6 +551,7 @@ export default function AssetsPage() {
                 const isFailed = video.status === "failed";
                 const isGenerating = video.status === "generating" || video.status === "pending";
                 const isCompleted = video.status === "completed";
+                const gridBlur = creditData !== undefined && !isPaid && isCompleted && video.id !== firstCompletedVideoId;
 
                 return (
                   <button
@@ -523,6 +567,7 @@ export default function AssetsPage() {
                         muted
                         playsInline
                         preload="metadata"
+                        style={gridBlur ? { filter: "blur(16px)", transform: "scale(1.05)" } : undefined}
                       />
                     ) : video.input_image_url ? (
                       <>
@@ -546,6 +591,13 @@ export default function AssetsPage() {
                         )}
                       </>
                     ) : null}
+
+                    {/* Lock badge for blurred videos */}
+                    {gridBlur && (
+                      <div className="absolute flex items-center justify-center" style={{ top: 8, right: 8, width: 28, height: 28, borderRadius: "50%", background: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)", zIndex: 2 }}>
+                        <Lock style={{ width: 13, height: 13, color: "#E8A838" }} strokeWidth={2} />
+                      </div>
+                    )}
 
                     {/* Bottom row: duration + status */}
                     <div className="absolute flex items-center" style={{ bottom: 8, left: 8, right: 8, gap: 4 }}>
