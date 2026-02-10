@@ -1,3 +1,6 @@
+# credentials
+google-credentials.json
+
 # dependencies
 /node_modules
 /.pnp
