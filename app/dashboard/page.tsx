@@ -376,7 +376,8 @@ function SearchParamsHandler({ onVideoId }: { onVideoId: (id: string) => void })
   const searchParams = useSearchParams();
   useEffect(() => {
     if (searchParams.get("payment") === "success") {
-      trackPurchase(0);
+      const amount = parseFloat(searchParams.get("amount") || "0");
+      trackPurchase(amount);
     }
     const videoId = searchParams.get("video");
     if (videoId) {

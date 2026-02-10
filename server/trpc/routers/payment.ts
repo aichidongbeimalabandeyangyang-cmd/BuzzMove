@@ -76,7 +76,11 @@ export const paymentRouter = router({
             quantity: 1,
           },
         ],
-        success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?payment=success`,
+        success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?payment=success&amount=${
+          (input.billingPeriod === "yearly"
+            ? (PLANS[input.plan] as any).price_yearly
+            : (PLANS[input.plan] as any).price_monthly) / 100
+        }`,
         cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing?payment=cancelled`,
         metadata: {
           supabase_user_id: ctx.user.id,
@@ -122,7 +126,7 @@ export const paymentRouter = router({
             quantity: 1,
           },
         ],
-        success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?payment=success`,
+        success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?payment=success&amount=${pack.price / 100}`,
         cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing?payment=cancelled`,
         metadata: {
           supabase_user_id: ctx.user.id,
