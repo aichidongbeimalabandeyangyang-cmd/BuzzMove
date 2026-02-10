@@ -40,7 +40,7 @@ export default function Seedance2VideoGeneratorPage() {
         <h2 style={{ textAlign: "center", fontSize: 28, fontWeight: 700, marginBottom: 28, color: "#FAFAF9" }}>
           Everything You Need
         </h2>
-        <div className="grid" style={{ gap: 14, gridTemplateColumns: "repeat(2, 1fr)" }}>
+        <div className="grid grid-cols-1 md:grid-cols-2" style={{ gap: 14 }}>
           {[
             {
               title: "Image to Video",

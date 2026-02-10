@@ -44,8 +44,8 @@ export default function AdsPage() {
 
       {/* Use cases */}
       <div
-        className="grid"
-        style={{ marginBottom: 64, gap: 16, gridTemplateColumns: "repeat(3, 1fr)" }}
+        className="grid grid-cols-1 md:grid-cols-3"
+        style={{ marginBottom: 64, gap: 16 }}
       >
         {[
           {
@@ -80,7 +80,7 @@ export default function AdsPage() {
         <h2 style={{ textAlign: "center", fontSize: 28, fontWeight: 700, marginBottom: 28, color: "#FAFAF9" }}>
           Built for Performance
         </h2>
-        <div className="grid" style={{ gap: 14, gridTemplateColumns: "repeat(2, 1fr)" }}>
+        <div className="grid grid-cols-1 md:grid-cols-2" style={{ gap: 14 }}>
           {[
             { title: "Native Ad Formats", desc: "9:16, 1:1, 16:9 — optimized for every platform." },
             { title: "Commercial License", desc: "All paid plans include full commercial usage rights." },

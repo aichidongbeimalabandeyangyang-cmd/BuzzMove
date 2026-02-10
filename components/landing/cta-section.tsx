@@ -11,7 +11,7 @@ export function CtaSection({ title, subtitle, ctaText }: CtaSectionProps) {
     <div
       style={{
         borderRadius: 16,
-        padding: "40px 48px",
+        padding: "32px 20px",
         textAlign: "center",
         background: "linear-gradient(135deg, #E8A838, #F0C060)",
       }}

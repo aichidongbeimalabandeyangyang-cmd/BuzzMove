@@ -15,7 +15,7 @@ export function StepsSection({ title = "How It Works", steps }: StepsSectionProp
       <h2 style={{ textAlign: "center", fontSize: 28, fontWeight: 700, marginBottom: 28, color: "#FAFAF9" }}>
         {title}
       </h2>
-      <div className="grid" style={{ gap: 16, gridTemplateColumns: `repeat(${steps.length}, 1fr)` }}>
+      <div className="grid grid-cols-1 md:grid-cols-3" style={{ gap: 16 }}>
         {steps.map((step) => (
           <div key={step.number} style={{ borderRadius: 16, padding: 20, textAlign: "center", backgroundColor: "#16161A" }}>
             <div

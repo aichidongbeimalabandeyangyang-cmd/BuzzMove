@@ -18,7 +18,7 @@ export function ShowcaseDemo({
         {subtitle}
       </p>
 
-      <div className="grid" style={{ gap: 16, gridTemplateColumns: "1fr 1fr", maxWidth: 720, margin: "0 auto" }}>
+      <div className="grid grid-cols-2" style={{ gap: 16, maxWidth: 720, margin: "0 auto" }}>
         {/* Before: static image */}
         <div style={{ position: "relative", borderRadius: 16, overflow: "hidden", backgroundColor: "#16161A" }}>
           <div style={{ position: "relative", aspectRatio: "3/4" }}>

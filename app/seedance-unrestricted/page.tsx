@@ -44,7 +44,7 @@ export default function SeedanceUnrestrictedPage() {
           Most AI video generators reject your prompts before you even start.
           Content filters block creative, artistic, and commercial use cases.
         </p>
-        <div className="grid" style={{ gap: 12, gridTemplateColumns: "repeat(3, 1fr)" }}>
+        <div className="grid grid-cols-1 md:grid-cols-3" style={{ gap: 12 }}>
           {[
             "\"Your prompt violates our content policy\"",
             "\"This image was flagged for review\"",
@@ -73,7 +73,7 @@ export default function SeedanceUnrestrictedPage() {
         <h2 style={{ textAlign: "center", fontSize: 28, fontWeight: 700, marginBottom: 28, color: "#FAFAF9" }}>
           BuzzMove Is Different
         </h2>
-        <div className="grid" style={{ gap: 16, gridTemplateColumns: "repeat(3, 1fr)" }}>
+        <div className="grid grid-cols-1 md:grid-cols-3" style={{ gap: 16 }}>
           {[
             {
               title: "No Content Filters",
