@@ -1,7 +1,15 @@
 import { z } from "zod";
 import { router, publicProcedure, protectedProcedure } from "../trpc";
+import { validateEmailDomain } from "@/server/services/email-validation";
 
 export const userRouter = router({
+  // Validate email domain (block disposable emails before OTP)
+  validateEmail: publicProcedure
+    .input(z.object({ email: z.string().email() }))
+    .mutation(async ({ input }) => {
+      return validateEmailDomain(input.email);
+    }),
+
   // Get current user profile
   getProfile: protectedProcedure.query(async ({ ctx }) => {
     const { data, error } = await ctx.supabase

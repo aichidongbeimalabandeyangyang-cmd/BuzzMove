@@ -5,6 +5,8 @@ import { createSupabaseBrowserClient } from "@/server/supabase/client";
 import { Play, Mail, ArrowLeft } from "lucide-react";
 import { trackSignUp, trackLoginModalView } from "@/lib/gtag";
 import { logEvent } from "@/lib/events";
+import { trpc } from "@/lib/trpc";
+import { getDeviceKey } from "@/components/tracking/device-key-ensurer";
 
 interface LoginModalProps {
   open: boolean;
@@ -39,10 +41,17 @@ export function LoginModal({ open, onClose, redirectTo }: LoginModalProps) {
     }
   }, [open]);
 
+  const validateEmail = trpc.user.validateEmail.useMutation();
+
   if (!open) return null;
 
   const handleGoogleLogin = async () => {
-    // trackSignUp fires in auth callback, not here (user may cancel OAuth)
+    // Store device_key in cookie so auth callback can read it
+    const deviceKey = getDeviceKey();
+    if (deviceKey) {
+      document.cookie = `vv_device_key=${deviceKey}; path=/; max-age=600; SameSite=Lax`;
+    }
+
     const supabase = createSupabaseBrowserClient();
     const callbackUrl = new URL("/auth/callback", window.location.origin);
     if (redirectTo) callbackUrl.searchParams.set("redirectTo", redirectTo);
@@ -57,6 +66,13 @@ export function LoginModal({ open, onClose, redirectTo }: LoginModalProps) {
     setError(null);
     setLoading(true);
     try {
+      // Check for disposable email domains before sending OTP
+      const validation = await validateEmail.mutateAsync({ email: email.trim() });
+      if (!validation.valid) {
+        setError(validation.reason || "This email domain is not supported.");
+        return;
+      }
+
       const supabase = createSupabaseBrowserClient();
       const { error } = await supabase.auth.signInWithOtp({ email: email.trim() });
       if (error) throw error;
@@ -82,6 +98,22 @@ export function LoginModal({ open, onClose, redirectTo }: LoginModalProps) {
         type: "email",
       });
       if (error) throw error;
+
+      // Claim free signup credits with device fingerprint
+      const deviceKey = getDeviceKey();
+      if (deviceKey) {
+        try {
+          await fetch("/api/claim-signup-credits", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ device_key: deviceKey }),
+            keepalive: true,
+          });
+        } catch {
+          // Non-blocking: user still signs in even if credit claim fails
+        }
+      }
+
       logEvent("otp_verify_ok", { email: email.trim() });
       trackSignUp("email");
       onClose();
