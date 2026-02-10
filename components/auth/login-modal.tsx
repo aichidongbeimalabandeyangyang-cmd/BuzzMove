@@ -40,7 +40,7 @@ export function LoginModal({ open, onClose }: LoginModalProps) {
   if (!open) return null;
 
   const handleGoogleLogin = async () => {
-    trackSignUp("google");
+    // trackSignUp fires in auth callback, not here (user may cancel OAuth)
     const supabase = createSupabaseBrowserClient();
     await supabase.auth.signInWithOAuth({
       provider: "google",

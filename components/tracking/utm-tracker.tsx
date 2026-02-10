@@ -23,15 +23,28 @@ export function UtmTracker() {
     const existing = localStorage.getItem(UTM_STORAGE_KEY);
     if (existing) return;
 
+    // Detect paid click IDs (auto-tagging) and infer source
+    const gclid = searchParams.get("gclid");   // Google Ads
+    const fbclid = searchParams.get("fbclid");  // Facebook/Meta Ads
+    const msclkid = searchParams.get("msclkid"); // Microsoft Ads
+
+    let inferredSource = searchParams.get("utm_source");
+    let inferredMedium = searchParams.get("utm_medium");
+    if (!inferredSource) {
+      if (gclid) { inferredSource = "google"; inferredMedium = inferredMedium || "cpc"; }
+      else if (fbclid) { inferredSource = "facebook"; inferredMedium = inferredMedium || "cpc"; }
+      else if (msclkid) { inferredSource = "bing"; inferredMedium = inferredMedium || "cpc"; }
+    }
+
     const utmData: UtmData = {
-      utm_source: searchParams.get("utm_source"),
-      utm_medium: searchParams.get("utm_medium"),
+      utm_source: inferredSource,
+      utm_medium: inferredMedium,
       utm_campaign: searchParams.get("utm_campaign"),
       ref: searchParams.get("ref"),
       captured_at: new Date().toISOString(),
     };
 
-    // Only store if there are actual UTM params
+    // Only store if there are actual UTM params or paid click IDs
     const hasParams = utmData.utm_source || utmData.utm_campaign || utmData.ref;
     if (!hasParams) {
       // Store empty data to prevent re-checking

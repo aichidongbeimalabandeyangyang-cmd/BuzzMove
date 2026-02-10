@@ -7,6 +7,8 @@ import { BottomNav } from "./bottom-nav";
 import { Sidebar } from "./sidebar";
 import { LoginModal } from "@/components/auth/login-modal";
 import { ReferralLinker } from "@/components/tracking/referral-linker";
+import { UtmLinker } from "@/components/tracking/utm-linker";
+import { trackSignUp } from "@/lib/gtag";
 
 // ---------- HomeView Context ----------
 type HomeView = "home" | "upload" | "generator" | "progress" | "result";
@@ -40,8 +42,12 @@ export function AppShell({ children }: { children: ReactNode }) {
     supabase.auth.getUser().then(({ data: { user } }) => setUser(user));
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
+      if (event === "SIGNED_IN" && session?.user) {
+        const provider = session.user.app_metadata?.provider;
+        trackSignUp(provider === "google" ? "google" : "email");
+      }
     });
     return () => subscription.unsubscribe();
   }, []);
@@ -77,6 +83,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <BottomNav isLoggedIn={!!user} onLoginClick={openLogin} />
       <LoginModal open={showLogin} onClose={() => setShowLogin(false)} />
       {user && <ReferralLinker userId={user.id} />}
+      {user && <UtmLinker userId={user.id} />}
     </AppContext.Provider>
   );
 }

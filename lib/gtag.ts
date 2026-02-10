@@ -31,8 +31,12 @@ export function trackVideoGenerate(params: { mode: string; duration: string; cre
 }
 
 // 4. Purchase completed (called on redirect back from Stripe)
-export function trackPurchase(value: number) {
-  gtag("event", "purchase", { currency: "USD", value });
+export function trackPurchase(value: number, transactionId?: string) {
+  gtag("event", "purchase", {
+    currency: "USD",
+    value,
+    transaction_id: transactionId || `txn_${Date.now()}`,
+  });
 }
 
 // 5. Video download click
