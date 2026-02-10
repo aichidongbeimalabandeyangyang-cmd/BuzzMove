@@ -67,6 +67,7 @@ async function handleCreditPackPurchase(
     type: "purchase",
     description: `${pack.name} credit pack`,
     stripe_payment_id: paymentIntentId,
+    price_cents: pack.price,
   });
 
   if (txError) {
@@ -146,6 +147,7 @@ async function handleSubscriptionCreated(
     type: "subscription",
     description: `${planConfig.name} subscription activated`,
     stripe_payment_id: `sub_activated_${stripeSubId}`,
+    price_cents: billingPeriod === "yearly" ? planConfig.price_yearly : planConfig.price_monthly,
   });
 
   console.log(`[stripe:subscription] ${plan} activated for ${userId}, +${creditsPerPeriod} credits`);
@@ -180,12 +182,18 @@ export async function handleInvoicePaid(invoice: Stripe.Invoice) {
   // instead, we use the invoice ID as idempotency key.
   const txKey = `invoice_${invoiceId}`;
 
+  // Look up plan config for price
+  const planKey = sub.plan as keyof typeof PLANS;
+  const planConfig = planKey in PLANS ? PLANS[planKey] : null;
+  const priceCents = planConfig && "price_monthly" in planConfig ? planConfig.price_monthly : 0;
+
   const { error: txError } = await supabase.from("credit_transactions").insert({
     user_id: sub.user_id,
     amount: sub.credits_per_period,
     type: "subscription",
     description: `${sub.plan} subscription renewed`,
     stripe_payment_id: txKey,
+    price_cents: priceCents,
   });
 
   if (txError) {

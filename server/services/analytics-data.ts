@@ -24,15 +24,17 @@ function getGoogleAuth() {
   });
 }
 
-function getRevenueCents(type: string, description: string): number {
-  if (type === "purchase") {
+function getRevenueCents(tx: { type: string; description: string | null; price_cents?: number | null }): number {
+  if (tx.price_cents != null) return tx.price_cents;
+  const desc = tx.description ?? "";
+  if (tx.type === "purchase") {
     for (const pack of CREDIT_PACKS) {
-      if (description?.includes(pack.name)) return pack.price;
+      if (desc.includes(pack.name)) return pack.price;
     }
   }
-  if (type === "subscription") {
-    if (description?.includes("Pro") && !description?.includes("Premium")) return PLANS.pro.price_monthly;
-    if (description?.includes("Premium")) return PLANS.premium.price_monthly;
+  if (tx.type === "subscription") {
+    if (desc.includes("Pro") && !desc.includes("Premium")) return PLANS.pro.price_monthly;
+    if (desc.includes("Premium")) return PLANS.premium.price_monthly;
   }
   return 0;
 }
@@ -159,7 +161,7 @@ async function fetchSupabaseData(days: number) {
   const [profilesRes, videosRes, transactionsRes, totalUsersRes, totalVideosRes] = await Promise.all([
     supabase.from("profiles").select("id, created_at, initial_utm_source, initial_ref").gte("created_at", sinceISO),
     supabase.from("videos").select("id, user_id, status, mode, created_at").gte("created_at", sinceISO),
-    supabase.from("credit_transactions").select("id, user_id, type, amount, description, created_at").gte("created_at", sinceISO).in("type", ["purchase", "subscription"]),
+    supabase.from("credit_transactions").select("id, user_id, type, amount, description, price_cents, created_at").gte("created_at", sinceISO).in("type", ["purchase", "subscription"]),
     supabase.from("profiles").select("id", { count: "exact", head: true }),
     supabase.from("videos").select("id", { count: "exact", head: true }),
   ]);
@@ -172,7 +174,7 @@ async function fetchSupabaseData(days: number) {
   let totalRevenueCents = 0;
   const packCounts: Record<string, number> = {};
   for (const tx of transactions) {
-    totalRevenueCents += getRevenueCents(tx.type, tx.description ?? "");
+    totalRevenueCents += getRevenueCents(tx);
     const label = tx.type === "subscription" ? "Subscription" : (tx.description ?? "Unknown");
     packCounts[label] = (packCounts[label] || 0) + 1;
   }

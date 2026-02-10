@@ -6,16 +6,19 @@ import { generateReport } from "@/server/services/report-generator";
 import { getStripe } from "@/server/stripe/client";
 import { generateToken as generateKlingToken } from "@/server/kling/client";
 
-// Map transaction descriptions to revenue (cents)
-function getRevenueCents(type: string, description: string): number {
-  if (type === "purchase") {
+// Map transaction to revenue (cents).
+// Prefer structured price_cents column; fall back to description matching for historical data.
+function getRevenueCents(tx: { type: string; description: string | null; price_cents?: number | null }): number {
+  if (tx.price_cents != null) return tx.price_cents;
+  const desc = tx.description ?? "";
+  if (tx.type === "purchase") {
     for (const pack of CREDIT_PACKS) {
-      if (description?.includes(pack.name)) return pack.price;
+      if (desc.includes(pack.name)) return pack.price;
     }
   }
-  if (type === "subscription") {
-    if (description?.includes("Pro") && !description?.includes("Premium")) return PLANS.pro.price_monthly;
-    if (description?.includes("Premium")) return PLANS.premium.price_monthly;
+  if (tx.type === "subscription") {
+    if (desc.includes("Pro") && !desc.includes("Premium")) return PLANS.pro.price_monthly;
+    if (desc.includes("Premium")) return PLANS.premium.price_monthly;
   }
   return 0;
 }
@@ -45,7 +48,7 @@ export const adminRouter = router({
         .gte("created_at", since),
       supabase
         .from("credit_transactions")
-        .select("id, user_id, type, amount, description, created_at")
+        .select("id, user_id, type, amount, description, price_cents, created_at")
         .gte("created_at", since)
         .in("type", ["purchase", "subscription"]),
     ]);
@@ -77,7 +80,7 @@ export const adminRouter = router({
       const packCounts: Record<string, number> = {};
 
       for (const tx of dayTx) {
-        revenueCents += getRevenueCents(tx.type, tx.description ?? "");
+        revenueCents += getRevenueCents(tx);
         const label = tx.type === "subscription" ? "Subscription" : (tx.description ?? "Unknown");
         packCounts[label] = (packCounts[label] || 0) + 1;
       }
@@ -114,7 +117,7 @@ export const adminRouter = router({
       activeUsers: new Set(videos.map((v) => v.user_id)).size,
       videoCount: videos.length,
       paidUsers: new Set(transactions.map((t) => t.user_id)).size,
-      revenueCents: transactions.reduce((sum, t) => sum + getRevenueCents(t.type, t.description ?? ""), 0),
+      revenueCents: transactions.reduce((sum, t) => sum + getRevenueCents(t), 0),
       sourceBreakdown: totalSourceCounts,
     };
 
