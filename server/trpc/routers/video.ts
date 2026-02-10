@@ -370,13 +370,21 @@ export const videoRouter = router({
       // Verify ownership
       const { data: video } = await ctx.supabase
         .from("videos")
-        .select("id, user_id")
+        .select("id, user_id, status, credits_consumed")
         .eq("id", input.videoId)
         .eq("user_id", ctx.user.id)
         .single();
 
       if (!video) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Video not found" });
+      }
+
+      // Refund credits if video hasn't completed (pending/generating)
+      if (video.status === "pending" || video.status === "generating") {
+        await ctx.adminSupabase.rpc("refund_credits", {
+          p_user_id: ctx.user.id,
+          p_amount: video.credits_consumed,
+        });
       }
 
       // Delete associated credit transactions (use admin to bypass RLS)
