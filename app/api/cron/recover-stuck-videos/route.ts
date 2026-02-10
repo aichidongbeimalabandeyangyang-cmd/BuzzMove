@@ -170,5 +170,35 @@ export async function GET(request: Request) {
     }
   }
 
-  return NextResponse.json({ recovered, failed, timedOut, checked: stuckVideos.length });
+  // ── Retry failed persists ──────────────────────────────────
+  // Completed videos where output_video_url still equals kling_video_url
+  // means persistVideoToStorage never succeeded. Retry before Kling URL expires.
+  const sixHoursAgo = new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString();
+  const { data: unpersisted } = await supabase
+    .from("videos")
+    .select("id, kling_video_url")
+    .eq("status", "completed")
+    .not("kling_video_url", "is", null)
+    .gte("completed_at", sixHoursAgo)
+    .limit(20);
+
+  let persisted = 0;
+  for (const v of unpersisted ?? []) {
+    // Only retry if output_video_url still matches kling_video_url
+    const { data: check } = await supabase
+      .from("videos")
+      .select("output_video_url, kling_video_url")
+      .eq("id", v.id)
+      .single();
+    if (!check || check.output_video_url !== check.kling_video_url) continue;
+
+    try {
+      await persistVideoToStorage(v.id, v.kling_video_url);
+      persisted++;
+    } catch {
+      // Will retry on next cron run
+    }
+  }
+
+  return NextResponse.json({ recovered, failed, timedOut, persisted, checked: stuckVideos.length });
 }
