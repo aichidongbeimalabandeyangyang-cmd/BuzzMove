@@ -6,12 +6,12 @@ import { trpc } from "@/lib/trpc";
 import { formatCredits } from "@/lib/utils";
 import { createSupabaseBrowserClient } from "@/server/supabase/client";
 import { User, Crown, Settings, LifeBuoy, LogOut, Receipt, Shield, FileText, BarChart3, Activity } from "lucide-react";
-import { ADMIN_EMAILS } from "@/lib/constants";
 
 export default function ProfilePage() {
   const router = useRouter();
   const { data: profile } = trpc.user.getProfile.useQuery();
   const { data: creditData } = trpc.credit.getBalance.useQuery();
+  const { data: isAdmin } = trpc.admin.isAdmin.useQuery();
 
   const handleLogout = async () => {
     const supabase = createSupabaseBrowserClient();
@@ -94,7 +94,7 @@ export default function ProfilePage() {
           </Link>
 
           {/* Admin Section — only for admin emails */}
-          {profile?.email && ADMIN_EMAILS.includes(profile.email) && (
+          {isAdmin && (
             <>
               <div style={{ width: "100%", height: 1, backgroundColor: "#252530" }} />
               <div style={{ padding: "8px 16px 2px" }}>
