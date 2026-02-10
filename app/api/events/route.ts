@@ -1,18 +1,26 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdminClient } from "@/server/supabase/server";
 
+const MAX_PAYLOAD_SIZE = 4096; // bytes
+
 export async function POST(request: NextRequest) {
   try {
-    const { event, email, metadata } = await request.json();
+    const body = await request.text();
 
-    if (!event || typeof event !== "string") {
-      return NextResponse.json({ error: "Missing event" }, { status: 400 });
+    if (body.length > MAX_PAYLOAD_SIZE) {
+      return NextResponse.json({ error: "Payload too large" }, { status: 413 });
+    }
+
+    const { event, email, metadata } = JSON.parse(body);
+
+    if (!event || typeof event !== "string" || event.length > 100) {
+      return NextResponse.json({ error: "Invalid event" }, { status: 400 });
     }
 
     const supabase = createSupabaseAdminClient();
     await supabase.from("system_events").insert({
       event,
-      email: email ?? null,
+      email: typeof email === "string" ? email.slice(0, 255) : null,
       metadata: metadata ?? {},
     });
 
