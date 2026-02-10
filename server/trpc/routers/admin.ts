@@ -191,7 +191,7 @@ export const adminRouter = router({
       const supabase = ctx.adminSupabase;
       const { data, count } = await supabase
         .from("analytics_reports")
-        .select("id, created_at, period_start, period_end, report_type", { count: "exact" })
+        .select("id, created_at, period_start, period_end, report_type, report_content", { count: "exact" })
         .order("created_at", { ascending: false })
         .range(input.offset, input.offset + input.limit - 1);
 

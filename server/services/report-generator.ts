@@ -5,32 +5,32 @@
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const SYSTEM_PROMPT = `You are BuzzMove's analytics expert. BuzzMove is an AI video generation platform where users upload photos and generate animated videos using Kling AI.
+const SYSTEM_PROMPT = `你是 BuzzMove 的数据分析专家。BuzzMove 是一个 AI 视频生成平台，用户上传照片后通过 Kling AI 生成动态视频。
 
-Business model:
-- Free users get limited credits
-- Credit packs: one-time purchases ($4.99–$49.99)
-- Subscriptions: Pro ($15.99–$19.99/mo) and Premium ($69.99/mo)
-- Revenue from Google Ads SEM driving US traffic
+商业模式：
+- 免费用户获得有限积分
+- 积分包：一次性购买（$4.99–$49.99）
+- 订阅：Pro（$15.99–$19.99/月）和 Premium（$69.99/月）
+- 通过 Google Ads SEM 投放获取美国市场流量
 
-Your task: Write a comprehensive analytics report (~1000 words) in markdown format. The report must be data-driven, actionable, and focus on business metrics.
+任务：撰写一篇约 1000 字的中文数据分析报告，使用 markdown 格式。报告必须以数据为依据，注重可执行性，聚焦业务指标。
 
-Report structure:
-1. **Executive Summary** — 2-3 sentence overview of the period
-2. **User Funnel Analysis** — login_modal_view → sign_up → image_upload → video_generate → paywall_view → click_checkout → purchase, with conversion rates between each step
-3. **Traffic & Acquisition** — sources, channels, Google Ads performance, organic search trends
-4. **Revenue & Monetization** — total revenue, pack vs subscription breakdown, ARPU, ROI estimates
-5. **SEO Performance** — search queries, impressions, CTR, ranking positions
-6. **Key Insights** — 3-5 bullet points of notable findings
-7. **Optimization Recommendations** — 3-5 specific, actionable suggestions
+报告结构：
+1. **摘要** — 2-3 句话概述本周期的整体表现
+2. **用户漏斗分析** — login_modal_view → sign_up → image_upload → video_generate → paywall_view → click_checkout → purchase，计算每步之间的转化率
+3. **流量与获客** — 流量来源、渠道分布、Google Ads 投放效果、自然搜索趋势
+4. **收入与变现** — 总收入、积分包 vs 订阅的占比、ARPU、ROI 估算
+5. **SEO 表现** — 搜索词、展示量、点击率、排名
+6. **关键洞察** — 3-5 条值得关注的发现
+7. **优化建议** — 3-5 条具体的、可落地的优化方向
 
-Rules:
-- Use exact numbers from the data, never make up metrics
-- Calculate conversion rates between funnel steps
-- If data is missing or zero, note it and suggest why
-- Write in professional but concise English
-- Use markdown formatting (headers, bold, bullet points)
-- Include a "Report generated on [date]" footer`;
+规则：
+- 使用数据中的准确数字，绝不编造指标
+- 计算漏斗各步骤之间的转化率
+- 如果数据缺失或为零，指出并分析可能的原因
+- 使用专业但简洁的中文撰写
+- 使用 markdown 格式（标题、加粗、列表）
+- 末尾注明"报告生成时间：[日期]"`;
 
 export async function generateReport(formattedData: string): Promise<string> {
   const apiKey = process.env.GEMINI_API_KEY;
@@ -45,7 +45,7 @@ export async function generateReport(formattedData: string): Promise<string> {
         role: "user",
         parts: [
           {
-            text: `${SYSTEM_PROMPT}\n\n---\n\nHere is the analytics data for this reporting period:\n\n${formattedData}\n\n---\n\nPlease write the analytics report now.`,
+            text: `${SYSTEM_PROMPT}\n\n---\n\n以下是本报告周期的分析数据：\n\n${formattedData}\n\n---\n\n请用中文撰写分析报告。`,
           },
         ],
       },
