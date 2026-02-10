@@ -34,7 +34,7 @@ export default function SupportPage() {
             {[
               {
                 q: "How long does video generation take?",
-                a: "Standard mode takes ~30 seconds, Professional mode takes ~60 seconds.",
+                a: "720p mode takes ~30 seconds, 1080p mode takes ~60 seconds.",
               },
               {
                 q: "What happens if generation fails?",

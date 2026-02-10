@@ -158,7 +158,7 @@ export function VideoGenerator({ imageUrl, imagePreview, onReset, onBackHome, in
                       backgroundColor: mode === m ? "#E8A838" : "transparent",
                     }}
                   >
-                    {m === "standard" ? "Std" : "Pro"}
+                    {m === "standard" ? "720p" : "1080p"}
                   </button>
                 ))}
               </div>

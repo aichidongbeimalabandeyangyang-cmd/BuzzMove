@@ -57,7 +57,7 @@ export async function createImageToVideo(params: {
   return klingFetch<KlingTaskResponse>("/v1/videos/image2video", {
     method: "POST",
     body: JSON.stringify({
-      model_name: "kling-v2-master",
+      model_name: "kling-v2-5-turbo",
       image: params.imageUrl,
       prompt: params.prompt || "",
       negative_prompt: params.negativePrompt || "",
