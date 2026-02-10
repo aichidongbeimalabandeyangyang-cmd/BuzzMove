@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { trpc } from "@/lib/trpc";
 import { formatCredits } from "@/lib/utils";
 import { createSupabaseBrowserClient } from "@/server/supabase/client";
-import { User, Crown, Settings, LifeBuoy, LogOut, Receipt } from "lucide-react";
+import { User, Crown, Settings, LifeBuoy, LogOut, Receipt, Shield, FileText, BarChart3, Activity } from "lucide-react";
+import { ADMIN_EMAILS } from "@/lib/constants";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -91,6 +92,32 @@ export default function ProfilePage() {
             <LifeBuoy style={{ width: 20, height: 20, color: "#9898A4", flexShrink: 0 }} strokeWidth={1.5} />
             <span style={{ fontSize: 15, fontWeight: 500, color: "#FAFAF9" }}>Help & Support</span>
           </Link>
+
+          {/* Admin Section — only for admin emails */}
+          {profile?.email && ADMIN_EMAILS.includes(profile.email) && (
+            <>
+              <div style={{ width: "100%", height: 1, backgroundColor: "#252530" }} />
+              <div style={{ padding: "8px 16px 2px" }}>
+                <span style={{ fontSize: 10, fontWeight: 600, color: "#4A4A50", letterSpacing: 1 }}>ADMIN</span>
+              </div>
+              <Link href="/admin" className="flex w-full items-center" style={{ gap: 12, padding: "14px 16px" }}>
+                <Shield style={{ width: 20, height: 20, color: "#E8A838", flexShrink: 0 }} strokeWidth={1.5} />
+                <span style={{ fontSize: 15, fontWeight: 500, color: "#FAFAF9" }}>Dashboard</span>
+              </Link>
+              <Link href="/admin/cases" className="flex w-full items-center" style={{ gap: 12, padding: "14px 16px" }}>
+                <FileText style={{ width: 20, height: 20, color: "#9898A4", flexShrink: 0 }} strokeWidth={1.5} />
+                <span style={{ fontSize: 15, fontWeight: 500, color: "#FAFAF9" }}>Cases</span>
+              </Link>
+              <Link href="/admin/reports" className="flex w-full items-center" style={{ gap: 12, padding: "14px 16px" }}>
+                <BarChart3 style={{ width: 20, height: 20, color: "#9898A4", flexShrink: 0 }} strokeWidth={1.5} />
+                <span style={{ fontSize: 15, fontWeight: 500, color: "#FAFAF9" }}>Reports</span>
+              </Link>
+              <Link href="/admin/monitoring" className="flex w-full items-center" style={{ gap: 12, padding: "14px 16px" }}>
+                <Activity style={{ width: 20, height: 20, color: "#9898A4", flexShrink: 0 }} strokeWidth={1.5} />
+                <span style={{ fontSize: 15, fontWeight: 500, color: "#FAFAF9" }}>Monitoring</span>
+              </Link>
+            </>
+          )}
 
           {/* Divider: 1px #252530, width fill */}
           <div style={{ width: "100%", height: 1, backgroundColor: "#252530" }} />
