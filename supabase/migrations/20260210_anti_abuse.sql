@@ -37,6 +37,13 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 -- ============================================================
 -- 3. claim_signup_credits RPC (idempotent, race-safe)
 -- ============================================================
+-- Pre-populate signup_device_log for all existing users
+-- so they won't get extra credits after this migration (fixes issue #2)
+INSERT INTO public.signup_device_log (device_key, user_id)
+SELECT COALESCE(device_key, 'legacy_' || id::text), id
+FROM public.profiles
+ON CONFLICT (user_id) DO NOTHING;
+
 CREATE OR REPLACE FUNCTION public.claim_signup_credits(
   p_user_id uuid,
   p_device_key text,
@@ -47,24 +54,29 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 DECLARE
-  v_already_claimed boolean;
+  v_rows_inserted integer;
   v_device_count integer;
   v_credits_to_grant integer;
   v_new_balance integer;
 BEGIN
-  -- 1. Idempotency: check if this user already claimed
-  SELECT EXISTS(
-    SELECT 1 FROM public.signup_device_log WHERE user_id = p_user_id
-  ) INTO v_already_claimed;
+  -- 1. Attempt to insert into signup_device_log (atomic idempotency via UNIQUE index)
+  --    This is the single source of truth — if INSERT succeeds, this is a new claim.
+  --    If it conflicts, user already claimed. No race condition possible.
+  INSERT INTO public.signup_device_log (device_key, user_id, ip_address)
+  VALUES (p_device_key, p_user_id, p_ip_address)
+  ON CONFLICT (user_id) DO NOTHING;
 
-  IF v_already_claimed THEN
+  GET DIAGNOSTICS v_rows_inserted = ROW_COUNT;
+
+  IF v_rows_inserted = 0 THEN
+    -- Already claimed, return current balance
     SELECT credits_balance INTO v_new_balance
     FROM public.profiles WHERE id = p_user_id;
     RETURN COALESCE(v_new_balance, 0);
   END IF;
 
-  -- 2. Count existing signups from this device
-  SELECT COUNT(*) INTO v_device_count
+  -- 2. Count existing signups from this device (excluding the one we just inserted)
+  SELECT COUNT(*) - 1 INTO v_device_count
   FROM public.signup_device_log
   WHERE device_key = p_device_key;
 
@@ -75,12 +87,7 @@ BEGIN
     v_credits_to_grant := 0;
   END IF;
 
-  -- 4. Log this signup (unique on user_id prevents duplicates)
-  INSERT INTO public.signup_device_log (device_key, user_id, ip_address)
-  VALUES (p_device_key, p_user_id, p_ip_address)
-  ON CONFLICT (user_id) DO NOTHING;
-
-  -- 5. Grant credits if eligible
+  -- 4. Grant credits if eligible
   IF v_credits_to_grant > 0 THEN
     UPDATE public.profiles
     SET credits_balance = credits_balance + v_credits_to_grant,

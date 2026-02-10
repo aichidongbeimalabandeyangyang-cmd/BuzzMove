@@ -55,9 +55,7 @@ export async function GET(request: NextRequest) {
           .eq("id", user.id)
           .single();
 
-        const isNewUser = !profile;
-
-        if (isNewUser) {
+        if (!profile) {
           // Trigger gives 0 credits; fallback insert also uses 0
           await supabase.from("profiles").insert({
             id: user.id,
@@ -66,16 +64,19 @@ export async function GET(request: NextRequest) {
           });
         }
 
-        // Claim free signup credits for new users (device fingerprint check)
-        if (isNewUser) {
+        // Claim free signup credits (idempotent — safe to call for existing users too).
+        // The RPC checks signup_device_log: if already claimed, returns current balance.
+        // This runs for EVERY Google OAuth login, but is a no-op for returning users.
+        const deviceKey = request.cookies.get("vv_device_key")?.value;
+        if (deviceKey && validateDeviceKey(deviceKey)) {
           const isDisposable = user.email ? isDisposableEmail(user.email) : false;
-          const deviceKey = request.cookies.get("vv_device_key")?.value;
-          const ipAddress =
-            request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-            request.headers.get("x-real-ip") ||
-            null;
 
-          if (!isDisposable && deviceKey && validateDeviceKey(deviceKey)) {
+          if (!isDisposable) {
+            const ipAddress =
+              request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+              request.headers.get("x-real-ip") ||
+              null;
+
             const admin = createSupabaseAdminClient();
             await admin.rpc("claim_signup_credits", {
               p_user_id: user.id,
@@ -86,7 +87,7 @@ export async function GET(request: NextRequest) {
               .from("profiles")
               .update({ device_key: deviceKey })
               .eq("id", user.id);
-          } else if (isDisposable) {
+          } else {
             console.warn(`[auth/callback] Disposable email blocked credits: ${user.email}`);
           }
 

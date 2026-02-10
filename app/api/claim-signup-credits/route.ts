@@ -4,6 +4,7 @@ import {
   createSupabaseAdminClient,
 } from "@/server/supabase/server";
 import { validateDeviceKey } from "@/server/services/device-fingerprint";
+import { isDisposableEmail } from "@/server/services/email-validation";
 
 export async function POST(request: NextRequest) {
   let body: { device_key?: string };
@@ -25,6 +26,12 @@ export async function POST(request: NextRequest) {
 
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // Defense-in-depth: block disposable emails even if client-side check was bypassed
+  if (user.email && isDisposableEmail(user.email)) {
+    console.warn(`[claim-signup-credits] Disposable email blocked: ${user.email}`);
+    return NextResponse.json({ balance: 0 });
   }
 
   const ipAddress =
