@@ -30,6 +30,7 @@ const SYSTEM_PROMPT = `你是 BuzzMove 的数据分析专家。BuzzMove 是一�
 - 如果数据缺失或为零，指出并分析可能的原因
 - 使用专业但简洁的中文撰写
 - 使用 markdown 格式（标题、加粗、列表）
+- 重要：不要使用 markdown 表格语法（| 分隔的表格），用加粗标题 + 缩进列表的方式展示结构化数据
 - 末尾注明"报告生成时间：[日期]"`;
 
 export async function generateReport(formattedData: string): Promise<string> {

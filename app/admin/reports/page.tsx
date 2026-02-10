@@ -8,6 +8,22 @@ import { ArrowLeft, FileText, RefreshCw, ChevronLeft, ChevronRight, Clock, BarCh
 
 const PAGE_SIZE = 10;
 
+/**
+ * Fix markdown tables where rows got concatenated on a single line.
+ * Splits `| ... || ... |` back into separate lines.
+ */
+function fixMarkdownContent(content: string): string {
+  return content.split("\n").map((line) => {
+    const trimmed = line.trim();
+    if (!trimmed.startsWith("|")) return line;
+    // If more than ~10 pipes, rows are likely merged. Split `||` into newlines.
+    const pipeCount = (trimmed.match(/\|/g) || []).length;
+    if (pipeCount <= 10) return line;
+    // Split: `end-of-cell | | start-of-next-row` → newline
+    return trimmed.replace(/\|\s*\|/g, "|\n|");
+  }).join("\n");
+}
+
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString("zh-CN", { month: "long", day: "numeric", year: "numeric" });
 }
@@ -147,7 +163,7 @@ export default function AdminReportsPage() {
                 ),
               }}
             >
-              {reportData.report_content}
+              {fixMarkdownContent(reportData.report_content)}
             </ReactMarkdown>
           </div>
         ) : null}
