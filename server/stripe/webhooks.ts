@@ -131,15 +131,23 @@ async function handleSubscriptionCreated(
     throw new Error(`subscription insert failed: ${subError.message}`);
   }
 
-  // Subscription recorded → update profile & log transaction
+  // Subscription recorded → update profile plan & add credits atomically
   await supabase
     .from("profiles")
     .update({
       subscription_plan: plan,
       subscription_status: "active",
-      credits_balance: creditsPerPeriod,
     })
     .eq("id", userId);
+
+  const { error: rpcError } = await supabase.rpc("refund_credits", {
+    p_user_id: userId,
+    p_amount: creditsPerPeriod,
+  });
+  if (rpcError) {
+    console.error(`[stripe:subscription] refund_credits RPC failed:`, rpcError.message);
+    throw new Error(`refund_credits failed: ${rpcError.message}`);
+  }
 
   await supabase.from("credit_transactions").insert({
     user_id: userId,
@@ -176,10 +184,15 @@ export async function handleInvoicePaid(invoice: Stripe.Invoice) {
   // hasn't run — skip. Stripe will retry or checkout will handle it.
   if (!sub) return;
 
-  // Skip the initial invoice — checkout.session.completed already
-  // granted credits. We detect this by checking if the subscription
-  // was created recently. No more fragile time-based hacks:
-  // instead, we use the invoice ID as idempotency key.
+  // Skip the initial invoice — handleCheckoutCompleted already granted credits.
+  // Detect by checking if subscription was created within the last 2 minutes.
+  const subCreatedAt = new Date(sub.created_at).getTime();
+  const now = Date.now();
+  if (now - subCreatedAt < 2 * 60 * 1000) {
+    console.log(`[stripe:invoice] Skipping initial invoice for ${sub.user_id} (sub created ${Math.round((now - subCreatedAt) / 1000)}s ago)`);
+    return;
+  }
+
   const txKey = `invoice_${invoiceId}`;
 
   // Look up plan config for price
@@ -202,15 +215,6 @@ export async function handleInvoicePaid(invoice: Stripe.Invoice) {
       return;
     }
     throw new Error(`invoice transaction insert failed: ${txError.message}`);
-  }
-
-  // Skip the initial invoice — handleCheckoutCompleted already granted credits.
-  // Detect initial invoice: subscription was created within the last 2 minutes.
-  const subCreatedAt = new Date(sub.created_at).getTime();
-  const now = Date.now();
-  if (now - subCreatedAt < 2 * 60 * 1000) {
-    console.log(`[stripe:invoice] Skipping initial invoice for ${sub.user_id} (sub created ${Math.round((now - subCreatedAt) / 1000)}s ago)`);
-    return;
   }
 
   // Renewal: ADD credits to existing balance (not overwrite)
