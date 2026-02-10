@@ -196,17 +196,27 @@ export async function handleInvoicePaid(invoice: Stripe.Invoice) {
     throw new Error(`invoice transaction insert failed: ${txError.message}`);
   }
 
-  // For the FIRST invoice (created alongside checkout), the checkout
-  // handler already set credits_balance. But since our INSERT succeeded
-  // (meaning this invoice hasn't been processed before), we should
-  // refresh credits. This covers both initial and renewal invoices
-  // uniformly — the extra SET on initial is harmless (same value).
-  await supabase
-    .from("profiles")
-    .update({ credits_balance: sub.credits_per_period })
-    .eq("id", sub.user_id);
+  // Skip the initial invoice — handleCheckoutCompleted already granted credits.
+  // Detect initial invoice: subscription was created within the last 2 minutes.
+  const subCreatedAt = new Date(sub.created_at).getTime();
+  const now = Date.now();
+  if (now - subCreatedAt < 2 * 60 * 1000) {
+    console.log(`[stripe:invoice] Skipping initial invoice for ${sub.user_id} (sub created ${Math.round((now - subCreatedAt) / 1000)}s ago)`);
+    return;
+  }
 
-  console.log(`[stripe:invoice] Renewed ${sub.plan} for ${sub.user_id}, reset to ${sub.credits_per_period} credits`);
+  // Renewal: ADD credits to existing balance (not overwrite)
+  const { error: rpcError } = await supabase.rpc("refund_credits", {
+    p_user_id: sub.user_id,
+    p_amount: sub.credits_per_period,
+  });
+
+  if (rpcError) {
+    console.error(`[stripe:invoice] refund_credits RPC failed:`, rpcError.message);
+    throw new Error(`refund_credits failed: ${rpcError.message}`);
+  }
+
+  console.log(`[stripe:invoice] Renewed ${sub.plan} for ${sub.user_id}, +${sub.credits_per_period} credits`);
 }
 
 // ── Subscription Deleted ─────────────────────────────────────

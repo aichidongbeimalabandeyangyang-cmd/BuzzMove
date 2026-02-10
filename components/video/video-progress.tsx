@@ -34,6 +34,11 @@ export function VideoProgress({ videoId, imagePreview, onComplete, onError }: Vi
     }
   );
 
+  // Estimate based on mode + duration (professional/10s takes longer)
+  const isPro = video?.mode === "professional";
+  const is10s = video?.duration === 10;
+  const estimateText = isPro || is10s ? "1–3 minutes" : "30–60 seconds";
+
   // Tab title flashing when video completes while tab is hidden
   useEffect(() => {
     if (video?.status === "completed") {
@@ -67,16 +72,19 @@ export function VideoProgress({ videoId, imagePreview, onComplete, onError }: Vi
     }
   }, [video?.status]);
 
+  // Slower progress for professional/10s to avoid stalling at 92%
+  const progressSpeed = isPro || is10s ? 0.5 : 1.2;
+
   useEffect(() => {
     const interval = setInterval(() => {
       setProgress((prev) => {
-        const next = prev + 1.2;
+        const next = prev + progressSpeed;
         if (next >= 92) { clearInterval(interval); return 92; }
         return next;
       });
     }, 600);
     return () => clearInterval(interval);
-  }, []);
+  }, [progressSpeed]);
 
   const currentStage = PROGRESS_STAGES.find((s) => progress < s.threshold) ?? PROGRESS_STAGES[PROGRESS_STAGES.length - 1];
   const pct = Math.round(Math.min(progress, 99));
@@ -115,7 +123,7 @@ export function VideoProgress({ videoId, imagePreview, onComplete, onError }: Vi
         <div className="w-full lg:max-w-lg" style={{ display: "flex", flexDirection: "column", gap: 8, textAlign: "center" }}>
           <p style={{ fontSize: 18, fontWeight: 700, color: "#FAFAF9" }}>Creating your video...</p>
           <p style={{ fontSize: 13, fontWeight: 400, lineHeight: 1.6, color: "#6B6B70" }}>
-            This usually takes 30–60 seconds.{"\n"}You can keep browsing while we work.
+            This usually takes {estimateText}.{"\n"}You can keep browsing while we work.
           </p>
         </div>
 

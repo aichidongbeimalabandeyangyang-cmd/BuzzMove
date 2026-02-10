@@ -274,10 +274,10 @@ export const adminRouter = router({
       stripe: stripeCheck.status === "fulfilled",
     };
 
-    // Video stats by status
+    // Video stats by status (capped to prevent unbounded queries)
     const [videos24hRes, videos7dRes] = await Promise.all([
-      supabase.from("videos").select("status").gte("created_at", since24h),
-      supabase.from("videos").select("status").gte("created_at", since7d),
+      supabase.from("videos").select("status").gte("created_at", since24h).limit(5000),
+      supabase.from("videos").select("status").gte("created_at", since7d).limit(20000),
     ]);
 
     function countByStatus(videos: { status: string }[]) {
@@ -300,7 +300,8 @@ export const adminRouter = router({
     const { data: txData } = await supabase
       .from("credit_transactions")
       .select("type, amount, created_at")
-      .gte("created_at", since7d);
+      .gte("created_at", since7d)
+      .limit(10000);
 
     const creditStats: Record<string, number> = {};
     for (const tx of txData ?? []) {
@@ -345,8 +346,8 @@ export const adminRouter = router({
 
     // System events (24h + 7d)
     const [events24hRes, events7dRes] = await Promise.all([
-      supabase.from("system_events").select("event, metadata, email, created_at").gte("created_at", since24h).order("created_at", { ascending: false }),
-      supabase.from("system_events").select("event").gte("created_at", since7d),
+      supabase.from("system_events").select("event, metadata, email, created_at").gte("created_at", since24h).order("created_at", { ascending: false }).limit(500),
+      supabase.from("system_events").select("event").gte("created_at", since7d).limit(5000),
     ]);
 
     function countByEvent(events: { event: string }[]) {
