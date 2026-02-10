@@ -4,7 +4,8 @@ export interface KlingImageToVideoRequest {
   prompt?: string;
   negative_prompt?: string;
   duration: "5" | "10";
-  mode: "std" | "pro";
+  mode: "pro";
+  sound?: "on" | "off";
   cfg_scale?: number;
   callback_url?: string;
 }
