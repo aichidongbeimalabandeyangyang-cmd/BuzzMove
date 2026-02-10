@@ -51,18 +51,19 @@ export async function createImageToVideo(params: {
   prompt?: string;
   negativePrompt?: string;
   duration: 5 | 10;
-  mode: "standard" | "professional";
+  sound: boolean;
   callbackUrl?: string;
 }): Promise<KlingTaskResponse> {
   return klingFetch<KlingTaskResponse>("/v1/videos/image2video", {
     method: "POST",
     body: JSON.stringify({
-      model_name: "kling-v2-5-turbo",
+      model_name: "kling-v2-6",
       image: params.imageUrl,
       prompt: params.prompt || "",
       negative_prompt: params.negativePrompt || "",
       duration: String(params.duration),
-      mode: params.mode === "standard" ? "std" : "pro",
+      mode: "pro",
+      sound: params.sound ? "on" : "off",
       cfg_scale: 0.5,
       callback_url:
         params.callbackUrl || process.env.KLING_CALLBACK_URL,

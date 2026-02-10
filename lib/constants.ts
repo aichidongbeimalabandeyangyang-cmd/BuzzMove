@@ -1,9 +1,8 @@
 // Credit costs per video generation
-// Base unit: std 5s = 100 credits ($0.50 at Pro subscription rate)
-// std 10s = 2x, pro 5s = 2x, pro 10s = 4x
+// Base unit: silent 5s = 100 credits, audio doubles the cost
 export const CREDIT_COSTS = {
-  standard: { 5: 100, 10: 200 },
-  professional: { 5: 200, 10: 400 },
+  silent: { 5: 100, 10: 200 },
+  audio: { 5: 200, 10: 400 },
 } as const;
 
 // Subscription plans (prices in cents)

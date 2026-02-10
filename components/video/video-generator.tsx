@@ -22,7 +22,7 @@ interface VideoGeneratorProps {
 export function VideoGenerator({ imageUrl, imagePreview, onReset, onBackHome, initialPrompt }: VideoGeneratorProps) {
   const [prompt, setPrompt] = useState(initialPrompt ?? "");
   const [duration, setDuration] = useState<"5" | "10">("5");
-  const [mode, setMode] = useState<"standard" | "professional">("standard");
+  const [mode, setMode] = useState<"silent" | "audio">("silent");
   const [videoId, setVideoId] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
   const [showPaywall, setShowPaywall] = useState(false);
@@ -144,9 +144,9 @@ export function VideoGenerator({ imageUrl, imagePreview, onReset, onBackHome, in
             </div>
             {/* Quality */}
             <div className="flex-1">
-              <p style={{ marginBottom: 6, fontSize: 12, fontWeight: 500, color: "#6B6B70" }}>Quality</p>
+              <p style={{ marginBottom: 6, fontSize: 12, fontWeight: 500, color: "#6B6B70" }}>Audio</p>
               <div className="flex" style={{ height: 44, borderRadius: 12, backgroundColor: "#16161A", padding: 4 }}>
-                {(["standard", "professional"] as const).map((m) => (
+                {(["silent", "audio"] as const).map((m) => (
                   <button
                     key={m}
                     onClick={() => setMode(m)}
@@ -158,7 +158,7 @@ export function VideoGenerator({ imageUrl, imagePreview, onReset, onBackHome, in
                       backgroundColor: mode === m ? "#E8A838" : "transparent",
                     }}
                   >
-                    {m === "standard" ? "720p" : "1080p"}
+                    {m === "silent" ? "Silent" : "Audio"}
                   </button>
                 ))}
               </div>

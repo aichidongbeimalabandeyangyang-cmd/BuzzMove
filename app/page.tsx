@@ -236,7 +236,7 @@ const LoggedInHome = memo(function LoggedInHome({ onUpload }: { onUpload: () => 
                       preload="metadata"
                     />
                   ) : video.input_image_url ? (
-                    <Image src={video.input_image_url} alt="" fill className="object-cover" unoptimized />
+                    <Image src={video.input_image_url} alt="" fill className="object-cover" />
                   ) : null}
 
                   {/* Overlay for generating */}

@@ -31,11 +31,26 @@ export function trackVideoGenerate(params: { mode: string; duration: string; cre
 }
 
 // 4. Purchase completed (called on redirect back from Stripe)
-export function trackPurchase(value: number, transactionId?: string) {
+export function trackPurchase(params: {
+  value: number;
+  transactionId?: string;
+  itemId: string;
+  itemName: string;
+  itemCategory: "subscription" | "credit_pack";
+}) {
   gtag("event", "purchase", {
     currency: "USD",
-    value,
-    transaction_id: transactionId || `txn_${Date.now()}`,
+    value: params.value,
+    transaction_id: params.transactionId || `txn_${Date.now()}`,
+    items: [
+      {
+        item_id: params.itemId,
+        item_name: params.itemName,
+        item_category: params.itemCategory,
+        price: params.value,
+        quantity: 1,
+      },
+    ],
   });
 }
 

@@ -23,7 +23,7 @@ export const videoRouter = router({
         prompt: z.string().max(1000).optional(),
         negativePrompt: z.string().max(500).optional(),
         duration: z.enum(["5", "10"]).default("5"),
-        mode: z.enum(["standard", "professional"]).default("standard"),
+        mode: z.enum(["silent", "audio"]).default("silent"),
         deviceKey: z.string().optional(),
       })
     )
@@ -139,7 +139,7 @@ export const videoRouter = router({
         user_id: ctx.user.id,
         amount: -creditCost,
         type: "deduction",
-        description: `Video generation: ${input.mode} ${duration}s`,
+        description: `Video generation: ${input.mode === "audio" ? "with audio" : "silent"} ${duration}s`,
         video_id: video.id,
       });
 
@@ -150,7 +150,7 @@ export const videoRouter = router({
           prompt: input.prompt,
           negativePrompt: input.negativePrompt,
           duration,
-          mode: input.mode,
+          sound: input.mode === "audio",
         });
 
         // Update video with Kling task ID

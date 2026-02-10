@@ -102,7 +102,7 @@ function PhotoCell({
   }
   return (
     <button onClick={() => onClick(item.url)} className="relative overflow-hidden" style={{ height: 150, borderRadius: 14 }}>
-      <Image src={item.url} alt={item.filename || "Upload"} fill className="object-cover" unoptimized />
+      <Image src={item.url} alt={item.filename || "Upload"} fill className="object-cover" />
       {/* Pin badge */}
       {item.is_pinned && (
         <div className="absolute flex items-center justify-center" style={{ top: 6, left: 6, width: 22, height: 22, borderRadius: 100, backgroundColor: "rgba(0,0,0,0.6)", zIndex: 10 }}>

@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { trackPurchase, trackVideoDownload, trackShareClick } from "@/lib/gtag";
+import { PLANS, CREDIT_PACKS } from "@/lib/constants";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Download, Share2, Trash2, X, Lock, CheckCircle, XCircle, Loader2, Copy, Check, RefreshCw, Pin, Sparkles } from "lucide-react";
@@ -39,13 +40,15 @@ function VideoDetail({ videoId, onBack }: { videoId: string; onBack: () => void 
 
   const videoUrl = video?.output_video_url;
 
+  const shareUrl = `https://buzzmove.me/v/${videoId}`;
+
   const handleShare = async () => {
     if (!videoUrl) return;
     trackShareClick();
     if (navigator.share) {
-      try { await navigator.share({ title: "Check out my AI video!", url: videoUrl }); } catch {}
+      try { await navigator.share({ title: "Check out my AI video!", url: shareUrl }); } catch {}
     } else {
-      await navigator.clipboard.writeText(videoUrl);
+      await navigator.clipboard.writeText(shareUrl);
     }
   };
 
@@ -342,9 +345,16 @@ function PhotosGrid({ onSelectPhoto }: { onSelectPhoto: (photo: { id: string; ur
 
   if (!photos || photos.length === 0) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center" style={{ gap: 12 }}>
+      <div className="flex flex-1 flex-col items-center justify-center" style={{ gap: 16 }}>
         <p style={{ fontSize: 14, color: "#6B6B70" }}>No photos yet</p>
         <p style={{ fontSize: 12, color: "#4A4A50" }}>Your uploaded photos will appear here</p>
+        <button
+          onClick={() => { window.location.href = "/"; }}
+          className="flex items-center justify-center transition-all active:scale-[0.98]"
+          style={{ height: 40, paddingInline: 20, borderRadius: 12, border: "1.5px solid #252530" }}
+        >
+          <span style={{ fontSize: 14, fontWeight: 600, color: "#FAFAF9" }}>Upload a photo</span>
+        </button>
       </div>
     );
   }
@@ -358,7 +368,7 @@ function PhotosGrid({ onSelectPhoto }: { onSelectPhoto: (photo: { id: string; ur
           className="relative overflow-hidden text-left"
           style={{ aspectRatio: "3/4", borderRadius: 14, backgroundColor: "#16161A" }}
         >
-          <Image src={photo.url} alt={photo.filename || "Photo"} fill className="object-cover" unoptimized />
+          <Image src={photo.url} alt={photo.filename || "Photo"} fill className="object-cover" />
           {photo.is_pinned && (
             <div className="absolute" style={{ top: 6, left: 6 }}>
               <div className="flex items-center justify-center" style={{ width: 22, height: 22, borderRadius: 100, backgroundColor: "rgba(0,0,0,0.6)" }}>
@@ -378,7 +388,29 @@ function SearchParamsHandler({ onVideoId }: { onVideoId: (id: string) => void })
     if (searchParams.get("payment") === "success") {
       const amount = parseFloat(searchParams.get("amount") || "0");
       const sessionId = searchParams.get("session_id") || undefined;
-      trackPurchase(amount, sessionId);
+      const type = searchParams.get("type") as "subscription" | "credit_pack" | null;
+      const planId = searchParams.get("plan");
+      const packId = searchParams.get("pack");
+      const billing = searchParams.get("billing");
+
+      let itemId = "unknown";
+      let itemName = "BuzzMove Purchase";
+      let itemCategory: "subscription" | "credit_pack" = "credit_pack";
+
+      if (type === "subscription" && planId) {
+        const plan = PLANS[planId as keyof typeof PLANS];
+        itemId = `${planId}_${billing || "monthly"}`;
+        itemName = `BuzzMove ${plan?.name || planId} Plan (${billing || "monthly"})`;
+        itemCategory = "subscription";
+      } else if (type === "credit_pack" && packId) {
+        const pack = CREDIT_PACKS.find((p) => p.id === packId);
+        itemId = `pack_${packId}`;
+        itemName = pack ? `BuzzMove ${pack.name} (${pack.credits} credits)` : `Credit Pack ${packId}`;
+        itemCategory = "credit_pack";
+      }
+
+      trackPurchase({ value: amount, transactionId: sessionId, itemId, itemName, itemCategory });
+      window.history.replaceState({}, "", "/dashboard");
     }
     const videoId = searchParams.get("video");
     if (videoId) {
@@ -490,7 +522,7 @@ export default function AssetsPage() {
                       />
                     ) : video.input_image_url ? (
                       <>
-                        <Image src={video.input_image_url} alt="Video thumbnail" fill className="object-cover" unoptimized />
+                        <Image src={video.input_image_url} alt="Video thumbnail" fill className="object-cover" />
                         {/* Overlay for non-completed */}
                         {!isCompleted && (
                           <div className="absolute inset-0 flex items-center justify-center" style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
@@ -544,9 +576,16 @@ export default function AssetsPage() {
               })}
             </div>
           ) : (
-            <div className="flex flex-1 flex-col items-center justify-center" style={{ gap: 12 }}>
+            <div className="flex flex-1 flex-col items-center justify-center" style={{ gap: 16 }}>
               <p style={{ fontSize: 14, color: "#6B6B70" }}>No videos yet</p>
               <p style={{ fontSize: 12, color: "#4A4A50" }}>Your generated videos will appear here</p>
+              <button
+                onClick={() => { window.location.href = "/"; }}
+                className="flex items-center justify-center transition-all active:scale-[0.98]"
+                style={{ height: 40, paddingInline: 20, borderRadius: 12, background: "linear-gradient(135deg, #F0C060, #E8A838)" }}
+              >
+                <span style={{ fontSize: 14, fontWeight: 600, color: "#0B0B0E" }}>Create your first video</span>
+              </button>
             </div>
           )
         ) : (
