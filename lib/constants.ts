@@ -75,8 +75,11 @@ export const HERO_EXAMPLES = [
   },
 ] as const;
 
-// Admin whitelist
-export const ADMIN_EMAILS = ["billccb.8128@gmail.com", "aichidongbeimalabandeyangyang@gmail.com", "shensiyu@hoxigames.com", "sanzeninsaki@gmail.com", "castheart200@gmail.com", "gaobin@hoxigames.com", "bingaoo@gmail.com"];
+// Admin whitelist (loaded from ADMIN_EMAILS env var, comma-separated)
+export const ADMIN_EMAILS: string[] = (process.env.ADMIN_EMAILS ?? "")
+  .split(",")
+  .map((e) => e.trim())
+  .filter(Boolean);
 
 // Referral reward
 export const REFERRAL_REWARD_CREDITS = 500;

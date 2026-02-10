@@ -1,14 +1,22 @@
 import { NextResponse } from "next/server";
+import { timingSafeEqual } from "crypto";
 import { collectAnalyticsData } from "@/server/services/analytics-data";
 import { generateReport } from "@/server/services/report-generator";
 import { createSupabaseAdminClient } from "@/server/supabase/server";
 
 export const maxDuration = 60;
 
+function isValidCronAuth(authHeader: string | null): boolean {
+  const secret = process.env.CRON_SECRET;
+  if (!secret || !authHeader) return false;
+  const expected = `Bearer ${secret}`;
+  if (authHeader.length !== expected.length) return false;
+  return timingSafeEqual(Buffer.from(authHeader), Buffer.from(expected));
+}
+
 export async function GET(request: Request) {
-  // Verify Vercel Cron authentication
-  const authHeader = request.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  // Verify Vercel Cron authentication (constant-time comparison)
+  if (!isValidCronAuth(request.headers.get("authorization"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

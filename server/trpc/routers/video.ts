@@ -3,10 +3,16 @@ import { TRPCError } from "@trpc/server";
 import { router, protectedProcedure } from "../trpc";
 import { createImageToVideo, getTaskStatus } from "@/server/kling/client";
 import { resolveContentPolicy } from "@/server/services/content-policy";
-import { CREDIT_COSTS } from "@/lib/constants";
+import { CREDIT_COSTS, PLANS } from "@/lib/constants";
 import { persistVideoToStorage } from "@/server/services/video-persist";
 import { after } from "next/server";
 import { logServerEvent } from "@/server/services/events";
+
+const MAX_CONCURRENT: Record<string, number> = {
+  free: PLANS.free.max_concurrent,
+  pro: PLANS.pro.max_concurrent,
+  premium: PLANS.premium.max_concurrent,
+};
 
 export const videoRouter = router({
   // Generate a video from an image
@@ -33,6 +39,22 @@ export const videoRouter = router({
         throw new TRPCError({
           code: "NOT_FOUND",
           message: "User profile not found",
+        });
+      }
+
+      // 1b. Enforce per-user concurrent generation limit
+      const plan = profile.subscription_plan ?? "free";
+      const maxConcurrent = MAX_CONCURRENT[plan] ?? MAX_CONCURRENT.free;
+      const { count: activeCount } = await ctx.supabase
+        .from("videos")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", ctx.user.id)
+        .in("status", ["pending", "generating"]);
+
+      if ((activeCount ?? 0) >= maxConcurrent) {
+        throw new TRPCError({
+          code: "TOO_MANY_REQUESTS",
+          message: `You can generate up to ${maxConcurrent} videos at a time. Please wait for current generations to finish.`,
         });
       }
 

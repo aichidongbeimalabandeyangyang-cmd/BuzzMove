@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
   const token = req.headers.get("authorization")?.replace("Bearer ", "");
   const expectedToken = process.env.KLING_WEBHOOK_SECRET;
 
-  if (expectedToken && token !== expectedToken) {
+  if (!expectedToken || token !== expectedToken) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

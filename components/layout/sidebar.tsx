@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Flame, Layers, CircleUser, Crown, Play, Gift, Shield, FileText, BarChart3, Activity } from "lucide-react";
-import { ADMIN_EMAILS } from "@/lib/constants";
+import { trpc } from "@/lib/trpc";
 
 interface SidebarProps {
   isLoggedIn: boolean;
@@ -28,7 +28,7 @@ const ADMIN_NAV = [
 
 export function Sidebar({ isLoggedIn, userEmail, onLoginClick }: SidebarProps) {
   const pathname = usePathname();
-  const isAdmin = !!userEmail && ADMIN_EMAILS.includes(userEmail);
+  const { data: isAdmin } = trpc.admin.isAdmin.useQuery(undefined, { enabled: isLoggedIn });
 
   return (
     <aside className="fixed inset-y-0 left-0 z-40 hidden lg:flex flex-col" style={{ width: 240, backgroundColor: "#0B0B0E", borderRight: "1px solid #1A1A1E" }}>

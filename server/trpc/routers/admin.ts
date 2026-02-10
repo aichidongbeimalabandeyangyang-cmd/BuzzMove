@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { router, adminProcedure } from "../trpc";
-import { CREDIT_PACKS, PLANS } from "@/lib/constants";
+import { router, adminProcedure, protectedProcedure } from "../trpc";
+import { CREDIT_PACKS, PLANS, ADMIN_EMAILS } from "@/lib/constants";
 import { collectAnalyticsData } from "@/server/services/analytics-data";
 import { generateReport } from "@/server/services/report-generator";
 import { getStripe } from "@/server/stripe/client";
@@ -21,6 +21,11 @@ function getRevenueCents(type: string, description: string): number {
 }
 
 export const adminRouter = router({
+  // Non-throwing admin check for UI (sidebar nav visibility)
+  isAdmin: protectedProcedure.query(({ ctx }) => {
+    return ADMIN_EMAILS.includes(ctx.user.email ?? "");
+  }),
+
   getDailyStats: adminProcedure.query(async ({ ctx }) => {
     const supabase = ctx.adminSupabase;
     const now = new Date();

@@ -48,8 +48,9 @@ export async function POST(req: NextRequest) {
       console.log(`[stripe] Duplicate event skipped: ${event.id} (${event.type})`);
       return NextResponse.json({ received: true });
     }
-    // Other DB error — log but still process (fail-open for availability)
+    // Other DB error — fail-closed to prevent duplicate processing
     console.error(`[stripe] Event dedup insert error: ${dedupError.message}`);
+    return NextResponse.json({ error: "Dedup check failed" }, { status: 500 });
   }
 
   // ═══════════════════════════════════════════════════════
