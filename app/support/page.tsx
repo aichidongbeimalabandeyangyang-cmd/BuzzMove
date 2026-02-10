@@ -34,7 +34,7 @@ export default function SupportPage() {
             {[
               {
                 q: "How long does video generation take?",
-                a: "720p mode takes ~30 seconds, 1080p mode takes ~60 seconds.",
+                a: "5-second videos take ~30 seconds, 10-second videos take ~60 seconds.",
               },
               {
                 q: "What happens if generation fails?",

@@ -34,10 +34,9 @@ export const VideoProgress = memo(function VideoProgress({ videoId, imagePreview
     }
   );
 
-  // Estimate based on mode + duration (professional/10s takes longer)
-  const isPro = video?.mode === "professional";
+  // Estimate based on duration (10s takes longer)
   const is10s = video?.duration === 10;
-  const estimateText = isPro || is10s ? "1–3 minutes" : "30–60 seconds";
+  const estimateText = is10s ? "1–3 minutes" : "30–60 seconds";
 
   // Tab title flashing when video completes while tab is hidden
   useEffect(() => {
@@ -79,8 +78,8 @@ export const VideoProgress = memo(function VideoProgress({ videoId, imagePreview
     return cleanup;
   }, [video?.status]);
 
-  // Slower progress for professional/10s to avoid stalling at 92%
-  const progressSpeed = isPro || is10s ? 0.5 : 1.2;
+  // Slower progress for 10s to avoid stalling at 92%
+  const progressSpeed = is10s ? 0.5 : 1.2;
 
   useEffect(() => {
     const interval = setInterval(() => {
