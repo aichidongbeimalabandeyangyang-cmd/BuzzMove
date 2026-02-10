@@ -131,6 +131,20 @@ export default function AdminReportsPage() {
                 ol: ({ children }) => <ol style={{ paddingLeft: 20, margin: "10px 0" }}>{children}</ol>,
                 li: ({ children }) => <li style={{ fontSize: 14, lineHeight: 1.8, color: "#C4C4C8", margin: "4px 0" }}>{children}</li>,
                 hr: () => <hr style={{ border: "none", borderTop: "1px solid #252530", margin: "24px 0" }} />,
+                table: ({ children }) => (
+                  <div style={{ overflowX: "auto", margin: "16px 0" }}>
+                    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>{children}</table>
+                  </div>
+                ),
+                thead: ({ children }) => <thead style={{ borderBottom: "2px solid #252530" }}>{children}</thead>,
+                tbody: ({ children }) => <tbody>{children}</tbody>,
+                tr: ({ children }) => <tr style={{ borderBottom: "1px solid #1E1E24" }}>{children}</tr>,
+                th: ({ children }) => (
+                  <th style={{ padding: "10px 12px", fontSize: 12, fontWeight: 600, color: "#E8A838", textAlign: "left", whiteSpace: "nowrap" }}>{children}</th>
+                ),
+                td: ({ children }) => (
+                  <td style={{ padding: "10px 12px", fontSize: 13, color: "#C4C4C8", lineHeight: 1.6 }}>{children}</td>
+                ),
               }}
             >
               {reportData.report_content}
