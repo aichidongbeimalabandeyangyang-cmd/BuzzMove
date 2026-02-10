@@ -160,7 +160,7 @@ export const videoRouter = router({
           p_amount: creditCost,
         });
 
-        await ctx.supabase
+        await ctx.adminSupabase
           .from("credit_transactions")
           .delete()
           .eq("video_id", video.id);

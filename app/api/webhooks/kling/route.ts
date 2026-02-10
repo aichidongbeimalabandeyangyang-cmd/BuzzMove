@@ -10,9 +10,8 @@ function isValidWebhookAuth(authHeader: string | null): boolean {
   const secret = process.env.KLING_WEBHOOK_SECRET;
   if (!secret || !authHeader) return false;
   const expected = `Bearer ${secret}`;
-  const actual = `Bearer ${authHeader.replace("Bearer ", "")}`;
-  if (actual.length !== expected.length) return false;
-  return timingSafeEqual(Buffer.from(actual), Buffer.from(expected));
+  if (authHeader.length !== expected.length) return false;
+  return timingSafeEqual(Buffer.from(authHeader), Buffer.from(expected));
 }
 
 export async function POST(req: NextRequest) {
