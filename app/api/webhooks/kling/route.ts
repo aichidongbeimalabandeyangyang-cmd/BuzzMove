@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { after } from "next/server";
 import { createSupabaseAdminClient } from "@/server/supabase/server";
 import { persistVideoToStorage } from "@/server/services/video-persist";
+import { sendVideoReadyEmail } from "@/server/services/email";
 import type { KlingCallbackPayload } from "@/server/kling/types";
 
 export async function POST(req: NextRequest) {
@@ -41,8 +42,20 @@ export async function POST(req: NextRequest) {
       })
       .eq("id", video.id);
 
-    // Persist to Supabase Storage after response is sent
-    after(() => persistVideoToStorage(video.id, videoUrl));
+    // Persist to Supabase Storage + send email notification after response
+    after(async () => {
+      await persistVideoToStorage(video.id, videoUrl);
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("email")
+        .eq("id", video.user_id)
+        .single();
+      if (profile?.email) {
+        sendVideoReadyEmail(profile.email, video.id).catch((err) =>
+          console.error("[kling-webhook] Email send failed:", err)
+        );
+      }
+    });
   } else if (payload.task_status === "failed") {
     await supabase
       .from("videos")

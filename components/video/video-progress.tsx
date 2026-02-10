@@ -34,13 +34,37 @@ export function VideoProgress({ videoId, imagePreview, onComplete, onError }: Vi
     }
   );
 
+  // Tab title flashing when video completes while tab is hidden
   useEffect(() => {
     if (video?.status === "completed") {
+      if (document.hidden) {
+        const originalTitle = document.title;
+        let flash = true;
+        const interval = setInterval(() => {
+          document.title = flash ? "✅ Video Ready! — BuzzMove" : originalTitle;
+          flash = !flash;
+        }, 1000);
+        const restore = () => {
+          clearInterval(interval);
+          document.title = originalTitle;
+          document.removeEventListener("visibilitychange", restore);
+        };
+        document.addEventListener("visibilitychange", restore);
+      }
       onComplete();
-      // Trigger PWA install prompt after first successful video
       window.dispatchEvent(new Event("show-install-prompt"));
     }
-    if (video?.status === "failed") onError();
+    if (video?.status === "failed") {
+      if (document.hidden) {
+        document.title = "❌ Generation Failed — BuzzMove";
+        const restore = () => {
+          document.title = "BuzzMove";
+          document.removeEventListener("visibilitychange", restore);
+        };
+        document.addEventListener("visibilitychange", restore);
+      }
+      onError();
+    }
   }, [video?.status]);
 
   useEffect(() => {
