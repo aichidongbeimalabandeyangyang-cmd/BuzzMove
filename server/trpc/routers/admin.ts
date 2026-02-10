@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { router, adminProcedure } from "../trpc";
 import { CREDIT_PACKS, PLANS } from "@/lib/constants";
+import { collectAnalyticsData } from "@/server/services/analytics-data";
+import { generateReport } from "@/server/services/report-generator";
 
 // Map transaction descriptions to revenue (cents)
 function getRevenueCents(type: string, description: string): number {
@@ -178,4 +180,63 @@ export const adminRouter = router({
         total: count ?? 0,
       };
     }),
+
+  // ---- Analytics Reports ----
+  getReports: adminProcedure
+    .input(z.object({
+      limit: z.number().min(1).max(50).default(20),
+      offset: z.number().min(0).default(0),
+    }))
+    .query(async ({ ctx, input }) => {
+      const supabase = ctx.adminSupabase;
+      const { data, count } = await supabase
+        .from("analytics_reports")
+        .select("id, created_at, period_start, period_end, report_type", { count: "exact" })
+        .order("created_at", { ascending: false })
+        .range(input.offset, input.offset + input.limit - 1);
+
+      return { reports: data ?? [], total: count ?? 0 };
+    }),
+
+  getReport: adminProcedure
+    .input(z.object({ id: z.string().uuid() }))
+    .query(async ({ ctx, input }) => {
+      const supabase = ctx.adminSupabase;
+      const { data, error } = await supabase
+        .from("analytics_reports")
+        .select("*")
+        .eq("id", input.id)
+        .single();
+
+      if (error || !data) {
+        throw new Error("Report not found");
+      }
+      return data;
+    }),
+
+  generateReport: adminProcedure.mutation(async ({ ctx }) => {
+    const days = 1;
+    const now = new Date();
+    const periodStart = new Date(now);
+    periodStart.setDate(periodStart.getDate() - days);
+
+    const data = await collectAnalyticsData(days);
+    const reportContent = await generateReport(data.formattedText);
+
+    const supabase = ctx.adminSupabase;
+    const { data: inserted, error } = await supabase
+      .from("analytics_reports")
+      .insert({
+        period_start: periodStart.toISOString(),
+        period_end: now.toISOString(),
+        report_type: "manual",
+        raw_data: { internal: data.internal, formattedText: data.formattedText },
+        report_content: reportContent,
+      })
+      .select("id")
+      .single();
+
+    if (error) throw new Error(`Failed to save report: ${error.message}`);
+    return { id: inserted.id };
+  }),
 });
