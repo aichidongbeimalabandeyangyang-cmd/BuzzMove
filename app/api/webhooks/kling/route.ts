@@ -42,18 +42,26 @@ export async function POST(req: NextRequest) {
       })
       .eq("id", video.id);
 
-    // Persist to Supabase Storage + send email notification after response
+    // Persist to Supabase Storage + send email for first video only
     after(async () => {
       await persistVideoToStorage(video.id, videoUrl);
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("email")
-        .eq("id", video.user_id)
-        .single();
-      if (profile?.email) {
-        sendVideoReadyEmail(profile.email, video.id).catch((err) =>
-          console.error("[kling-webhook] Email send failed:", err)
-        );
+      // Only send email notification for user's first completed video
+      const { count } = await supabase
+        .from("videos")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", video.user_id)
+        .eq("status", "completed");
+      if (count === 1) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("email")
+          .eq("id", video.user_id)
+          .single();
+        if (profile?.email) {
+          sendVideoReadyEmail(profile.email, video.id).catch((err) =>
+            console.error("[kling-webhook] Email send failed:", err)
+          );
+        }
       }
     });
   } else if (payload.task_status === "failed") {
