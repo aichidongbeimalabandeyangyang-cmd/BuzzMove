@@ -13,22 +13,27 @@ export default function AdsPage() {
     <div className="mx-auto max-w-4xl px-4 py-6 sm:px-6 sm:py-12">
       {/* Hero */}
       <div className="mb-12 sm:mb-20 text-center">
-        <div className="mb-4 inline-block rounded-full bg-[var(--primary-10)] px-4 py-1 text-sm font-medium text-[var(--primary)]">
+        <div
+          className="mb-4 inline-block rounded-full px-4 py-1 text-sm font-medium"
+          style={{ backgroundColor: "rgba(232,168,56,0.12)", color: "#E8A838" }}
+        >
           For Performance Marketers
         </div>
         <h1 className="mb-4 text-3xl font-bold leading-tight sm:text-5xl">
           Turn one image into
           <br />
-          <span className="text-gradient">10 ad-ready videos</span>
+          <span style={{ background: "linear-gradient(135deg, #F0C060, #E8A838)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+            10 ad-ready videos
+          </span>
         </h1>
-        <p className="mx-auto mb-8 max-w-xl text-base text-[var(--muted-foreground)] leading-relaxed sm:text-lg">
+        <p className="mx-auto mb-8 max-w-xl text-base leading-relaxed sm:text-lg" style={{ color: "#9898A4" }}>
           Generate scroll-stopping video ads from a single product image.
           Designed for ROAS. Minutes, not days.
         </p>
         <Link
           href="/"
-          className="inline-block rounded-xl px-8 py-4 text-base font-semibold text-[var(--background)] transition-all active:scale-[0.98]"
-          style={{ background: "linear-gradient(135deg, #e8a838, #d4942e)" }}
+          className="inline-block rounded-xl px-8 py-4 text-base font-semibold transition-all active:scale-[0.98]"
+          style={{ background: "linear-gradient(135deg, #F0C060, #E8A838)", color: "#0B0B0E" }}
         >
           Start Creating Ads
         </Link>
@@ -52,10 +57,11 @@ export default function AdsPage() {
         ].map((item) => (
           <div
             key={item.title}
-            className="rounded-2xl bg-[var(--card)] p-5 sm:p-6"
+            className="rounded-2xl p-5 sm:p-6"
+            style={{ backgroundColor: "#16161A" }}
           >
-            <h3 className="mb-2 text-lg font-bold">{item.title}</h3>
-            <p className="text-sm text-[var(--muted-foreground)] leading-relaxed">
+            <h3 className="mb-2 text-lg font-bold" style={{ color: "#FAFAF9" }}>{item.title}</h3>
+            <p className="text-sm leading-relaxed" style={{ color: "#6B6B70" }}>
               {item.desc}
             </p>
           </div>
@@ -86,16 +92,16 @@ export default function AdsPage() {
               desc: "From upload to ad-ready video in under 2 minutes.",
             },
           ].map((item) => (
-            <div key={item.title} className="flex gap-4 rounded-2xl bg-[var(--secondary)] p-4 sm:p-5">
+            <div key={item.title} className="flex gap-4 rounded-2xl p-4 sm:p-5" style={{ backgroundColor: "#16161A" }}>
               <div
                 className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
-                style={{ background: "rgba(232,168,56,0.12)" }}
+                style={{ backgroundColor: "rgba(232,168,56,0.12)" }}
               >
                 <svg
-                  className="h-5 w-5 text-[var(--primary)]"
+                  className="h-5 w-5"
                   fill="none"
                   viewBox="0 0 24 24"
-                  stroke="currentColor"
+                  stroke="#E8A838"
                 >
                   <path
                     strokeLinecap="round"
@@ -106,8 +112,8 @@ export default function AdsPage() {
                 </svg>
               </div>
               <div>
-                <h3 className="font-bold">{item.title}</h3>
-                <p className="text-sm text-[var(--muted-foreground)]">
+                <h3 className="font-bold" style={{ color: "#FAFAF9" }}>{item.title}</h3>
+                <p className="text-sm" style={{ color: "#6B6B70" }}>
                   {item.desc}
                 </p>
               </div>
@@ -119,17 +125,18 @@ export default function AdsPage() {
       {/* CTA */}
       <div
         className="rounded-2xl p-8 sm:p-12 text-center"
-        style={{ background: "linear-gradient(135deg, #e8a838, #f0c060)" }}
+        style={{ background: "linear-gradient(135deg, #E8A838, #F0C060)" }}
       >
-        <h2 className="mb-3 text-2xl font-bold text-[var(--background)] sm:text-3xl">
+        <h2 className="mb-3 text-2xl font-bold sm:text-3xl" style={{ color: "#0B0B0E" }}>
           Ready to Scale Your Creatives?
         </h2>
-        <p className="mb-6 text-[var(--background)]/70">
+        <p className="mb-6" style={{ color: "rgba(11,11,14,0.7)" }}>
           Start with free credits. No credit card required.
         </p>
         <Link
           href="/"
-          className="inline-block rounded-xl bg-[var(--background)] px-8 py-3 font-semibold text-[var(--foreground)] transition-all hover:bg-[#111] active:scale-[0.98]"
+          className="inline-block rounded-xl px-8 py-3 font-semibold transition-all active:scale-[0.98]"
+          style={{ backgroundColor: "#0B0B0E", color: "#FAFAF9" }}
         >
           Get Started Free
         </Link>
