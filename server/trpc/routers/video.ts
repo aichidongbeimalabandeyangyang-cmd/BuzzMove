@@ -379,11 +379,11 @@ export const videoRouter = router({
         throw new TRPCError({ code: "NOT_FOUND", message: "Video not found" });
       }
 
-      // Refund credits if video hasn't completed (pending/generating)
+      // Block deletion of in-progress videos (credits already committed to Kling)
       if (video.status === "pending" || video.status === "generating") {
-        await ctx.adminSupabase.rpc("refund_credits", {
-          p_user_id: ctx.user.id,
-          p_amount: video.credits_consumed,
+        throw new TRPCError({
+          code: "PRECONDITION_FAILED",
+          message: "Cannot delete a video that is still generating. Please wait for it to finish.",
         });
       }
 
