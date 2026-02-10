@@ -70,6 +70,7 @@ export function LoginModal({ open, onClose, redirectTo }: LoginModalProps) {
       const validation = await validateEmail.mutateAsync({ email: email.trim() });
       if (!validation.valid) {
         setError(validation.reason || "This email domain is not supported.");
+        logEvent("disposable_email_blocked", { email: email.trim() });
         return;
       }
 

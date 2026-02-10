@@ -4,6 +4,7 @@ import { createSupabaseAdminClient } from "@/server/supabase/server";
 import { REFERRAL_REWARD_CREDITS } from "@/lib/constants";
 import { isDisposableEmail } from "@/server/services/email-validation";
 import { validateDeviceKey } from "@/server/services/device-fingerprint";
+import { logServerEvent } from "@/server/services/events";
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
@@ -78,17 +79,39 @@ export async function GET(request: NextRequest) {
               null;
 
             const admin = createSupabaseAdminClient();
-            await admin.rpc("claim_signup_credits", {
+            const { data: claimedBalance } = await admin.rpc("claim_signup_credits", {
               p_user_id: user.id,
               p_device_key: deviceKey,
               p_ip_address: ipAddress,
             });
+
+            // Log if device limit was hit
+            if (claimedBalance === 0) {
+              const { count } = await admin
+                .from("signup_device_log")
+                .select("id", { count: "exact", head: true })
+                .eq("device_key", deviceKey);
+
+              if (count && count >= 3) {
+                logServerEvent("device_limit_blocked", {
+                  email: user.email ?? undefined,
+                  userId: user.id,
+                  metadata: { device_key: deviceKey, device_accounts: count, source: "google_oauth" },
+                });
+              }
+            }
+
             await admin
               .from("profiles")
               .update({ device_key: deviceKey })
               .eq("id", user.id);
           } else {
             console.warn(`[auth/callback] Disposable email blocked credits: ${user.email}`);
+            logServerEvent("disposable_email_blocked", {
+              email: user.email,
+              userId: user.id,
+              metadata: { source: "google_oauth" },
+            });
           }
 
           // Clear the device_key cookie

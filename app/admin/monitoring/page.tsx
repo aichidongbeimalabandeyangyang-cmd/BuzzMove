@@ -11,6 +11,9 @@ import {
   XCircle,
   AlertTriangle,
   Clock,
+  ShieldAlert,
+  Fingerprint,
+  MailX,
 } from "lucide-react";
 
 function StatCard({
@@ -395,6 +398,30 @@ export default function MonitoringPage() {
         </div>
       </div>
 
+      {/* Anti-Abuse (24h) */}
+      {((eventStats.last24h["disposable_email_blocked"] ?? 0) > 0 ||
+        (eventStats.last24h["device_limit_blocked"] ?? 0) > 0) && (
+        <div className="flex flex-col" style={{ gap: 12 }}>
+          <SectionTitle>Anti-Abuse (24h)</SectionTitle>
+          <div className="flex flex-wrap" style={{ gap: 12 }}>
+            <StatCard
+              label="Disposable Email"
+              value={eventStats.last24h["disposable_email_blocked"] ?? 0}
+              sub={`${eventStats.last7d["disposable_email_blocked"] ?? 0} in 7d`}
+              icon={MailX}
+              color="#EF4444"
+            />
+            <StatCard
+              label="Device Limit"
+              value={eventStats.last24h["device_limit_blocked"] ?? 0}
+              sub={`${eventStats.last7d["device_limit_blocked"] ?? 0} in 7d`}
+              icon={Fingerprint}
+              color="#F59E0B"
+            />
+          </div>
+        </div>
+      )}
+
       {/* Recent Events Log */}
       {eventStats.recentEvents.length > 0 && (
         <div className="flex flex-col" style={{ gap: 12 }}>
@@ -423,7 +450,7 @@ export default function MonitoringPage() {
                 </thead>
                 <tbody>
                   {eventStats.recentEvents.map((e: any, i: number) => {
-                    const isFail = e.event.includes("fail");
+                    const isFail = e.event.includes("fail") || e.event.includes("blocked");
                     return (
                       <tr key={i} style={{ borderBottom: "1px solid #1E1E22" }}>
                         <td style={{ padding: "8px 12px" }}>
