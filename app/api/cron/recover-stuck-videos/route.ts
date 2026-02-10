@@ -22,6 +22,7 @@ export async function GET(request: Request) {
 
   const supabase = createSupabaseAdminClient();
   const tenMinAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
+  const thirtyMinAgo = new Date(Date.now() - 30 * 60 * 1000).toISOString();
   const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
 
   // Find videos stuck in generating/pending for > 10 minutes
@@ -69,8 +70,35 @@ export async function GET(request: Request) {
       continue;
     }
 
-    // No kling_task_id means stuck in pending — skip, will timeout at 2h
-    if (!video.kling_task_id) continue;
+    // Pending without kling_task_id = server crashed before Kling call.
+    // Force-fail after 30 min to unblock concurrent slot (instead of waiting 2h).
+    if (!video.kling_task_id) {
+      if (video.created_at < thirtyMinAgo) {
+        const { data: updated } = await supabase
+          .from("videos")
+          .update({ status: "failed" })
+          .eq("id", video.id)
+          .eq("status", "pending")
+          .select("id")
+          .single();
+
+        if (updated) {
+          await supabase.rpc("refund_credits", {
+            p_user_id: video.user_id,
+            p_amount: video.credits_consumed,
+          });
+          await supabase.from("credit_transactions").insert({
+            user_id: video.user_id,
+            amount: video.credits_consumed,
+            type: "refund",
+            description: "Refund: video stuck in pending (auto-recovery)",
+            video_id: video.id,
+          });
+          timedOut++;
+        }
+      }
+      continue;
+    }
 
     try {
       const result = await getTaskStatus(video.kling_task_id);

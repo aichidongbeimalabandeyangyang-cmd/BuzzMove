@@ -110,6 +110,30 @@ export const videoRouter = router({
         });
       }
 
+      // 4b. Post-insert concurrent check (prevent TOCTOU race)
+      // Now that our video exists in DB, re-check the real count.
+      const { count: postInsertCount } = await ctx.supabase
+        .from("videos")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", ctx.user.id)
+        .in("status", ["pending", "generating"]);
+
+      if ((postInsertCount ?? 0) > maxConcurrent) {
+        // Another request sneaked past the pre-check — undo this one
+        await ctx.supabase
+          .from("videos")
+          .delete()
+          .eq("id", video.id);
+        await ctx.adminSupabase.rpc("refund_credits", {
+          p_user_id: ctx.user.id,
+          p_amount: creditCost,
+        });
+        throw new TRPCError({
+          code: "TOO_MANY_REQUESTS",
+          message: `You can generate up to ${maxConcurrent} videos at a time. Please wait for current generations to finish.`,
+        });
+      }
+
       // 5. Record credit transaction (use admin to bypass RLS)
       await ctx.adminSupabase.from("credit_transactions").insert({
         user_id: ctx.user.id,
@@ -387,13 +411,13 @@ export const videoRouter = router({
         });
       }
 
-      // Delete associated credit transactions (use admin to bypass RLS)
+      // Nullify the video_id reference on credit transactions (preserve audit trail)
       await ctx.adminSupabase
         .from("credit_transactions")
-        .delete()
+        .update({ video_id: null })
         .eq("video_id", video.id);
 
-      // Delete the video record (use admin to bypass FK issues)
+      // Delete the video record
       const { error } = await ctx.adminSupabase
         .from("videos")
         .delete()
