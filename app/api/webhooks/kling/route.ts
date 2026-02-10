@@ -1,16 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { after } from "next/server";
+import { timingSafeEqual } from "crypto";
 import { createSupabaseAdminClient } from "@/server/supabase/server";
 import { persistVideoToStorage } from "@/server/services/video-persist";
 import { sendVideoReadyEmail } from "@/server/services/email";
 import type { KlingCallbackPayload } from "@/server/kling/types";
 
-export async function POST(req: NextRequest) {
-  // Verify webhook token
-  const token = req.headers.get("authorization")?.replace("Bearer ", "");
-  const expectedToken = process.env.KLING_WEBHOOK_SECRET;
+function isValidWebhookAuth(authHeader: string | null): boolean {
+  const secret = process.env.KLING_WEBHOOK_SECRET;
+  if (!secret || !authHeader) return false;
+  const expected = `Bearer ${secret}`;
+  const actual = `Bearer ${authHeader.replace("Bearer ", "")}`;
+  if (actual.length !== expected.length) return false;
+  return timingSafeEqual(Buffer.from(actual), Buffer.from(expected));
+}
 
-  if (!expectedToken || token !== expectedToken) {
+export async function POST(req: NextRequest) {
+  if (!isValidWebhookAuth(req.headers.get("authorization"))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

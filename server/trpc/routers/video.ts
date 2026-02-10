@@ -220,11 +220,28 @@ export const videoRouter = router({
           }
 
           if (klingStatus === "failed") {
-            await ctx.supabase
+            const { data: failUpdated } = await ctx.supabase
               .from("videos")
               .update({ status: "failed" })
               .eq("id", video.id)
-              .eq("status", "generating");
+              .eq("status", "generating")
+              .select("id")
+              .single();
+
+            if (failUpdated) {
+              await ctx.adminSupabase.rpc("refund_credits", {
+                p_user_id: ctx.user.id,
+                p_amount: video.credits_consumed,
+              });
+              await ctx.adminSupabase.from("credit_transactions").insert({
+                user_id: ctx.user.id,
+                amount: video.credits_consumed,
+                type: "refund",
+                description: "Refund: video generation failed",
+                video_id: video.id,
+              });
+            }
+
             return { ...video, status: "failed" };
           }
         } catch {
@@ -290,11 +307,28 @@ export const videoRouter = router({
                 v.status = "completed";
                 v.output_video_url = videoUrl;
               } else if (klingStatus === "failed") {
-                await ctx.supabase
+                const { data: failUpdated } = await ctx.supabase
                   .from("videos")
                   .update({ status: "failed" })
                   .eq("id", v.id)
-                  .eq("status", "generating");
+                  .eq("status", "generating")
+                  .select("id")
+                  .single();
+
+                if (failUpdated) {
+                  await ctx.adminSupabase.rpc("refund_credits", {
+                    p_user_id: ctx.user.id,
+                    p_amount: v.credits_consumed,
+                  });
+                  await ctx.adminSupabase.from("credit_transactions").insert({
+                    user_id: ctx.user.id,
+                    amount: v.credits_consumed,
+                    type: "refund",
+                    description: "Refund: video generation failed",
+                    video_id: v.id,
+                  });
+                }
+
                 v.status = "failed";
               }
             } catch {
