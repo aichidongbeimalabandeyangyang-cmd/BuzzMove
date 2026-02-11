@@ -192,7 +192,7 @@ export const adminRouter = router({
       };
     }),
 
-  // ---- Transactions (from Stripe — includes failed payments) ----
+  // ---- Transactions (Stripe events — payments, failures, cancellations) ----
   getTransactions: adminProcedure
     .input(
       z.object({
@@ -203,31 +203,92 @@ export const adminRouter = router({
     .query(async ({ input }) => {
       const stripe = getStripe();
 
-      const params: Record<string, unknown> = {
+      const events = await stripe.events.list({
         limit: input.limit,
-        expand: ["data.customer"],
-      };
-      if (input.startingAfter) {
-        params.starting_after = input.startingAfter;
-      }
+        types: [
+          "payment_intent.succeeded",
+          "payment_intent.payment_failed",
+          "checkout.session.completed",
+          "customer.subscription.deleted",
+          "invoice.paid",
+          "charge.refunded",
+        ],
+        ...(input.startingAfter ? { starting_after: input.startingAfter } : {}),
+      });
 
-      const paymentIntents = await stripe.paymentIntents.list(params as any);
+      const transactions = events.data.map((event) => {
+        const obj = event.data.object as any;
+        let email = "";
+        let amountCents = 0;
+        let currency = "usd";
+        let status = "";
+        let description = "";
+
+        switch (event.type) {
+          case "payment_intent.succeeded":
+            email = obj.receipt_email ?? obj.metadata?.email ?? "";
+            amountCents = obj.amount ?? 0;
+            currency = obj.currency ?? "usd";
+            status = "succeeded";
+            description = obj.description ?? obj.metadata?.pack_id ?? "Payment";
+            break;
+          case "payment_intent.payment_failed":
+            email = obj.receipt_email ?? obj.metadata?.email ?? "";
+            amountCents = obj.amount ?? 0;
+            currency = obj.currency ?? "usd";
+            status = "failed";
+            description = obj.last_payment_error?.message ?? "Payment failed";
+            break;
+          case "checkout.session.completed":
+            email = obj.customer_email ?? obj.customer_details?.email ?? "";
+            amountCents = obj.amount_total ?? 0;
+            currency = obj.currency ?? "usd";
+            status = "checkout";
+            description = obj.metadata?.pack_id
+              ? `Pack: ${obj.metadata.pack_id}`
+              : obj.metadata?.plan
+                ? `Plan: ${obj.metadata.plan}`
+                : "Checkout";
+            break;
+          case "customer.subscription.deleted":
+            email = "";
+            amountCents = 0;
+            currency = obj.currency ?? "usd";
+            status = "canceled";
+            description = `Subscription canceled`;
+            break;
+          case "invoice.paid":
+            email = obj.customer_email ?? "";
+            amountCents = obj.amount_paid ?? 0;
+            currency = obj.currency ?? "usd";
+            status = "invoice_paid";
+            description = "Invoice paid";
+            break;
+          case "charge.refunded":
+            email = obj.receipt_email ?? obj.billing_details?.email ?? "";
+            amountCents = obj.amount_refunded ?? 0;
+            currency = obj.currency ?? "usd";
+            status = "refunded";
+            description = "Refund";
+            break;
+        }
+
+        return {
+          id: event.id,
+          type: event.type,
+          email,
+          amountCents,
+          currency,
+          status,
+          description,
+          createdAt: new Date(event.created * 1000).toISOString(),
+        };
+      });
 
       return {
-        transactions: paymentIntents.data.map((pi) => {
-          const customer = pi.customer as import("stripe").default.Customer | null;
-          return {
-            id: pi.id,
-            email: customer?.email ?? pi.receipt_email ?? pi.metadata?.email ?? "",
-            amountCents: pi.amount,
-            currency: pi.currency,
-            status: pi.status,
-            description: pi.description ?? pi.metadata?.pack_id ?? "",
-            createdAt: new Date(pi.created * 1000).toISOString(),
-          };
-        }),
-        hasMore: paymentIntents.has_more,
-        lastId: paymentIntents.data.at(-1)?.id,
+        transactions,
+        hasMore: events.has_more,
+        lastId: events.data.at(-1)?.id,
       };
     }),
 
