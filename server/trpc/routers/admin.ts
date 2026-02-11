@@ -200,8 +200,9 @@ export const adminRouter = router({
         startingAfter: z.string().optional(),
       })
     )
-    .query(async ({ input }) => {
+    .query(async ({ ctx, input }) => {
       const stripe = getStripe();
+      const supabase = ctx.adminSupabase;
 
       const events = await stripe.events.list({
         limit: input.limit,
@@ -214,24 +215,68 @@ export const adminRouter = router({
         ...(input.startingAfter ? { starting_after: input.startingAfter } : {}),
       });
 
+      // Extract Stripe customer IDs and supabase user IDs to resolve emails
+      const customerIds = new Set<string>();
+      const supabaseUserIds = new Set<string>();
+      for (const event of events.data) {
+        const obj = event.data.object as any;
+        if (obj.customer && typeof obj.customer === "string") customerIds.add(obj.customer);
+        if (obj.metadata?.supabase_user_id) supabaseUserIds.add(obj.metadata.supabase_user_id);
+      }
+
+      // Batch resolve: Stripe customers + Supabase profiles
+      const [customerEmails, profileEmails] = await Promise.all([
+        (async () => {
+          const map: Record<string, string> = {};
+          await Promise.all(
+            [...customerIds].map(async (cid) => {
+              try {
+                const c = await stripe.customers.retrieve(cid);
+                if (!c.deleted && c.email) map[cid] = c.email;
+              } catch {}
+            })
+          );
+          return map;
+        })(),
+        (async () => {
+          const map: Record<string, string> = {};
+          const ids = [...supabaseUserIds];
+          if (ids.length > 0) {
+            const { data: profiles } = await supabase
+              .from("profiles")
+              .select("id, email")
+              .in("id", ids);
+            for (const p of profiles ?? []) {
+              if (p.email) map[p.id] = p.email;
+            }
+          }
+          return map;
+        })(),
+      ]);
+
       const transactions = events.data.map((event) => {
         const obj = event.data.object as any;
-        let email = "";
         let amountCents = 0;
         let currency = "usd";
         let status = "";
         let description = "";
 
+        // Resolve email: receipt_email > charges billing > Stripe customer > Supabase profile
+        const email = obj.receipt_email
+          ?? obj.charges?.data?.[0]?.billing_details?.email
+          ?? obj.billing_details?.email
+          ?? (obj.customer ? customerEmails[obj.customer] : null)
+          ?? (obj.metadata?.supabase_user_id ? profileEmails[obj.metadata.supabase_user_id] : null)
+          ?? "";
+
         switch (event.type) {
           case "payment_intent.succeeded":
-            email = obj.receipt_email ?? obj.metadata?.email ?? "";
             amountCents = obj.amount ?? 0;
             currency = obj.currency ?? "usd";
             status = "succeeded";
             description = obj.description ?? obj.metadata?.pack_id ?? "Payment";
             break;
           case "payment_intent.payment_failed":
-            email = obj.receipt_email ?? obj.metadata?.email ?? "";
             amountCents = obj.amount ?? 0;
             currency = obj.currency ?? "usd";
             status = "failed";
@@ -242,14 +287,12 @@ export const adminRouter = router({
               ?? "Payment failed";
             break;
           case "customer.subscription.deleted":
-            email = "";
             amountCents = 0;
             currency = obj.currency ?? "usd";
             status = "canceled";
             description = "Subscription canceled";
             break;
           case "charge.refunded":
-            email = obj.receipt_email ?? obj.billing_details?.email ?? "";
             amountCents = obj.amount_refunded ?? 0;
             currency = obj.currency ?? "usd";
             status = "refunded";
