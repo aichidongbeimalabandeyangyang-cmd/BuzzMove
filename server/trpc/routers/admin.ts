@@ -192,48 +192,42 @@ export const adminRouter = router({
       };
     }),
 
-  // ---- Transactions ----
+  // ---- Transactions (from Stripe — includes failed payments) ----
   getTransactions: adminProcedure
     .input(
       z.object({
-        limit: z.number().min(1).max(100).default(50),
-        offset: z.number().min(0).default(0),
+        limit: z.number().min(1).max(100).default(30),
+        startingAfter: z.string().optional(),
       })
     )
-    .query(async ({ ctx, input }) => {
-      const supabase = ctx.adminSupabase;
+    .query(async ({ input }) => {
+      const stripe = getStripe();
 
-      const { data: transactions, count } = await supabase
-        .from("credit_transactions")
-        .select("id, user_id, type, amount, description, price_cents, stripe_payment_id, created_at", { count: "exact" })
-        .in("type", ["purchase", "subscription"])
-        .order("created_at", { ascending: false })
-        .range(input.offset, input.offset + input.limit - 1);
-
-      const userIds = [...new Set((transactions ?? []).map((t) => t.user_id))];
-      let emailMap: Record<string, string> = {};
-      if (userIds.length > 0) {
-        const { data: profiles } = await supabase
-          .from("profiles")
-          .select("id, email")
-          .in("id", userIds);
-        for (const p of profiles ?? []) {
-          emailMap[p.id] = p.email ?? "";
-        }
+      const params: Record<string, unknown> = {
+        limit: input.limit,
+        expand: ["data.customer"],
+      };
+      if (input.startingAfter) {
+        params.starting_after = input.startingAfter;
       }
 
+      const paymentIntents = await stripe.paymentIntents.list(params as any);
+
       return {
-        transactions: (transactions ?? []).map((t) => ({
-          id: t.id,
-          email: emailMap[t.user_id] ?? "",
-          type: t.type,
-          amount: t.amount,
-          description: t.description,
-          priceCents: t.price_cents,
-          stripePaymentId: t.stripe_payment_id,
-          createdAt: t.created_at,
-        })),
-        total: count ?? 0,
+        transactions: paymentIntents.data.map((pi) => {
+          const customer = pi.customer as import("stripe").default.Customer | null;
+          return {
+            id: pi.id,
+            email: customer?.email ?? pi.receipt_email ?? pi.metadata?.email ?? "",
+            amountCents: pi.amount,
+            currency: pi.currency,
+            status: pi.status,
+            description: pi.description ?? pi.metadata?.pack_id ?? "",
+            createdAt: new Date(pi.created * 1000).toISOString(),
+          };
+        }),
+        hasMore: paymentIntents.has_more,
+        lastId: paymentIntents.data.at(-1)?.id,
       };
     }),
 
