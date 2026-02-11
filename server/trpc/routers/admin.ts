@@ -270,12 +270,19 @@ export const adminRouter = router({
           ?? "";
 
         switch (event.type) {
-          case "payment_intent.succeeded":
+          case "payment_intent.succeeded": {
             amountCents = obj.amount ?? 0;
             currency = obj.currency ?? "usd";
             status = "succeeded";
-            description = obj.description ?? obj.metadata?.pack_id ?? "Payment";
+            const packId = obj.metadata?.pack_id;
+            const plan = obj.metadata?.plan;
+            const pack = packId ? CREDIT_PACKS.find((p) => p.id === packId) : null;
+            const planConfig = plan && plan in PLANS ? (PLANS as any)[plan] : null;
+            description = pack ? pack.name
+              : planConfig ? `${planConfig.name} subscription`
+              : obj.description ?? "Payment";
             break;
+          }
           case "payment_intent.payment_failed":
             amountCents = obj.amount ?? 0;
             currency = obj.currency ?? "usd";
