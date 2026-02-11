@@ -1,10 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import ReactMarkdown from "react-markdown";
 import { trpc } from "@/lib/trpc";
-import { ArrowLeft, FileText, RefreshCw, ChevronLeft, ChevronRight, Clock, BarChart3, TrendingUp, Calendar, ChevronDown } from "lucide-react";
+import { ArrowLeft, RefreshCw, ChevronLeft, ChevronRight, Clock, BarChart3, TrendingUp, ChevronDown } from "lucide-react";
 
 const PAGE_SIZE = 10;
 
@@ -20,22 +18,6 @@ const REPORT_TYPE_COLORS: Record<string, { color: string; bg: string }> = {
   manual: { color: "#A855F7", bg: "#A855F720" },
 };
 
-/**
- * Fix markdown tables where rows got concatenated on a single line.
- * Splits `| ... || ... |` back into separate lines.
- */
-function fixMarkdownContent(content: string): string {
-  return content.split("\n").map((line) => {
-    const trimmed = line.trim();
-    if (!trimmed.startsWith("|")) return line;
-    // If more than ~10 pipes, rows are likely merged. Split `||` into newlines.
-    const pipeCount = (trimmed.match(/\|/g) || []).length;
-    if (pipeCount <= 10) return line;
-    // Split: `end-of-cell | | start-of-next-row` → newline
-    return trimmed.replace(/\|\s*\|/g, "|\n|");
-  }).join("\n");
-}
-
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString("zh-CN", { month: "long", day: "numeric", year: "numeric" });
 }
@@ -44,45 +26,47 @@ function formatTime(dateStr: string) {
   return new Date(dateStr).toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
 }
 
-/** Extract first meaningful line from markdown as a title */
+/** Extract first meaningful heading from HTML or markdown content as a title */
 function extractTitle(content: string): string {
+  // Try HTML heading first
+  const htmlMatch = content.match(/<h[12][^>]*>(.*?)<\/h[12]>/i);
+  if (htmlMatch) {
+    const cleaned = htmlMatch[1].replace(/<[^>]+>/g, "").trim();
+    if (cleaned.length > 4) return cleaned.slice(0, 60) + (cleaned.length > 60 ? "..." : "");
+  }
+  // Fallback: markdown heading
   const lines = content.split("\n");
   for (const line of lines) {
-    const cleaned = line.replace(/^#+\s*/, "").replace(/\*\*/g, "").trim();
+    const cleaned = line.replace(/^#+\s*/, "").replace(/\*\*/g, "").replace(/<[^>]+>/g, "").trim();
     if (cleaned.length > 4) return cleaned.slice(0, 60) + (cleaned.length > 60 ? "..." : "");
   }
   return "分析报告";
 }
 
-/** Extract executive summary section content */
+/** Extract executive summary from HTML or markdown content */
 function extractSummary(content: string): string {
-  const lines = content.split("\n");
-  let inSummary = false;
-  const summaryLines: string[] = [];
-
-  for (const line of lines) {
-    const trimmed = line.trim();
-    // Detect summary/摘要 heading
-    if (/^#{1,3}\s*.*(summary|摘要|概述|总结)/i.test(trimmed)) {
-      inSummary = true;
-      continue;
-    }
-    // Stop at next heading
-    if (inSummary && /^#{1,3}\s/.test(trimmed)) break;
-    if (inSummary && trimmed.length > 0) {
-      summaryLines.push(trimmed.replace(/\*\*/g, "").replace(/^[-*]\s*/, ""));
-    }
+  // Try to find summary section in HTML (look for heading containing 摘要/summary then grab next <p>)
+  const summaryMatch = content.match(/<h[23][^>]*>[^<]*(摘要|summary|概述|总结)[^<]*<\/h[23]>\s*([\s\S]*?)(?=<h[23]|$)/i);
+  if (summaryMatch) {
+    const sectionHtml = summaryMatch[2];
+    const text = sectionHtml.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+    if (text.length > 10) return text.slice(0, 300) + (text.length > 300 ? "..." : "");
   }
 
-  const text = summaryLines.join(" ").trim();
-  if (text.length > 0) return text.slice(0, 300) + (text.length > 300 ? "..." : "");
+  // Fallback: first <p> tag content
+  const pMatch = content.match(/<p[^>]*>([\s\S]*?)<\/p>/i);
+  if (pMatch) {
+    const text = pMatch[1].replace(/<[^>]+>/g, "").trim();
+    if (text.length > 10) return text.slice(0, 300) + (text.length > 300 ? "..." : "");
+  }
 
-  // Fallback: first non-heading paragraph
+  // Fallback: markdown style
+  const lines = content.split("\n");
   for (const line of lines) {
-    const trimmed = line.trim();
-    if (trimmed.startsWith("#") || trimmed.length < 20) continue;
-    const clean = trimmed.replace(/\*\*/g, "").replace(/^[-*]\s*/, "");
-    return clean.slice(0, 300) + (clean.length > 300 ? "..." : "");
+    const trimmed = line.replace(/<[^>]+>/g, "").replace(/^#+\s*/, "").replace(/\*\*/g, "").trim();
+    if (trimmed.length >= 20 && !trimmed.startsWith("#")) {
+      return trimmed.slice(0, 300) + (trimmed.length > 300 ? "..." : "");
+    }
   }
   return "";
 }
@@ -169,35 +153,7 @@ export default function AdminReportsPage() {
                 {formatDate(reportData.period_start)} — {formatDate(reportData.period_end)}
               </span>
             </div>
-            <ReactMarkdown
-              components={{
-                h1: ({ children }) => <h1 style={{ fontSize: 24, fontWeight: 700, color: "#FAFAF9", margin: "28px 0 14px" }}>{children}</h1>,
-                h2: ({ children }) => <h2 style={{ fontSize: 18, fontWeight: 700, color: "#E8A838", margin: "24px 0 12px" }}>{children}</h2>,
-                h3: ({ children }) => <h3 style={{ fontSize: 15, fontWeight: 600, color: "#FAFAF9", margin: "18px 0 8px" }}>{children}</h3>,
-                p: ({ children }) => <p style={{ fontSize: 14, lineHeight: 1.8, color: "#C4C4C8", margin: "10px 0" }}>{children}</p>,
-                strong: ({ children }) => <strong style={{ color: "#FAFAF9", fontWeight: 600 }}>{children}</strong>,
-                ul: ({ children }) => <ul style={{ paddingLeft: 20, margin: "10px 0" }}>{children}</ul>,
-                ol: ({ children }) => <ol style={{ paddingLeft: 20, margin: "10px 0" }}>{children}</ol>,
-                li: ({ children }) => <li style={{ fontSize: 14, lineHeight: 1.8, color: "#C4C4C8", margin: "4px 0" }}>{children}</li>,
-                hr: () => <hr style={{ border: "none", borderTop: "1px solid #252530", margin: "24px 0" }} />,
-                table: ({ children }) => (
-                  <div style={{ overflowX: "auto", margin: "16px 0" }}>
-                    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>{children}</table>
-                  </div>
-                ),
-                thead: ({ children }) => <thead style={{ borderBottom: "2px solid #252530" }}>{children}</thead>,
-                tbody: ({ children }) => <tbody>{children}</tbody>,
-                tr: ({ children }) => <tr style={{ borderBottom: "1px solid #1E1E24" }}>{children}</tr>,
-                th: ({ children }) => (
-                  <th style={{ padding: "10px 12px", fontSize: 12, fontWeight: 600, color: "#E8A838", textAlign: "left", whiteSpace: "nowrap" }}>{children}</th>
-                ),
-                td: ({ children }) => (
-                  <td style={{ padding: "10px 12px", fontSize: 13, color: "#C4C4C8", lineHeight: 1.6 }}>{children}</td>
-                ),
-              }}
-            >
-              {fixMarkdownContent(reportData.report_content)}
-            </ReactMarkdown>
+            <div dangerouslySetInnerHTML={{ __html: reportData.report_content }} />
           </div>
         ) : null}
       </div>
