@@ -140,9 +140,14 @@ export default function CasesPage() {
                       {c.email}
                     </span>
                     <div className="flex items-center" style={{ gap: 6 }}>
-                      {c.downloadedAt && (
-                        <span className="flex items-center" style={{ gap: 2, fontSize: 10, fontWeight: 600, borderRadius: 4, padding: "1px 6px", color: "#3B82F6", backgroundColor: "#3B82F615" }} title={`Downloaded ${new Date(c.downloadedAt).toLocaleString()}`}>
+                      {c.status === "completed" && (
+                        <span className="flex items-center" style={{
+                          gap: 3, fontSize: 10, fontWeight: 600, borderRadius: 4, padding: "1px 6px",
+                          color: c.downloadedAt ? "#3B82F6" : "#6B6B70",
+                          backgroundColor: c.downloadedAt ? "#3B82F615" : "#6B6B7010",
+                        }} title={c.downloadedAt ? `Downloaded ${new Date(c.downloadedAt).toLocaleString()}` : "Not downloaded"}>
                           <Download style={{ width: 10, height: 10 }} strokeWidth={2} />
+                          {c.downloadedAt ? "DL" : "No DL"}
                         </span>
                       )}
                       <span style={{
