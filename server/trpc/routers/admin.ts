@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { router, adminProcedure, protectedProcedure } from "../trpc";
 import { CREDIT_PACKS, PLANS, ADMIN_EMAILS } from "@/lib/constants";
-import { collectAnalyticsData } from "@/server/services/analytics-data";
+import { collectAnalyticsData, type ReportType } from "@/server/services/analytics-data";
 import { generateReport } from "@/server/services/report-generator";
 import { getStripe } from "@/server/stripe/client";
 import { generateToken as generateKlingToken } from "@/server/kling/client";
@@ -224,31 +224,39 @@ export const adminRouter = router({
       return data;
     }),
 
-  generateReport: adminProcedure.mutation(async ({ ctx }) => {
-    const days = 1;
-    const now = new Date();
-    const periodStart = new Date(now);
-    periodStart.setDate(periodStart.getDate() - days);
+  generateReport: adminProcedure
+    .input(z.object({
+      type: z.enum(["half_day", "daily"]).default("daily"),
+    }).optional())
+    .mutation(async ({ ctx, input }) => {
+      const reportType: ReportType = input?.type ?? "daily";
+      const now = new Date();
+      const periodStart = new Date(now);
+      if (reportType === "daily") {
+        periodStart.setDate(periodStart.getDate() - 1);
+      } else {
+        periodStart.setTime(periodStart.getTime() - 12 * 60 * 60 * 1000);
+      }
 
-    const data = await collectAnalyticsData(days);
-    const reportContent = await generateReport(data.formattedText);
+      const data = await collectAnalyticsData(reportType);
+      const reportContent = await generateReport(data.formattedText, reportType);
 
-    const supabase = ctx.adminSupabase;
-    const { data: inserted, error } = await supabase
-      .from("analytics_reports")
-      .insert({
-        period_start: periodStart.toISOString(),
-        period_end: now.toISOString(),
-        report_type: "manual",
-        raw_data: { internal: data.internal, formattedText: data.formattedText },
-        report_content: reportContent,
-      })
-      .select("id")
-      .single();
+      const supabase = ctx.adminSupabase;
+      const { data: inserted, error } = await supabase
+        .from("analytics_reports")
+        .insert({
+          period_start: periodStart.toISOString(),
+          period_end: now.toISOString(),
+          report_type: "manual",
+          raw_data: { internal: data.internal, formattedText: data.formattedText },
+          report_content: reportContent,
+        })
+        .select("id")
+        .single();
 
-    if (error) throw new Error(`Failed to save report: ${error.message}`);
-    return { id: inserted.id };
-  }),
+      if (error) throw new Error(`Failed to save report: ${error.message}`);
+      return { id: inserted.id };
+    }),
 
   // ---- Infrastructure Monitoring ----
   getMonitoringData: adminProcedure.query(async ({ ctx }) => {

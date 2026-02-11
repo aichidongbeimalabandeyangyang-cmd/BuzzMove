@@ -4,9 +4,21 @@ import { useState } from "react";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import { trpc } from "@/lib/trpc";
-import { ArrowLeft, FileText, RefreshCw, ChevronLeft, ChevronRight, Clock, BarChart3, TrendingUp, Calendar } from "lucide-react";
+import { ArrowLeft, FileText, RefreshCw, ChevronLeft, ChevronRight, Clock, BarChart3, TrendingUp, Calendar, ChevronDown } from "lucide-react";
 
 const PAGE_SIZE = 10;
+
+const REPORT_TYPE_LABELS: Record<string, string> = {
+  half_day: "半日报告",
+  daily: "日报",
+  manual: "手动",
+};
+
+const REPORT_TYPE_COLORS: Record<string, { color: string; bg: string }> = {
+  half_day: { color: "#3B82F6", bg: "#3B82F620" },
+  daily: { color: "#22C55E", bg: "#22C55E20" },
+  manual: { color: "#A855F7", bg: "#A855F720" },
+};
 
 /**
  * Fix markdown tables where rows got concatenated on a single line.
@@ -75,9 +87,13 @@ function extractSummary(content: string): string {
   return "";
 }
 
+type FilterType = "all" | "half_day" | "daily" | "manual";
+
 export default function AdminReportsPage() {
   const [offset, setOffset] = useState(0);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [filter, setFilter] = useState<FilterType>("all");
+  const [showGenerateMenu, setShowGenerateMenu] = useState(false);
 
   const { data: listData, isLoading: listLoading, error: listError, refetch } = trpc.admin.getReports.useQuery(
     { limit: PAGE_SIZE, offset },
@@ -91,8 +107,15 @@ export default function AdminReportsPage() {
   const generateMutation = trpc.admin.generateReport.useMutation({
     onSuccess(data) {
       setSelectedId(data.id);
+      setShowGenerateMenu(false);
       refetch();
     },
+  });
+
+  // Filter reports client-side
+  const filteredReports = (listData?.reports ?? []).filter((r: any) => {
+    if (filter === "all") return true;
+    return r.report_type === filter;
   });
 
   if (listError) {
@@ -131,10 +154,20 @@ export default function AdminReportsPage() {
           </div>
         ) : reportData ? (
           <div style={{ borderRadius: 16, backgroundColor: "#16161A", padding: "28px 32px" }}>
-            <div style={{ fontSize: 12, fontWeight: 500, color: "#6B6B70", marginBottom: 20 }}>
-              {formatDate(reportData.period_start)} — {formatDate(reportData.period_end)}
-              {" · "}
-              {reportData.report_type === "manual" ? "手动生成" : "自动生成"}
+            <div className="flex items-center" style={{ fontSize: 12, fontWeight: 500, color: "#6B6B70", marginBottom: 20, gap: 8 }}>
+              <span
+                style={{
+                  fontSize: 10, fontWeight: 700, letterSpacing: 0.5,
+                  borderRadius: 6, padding: "3px 8px",
+                  color: REPORT_TYPE_COLORS[reportData.report_type]?.color ?? "#6B6B70",
+                  backgroundColor: REPORT_TYPE_COLORS[reportData.report_type]?.bg ?? "#25253020",
+                }}
+              >
+                {REPORT_TYPE_LABELS[reportData.report_type] ?? reportData.report_type}
+              </span>
+              <span>
+                {formatDate(reportData.period_start)} — {formatDate(reportData.period_end)}
+              </span>
             </div>
             <ReactMarkdown
               components={{
@@ -172,26 +205,86 @@ export default function AdminReportsPage() {
   }
 
   // ============ Reports List View (Cards) ============
+  const filterTabs: { key: FilterType; label: string }[] = [
+    { key: "all", label: "全部" },
+    { key: "daily", label: "日报" },
+    { key: "half_day", label: "半日报告" },
+    { key: "manual", label: "手动" },
+  ];
+
   return (
     <div className="flex w-full flex-1 flex-col overflow-y-auto" style={{ padding: 20, gap: 20, maxWidth: 900, margin: "0 auto" }}>
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 style={{ fontSize: 22, fontWeight: 700, color: "#FAFAF9" }}>分析报告</h1>
-        <button
-          onClick={() => generateMutation.mutate()}
-          disabled={generateMutation.isPending}
-          className="flex items-center transition-all active:scale-[0.97] disabled:opacity-50"
-          style={{ gap: 6, borderRadius: 10, background: "linear-gradient(135deg, #F0C060, #E8A838)", padding: "8px 16px" }}
-        >
-          <RefreshCw
-            style={{ width: 14, height: 14, color: "#0B0B0E" }}
-            strokeWidth={1.5}
-            className={generateMutation.isPending ? "animate-spin" : ""}
-          />
-          <span style={{ fontSize: 13, fontWeight: 700, color: "#0B0B0E" }}>
-            {generateMutation.isPending ? "生成中..." : "立即生成"}
-          </span>
-        </button>
+        <div className="relative">
+          <button
+            onClick={() => setShowGenerateMenu(!showGenerateMenu)}
+            disabled={generateMutation.isPending}
+            className="flex items-center transition-all active:scale-[0.97] disabled:opacity-50"
+            style={{ gap: 6, borderRadius: 10, background: "linear-gradient(135deg, #F0C060, #E8A838)", padding: "8px 16px" }}
+          >
+            <RefreshCw
+              style={{ width: 14, height: 14, color: "#0B0B0E" }}
+              strokeWidth={1.5}
+              className={generateMutation.isPending ? "animate-spin" : ""}
+            />
+            <span style={{ fontSize: 13, fontWeight: 700, color: "#0B0B0E" }}>
+              {generateMutation.isPending ? "生成中..." : "立即生成"}
+            </span>
+            {!generateMutation.isPending && (
+              <ChevronDown style={{ width: 14, height: 14, color: "#0B0B0E" }} strokeWidth={1.5} />
+            )}
+          </button>
+          {showGenerateMenu && !generateMutation.isPending && (
+            <div
+              style={{
+                position: "absolute", right: 0, top: "calc(100% + 6px)", zIndex: 50,
+                borderRadius: 12, backgroundColor: "#1E1E24", border: "1px solid #2A2A34",
+                padding: 4, minWidth: 160, boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
+              }}
+            >
+              <button
+                onClick={() => generateMutation.mutate({ type: "daily" })}
+                className="flex w-full items-center transition-all"
+                style={{ gap: 8, padding: "10px 12px", borderRadius: 8, fontSize: 13, color: "#FAFAF9", fontWeight: 500 }}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#252530")}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+              >
+                <TrendingUp style={{ width: 14, height: 14, color: "#22C55E" }} strokeWidth={1.5} />
+                日报（24h + 7日趋势）
+              </button>
+              <button
+                onClick={() => generateMutation.mutate({ type: "half_day" })}
+                className="flex w-full items-center transition-all"
+                style={{ gap: 8, padding: "10px 12px", borderRadius: 8, fontSize: 13, color: "#FAFAF9", fontWeight: 500 }}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#252530")}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+              >
+                <Clock style={{ width: 14, height: 14, color: "#3B82F6" }} strokeWidth={1.5} />
+                半日报告（12h 快照）
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Filter Tabs */}
+      <div className="flex items-center" style={{ gap: 4 }}>
+        {filterTabs.map((tab) => (
+          <button
+            key={tab.key}
+            onClick={() => { setFilter(tab.key); setOffset(0); }}
+            className="transition-all"
+            style={{
+              padding: "6px 14px", borderRadius: 8, fontSize: 13, fontWeight: 600,
+              color: filter === tab.key ? "#FAFAF9" : "#6B6B70",
+              backgroundColor: filter === tab.key ? "#252530" : "transparent",
+            }}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       {listLoading ? (
@@ -204,7 +297,7 @@ export default function AdminReportsPage() {
             <span style={{ fontSize: 13, color: "#6B6B70" }}>加载中...</span>
           </div>
         </div>
-      ) : !listData?.reports.length ? (
+      ) : !filteredReports.length ? (
         <div className="flex flex-1 flex-col items-center justify-center" style={{ gap: 12, padding: "60px 0" }}>
           <BarChart3 style={{ width: 40, height: 40, color: "#252530" }} strokeWidth={1} />
           <span style={{ fontSize: 15, fontWeight: 500, color: "#6B6B70" }}>暂无报告</span>
@@ -213,9 +306,10 @@ export default function AdminReportsPage() {
       ) : (
         <>
           <div className="flex flex-col" style={{ gap: 16 }}>
-            {listData.reports.map((report: any) => {
+            {filteredReports.map((report: any) => {
               const title = report.report_content ? extractTitle(report.report_content) : "分析报告";
               const summary = report.report_content ? extractSummary(report.report_content) : "";
+              const typeColors = REPORT_TYPE_COLORS[report.report_type] ?? { color: "#6B6B70", bg: "#25253020" };
 
               return (
                 <button
@@ -238,11 +332,11 @@ export default function AdminReportsPage() {
                       style={{
                         fontSize: 10, fontWeight: 700, letterSpacing: 0.5,
                         borderRadius: 6, padding: "3px 8px",
-                        color: report.report_type === "manual" ? "#A855F7" : "#22C55E",
-                        backgroundColor: report.report_type === "manual" ? "#A855F720" : "#22C55E20",
+                        color: typeColors.color,
+                        backgroundColor: typeColors.bg,
                       }}
                     >
-                      {report.report_type === "manual" ? "手动" : "自动"}
+                      {REPORT_TYPE_LABELS[report.report_type] ?? report.report_type}
                     </span>
                     <span style={{ fontSize: 12, color: "#4A4A50" }}>
                       {formatDate(report.created_at)} {formatTime(report.created_at)}
@@ -277,7 +371,7 @@ export default function AdminReportsPage() {
           </div>
 
           {/* Pagination */}
-          {listData.total > PAGE_SIZE && (
+          {listData && listData.total > PAGE_SIZE && (
             <div className="flex items-center justify-center" style={{ gap: 12 }}>
               <button
                 onClick={() => setOffset(Math.max(0, offset - PAGE_SIZE))}

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { timingSafeEqual } from "crypto";
-import { collectAnalyticsData } from "@/server/services/analytics-data";
+import { collectAnalyticsData, type ReportType } from "@/server/services/analytics-data";
 import { generateReport } from "@/server/services/report-generator";
 import { createSupabaseAdminClient } from "@/server/supabase/server";
 
@@ -21,23 +21,30 @@ export async function GET(request: Request) {
   }
 
   try {
-    const days = 1; // Report covers last 24 hours
+    // Alternate: 00:00 UTC → daily, 12:00 UTC → half_day
+    const hourUTC = new Date().getUTCHours();
+    const reportType: ReportType = hourUTC < 6 ? "daily" : "half_day";
+
     const now = new Date();
     const periodStart = new Date(now);
-    periodStart.setDate(periodStart.getDate() - days);
+    if (reportType === "daily") {
+      periodStart.setDate(periodStart.getDate() - 1);
+    } else {
+      periodStart.setTime(periodStart.getTime() - 12 * 60 * 60 * 1000);
+    }
 
     // 1. Collect data
-    const data = await collectAnalyticsData(days);
+    const data = await collectAnalyticsData(reportType);
 
     // 2. Generate AI report
-    const reportContent = await generateReport(data.formattedText);
+    const reportContent = await generateReport(data.formattedText, reportType);
 
     // 3. Store in Supabase
     const supabase = createSupabaseAdminClient();
     const { error: insertError } = await supabase.from("analytics_reports").insert({
       period_start: periodStart.toISOString(),
       period_end: now.toISOString(),
-      report_type: "daily",
+      report_type: reportType,
       raw_data: {
         internal: data.internal,
         formattedText: data.formattedText,
@@ -50,7 +57,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Database insert failed", details: insertError.message }, { status: 500 });
     }
 
-    return NextResponse.json({ ok: true, reportLength: reportContent.length });
+    return NextResponse.json({ ok: true, type: reportType, reportLength: reportContent.length });
   } catch (err: any) {
     console.error("Analytics report generation failed:", err);
     return NextResponse.json({ error: err.message }, { status: 500 });
