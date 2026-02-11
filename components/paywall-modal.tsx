@@ -9,9 +9,10 @@ import { trackPaywallView, trackClickCheckout } from "@/lib/gtag";
 interface PaywallModalProps {
   open: boolean;
   onClose: () => void;
+  context?: "download" | "credits";
 }
 
-export function PaywallModal({ open, onClose }: PaywallModalProps) {
+export function PaywallModal({ open, onClose, context = "credits" }: PaywallModalProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
 
   const creditData = trpc.credit.getBalance.useQuery();
@@ -61,7 +62,9 @@ export function PaywallModal({ open, onClose }: PaywallModalProps) {
         <div className="flex items-center justify-between" style={{ marginBottom: 16 }}>
           <div className="flex items-center" style={{ gap: 8 }}>
             <Zap style={{ width: 20, height: 20, color: "#E8A838" }} strokeWidth={1.5} />
-            <span style={{ fontSize: 18, fontWeight: 700, color: "#FAFAF9" }}>Unlock Downloads</span>
+            <span style={{ fontSize: 18, fontWeight: 700, color: "#FAFAF9" }}>
+              {context === "download" ? "Unlock Downloads" : "Get More Credits"}
+            </span>
           </div>
           <button onClick={onClose} className="flex items-center justify-center" style={{ width: 32, height: 32, borderRadius: 100, backgroundColor: "#16161A" }}>
             <X style={{ width: 16, height: 16, color: "#6B6B70" }} strokeWidth={1.5} />
@@ -69,47 +72,13 @@ export function PaywallModal({ open, onClose }: PaywallModalProps) {
         </div>
 
         <p style={{ fontSize: 14, fontWeight: 400, color: "#6B6B70", marginBottom: 20 }}>
-          Purchase credits or subscribe to download your videos.
+          {context === "download"
+            ? "Subscribe or purchase credits to download your videos."
+            : "Subscribe or purchase credits to keep generating."}
         </p>
 
-        {/* ---- CREDIT PACKS (priority) ---- */}
+        {/* ---- SUBSCRIPTIONS (priority) ---- */}
         <div className="flex flex-col" style={{ gap: 8, marginBottom: 20 }}>
-          <span style={{ fontSize: 12, fontWeight: 600, letterSpacing: 1, color: "#6B6B70" }}>ONE-TIME PACKS</span>
-          {CREDIT_PACKS.map((pack, i) => (
-            <button
-              key={pack.id}
-              onClick={() => { trackClickCheckout({ type: "credit_pack", plan: pack.id }); packCheckout.mutate({ packId: pack.id as any }); }}
-              disabled={isPending}
-              className="flex w-full items-center justify-between transition-all active:scale-[0.98] disabled:opacity-50"
-              style={{
-                borderRadius: 14,
-                backgroundColor: "#16161A",
-                padding: "12px 14px",
-                border: i === 0 ? "1.5px solid #E8A83860" : "1.5px solid transparent",
-              }}
-            >
-              <div className="flex flex-col" style={{ gap: 2 }}>
-                <div className="flex items-center" style={{ gap: 8 }}>
-                  <span style={{ fontSize: 15, fontWeight: 600, color: "#FAFAF9" }}>{pack.name}</span>
-                  {pack.tag && (
-                    <span style={{ fontSize: 10, fontWeight: 700, color: "#E8A838", backgroundColor: "#E8A83820", borderRadius: 6, padding: "2px 6px" }}>
-                      {pack.tag}
-                    </span>
-                  )}
-                </div>
-                <span style={{ fontSize: 12, fontWeight: 400, color: "#6B6B70" }}>
-                  {pack.credits.toLocaleString()} credits{pack.savings ? ` · Save ${pack.savings}%` : ""}
-                </span>
-              </div>
-              <span style={{ fontSize: 16, fontWeight: 700, color: "#E8A838" }}>
-                ${(pack.price / 100).toFixed(2)}
-              </span>
-            </button>
-          ))}
-        </div>
-
-        {/* ---- SUBSCRIPTIONS ---- */}
-        <div className="flex flex-col" style={{ gap: 8 }}>
           <span style={{ fontSize: 12, fontWeight: 600, letterSpacing: 1, color: "#6B6B70" }}>SUBSCRIPTIONS</span>
 
           {/* Pro */}
@@ -173,6 +142,41 @@ export function PaywallModal({ open, onClose }: PaywallModalProps) {
               ))}
             </div>
           </button>
+        </div>
+
+        {/* ---- CREDIT PACKS ---- */}
+        <div className="flex flex-col" style={{ gap: 8 }}>
+          <span style={{ fontSize: 12, fontWeight: 600, letterSpacing: 1, color: "#6B6B70" }}>ONE-TIME PACKS</span>
+          {CREDIT_PACKS.map((pack) => (
+            <button
+              key={pack.id}
+              onClick={() => { trackClickCheckout({ type: "credit_pack", plan: pack.id }); packCheckout.mutate({ packId: pack.id as any }); }}
+              disabled={isPending}
+              className="flex w-full items-center justify-between transition-all active:scale-[0.98] disabled:opacity-50"
+              style={{
+                borderRadius: 14,
+                backgroundColor: "#16161A",
+                padding: "12px 14px",
+              }}
+            >
+              <div className="flex flex-col" style={{ gap: 2 }}>
+                <div className="flex items-center" style={{ gap: 8 }}>
+                  <span style={{ fontSize: 15, fontWeight: 600, color: "#FAFAF9" }}>{pack.name}</span>
+                  {pack.tag && (
+                    <span style={{ fontSize: 10, fontWeight: 700, color: "#E8A838", backgroundColor: "#E8A83820", borderRadius: 6, padding: "2px 6px" }}>
+                      {pack.tag}
+                    </span>
+                  )}
+                </div>
+                <span style={{ fontSize: 12, fontWeight: 400, color: "#6B6B70" }}>
+                  {pack.credits.toLocaleString()} credits{pack.savings ? ` · Save ${pack.savings}%` : ""}
+                </span>
+              </div>
+              <span style={{ fontSize: 16, fontWeight: 700, color: "#E8A838" }}>
+                ${(pack.price / 100).toFixed(2)}
+              </span>
+            </button>
+          ))}
         </div>
       </div>
     </div>

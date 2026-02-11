@@ -109,7 +109,7 @@ export function VideoPlayer({ videoId, onReset, onBackHome, creditCost }: VideoP
         )}
       </div>
 
-      <PaywallModal open={showPaywall} onClose={() => setShowPaywall(false)} />
+      <PaywallModal open={showPaywall} onClose={() => setShowPaywall(false)} context="download" />
     </div>
   );
 }

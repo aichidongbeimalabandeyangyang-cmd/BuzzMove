@@ -8,7 +8,7 @@ import { CREDIT_PACKS } from "@/lib/constants";
 import { trackClickCheckout } from "@/lib/gtag";
 
 export default function PricingPage() {
-  const [billing, setBilling] = useState<"weekly" | "yearly">("yearly");
+  const [billing, setBilling] = useState<"weekly" | "yearly">("weekly");
   const { user, openLogin } = useApp();
 
   const creditData = trpc.credit.getBalance.useQuery(undefined, { enabled: !!user });
@@ -77,11 +77,13 @@ export default function PricingPage() {
             }}
           >
             Yearly
-            {billing === "yearly" && (
-              <span style={{ borderRadius: 8, backgroundColor: "#22C55E", padding: "2px 8px", fontSize: 13, fontWeight: 800, color: "#FFFFFF" }}>
-                -29%
-              </span>
-            )}
+            <span style={{
+              borderRadius: 8, padding: "2px 8px", fontSize: 13, fontWeight: 800,
+              backgroundColor: billing === "yearly" ? "#22C55E" : "#22C55E20",
+              color: billing === "yearly" ? "#FFFFFF" : "#22C55E",
+            }}>
+              -29%
+            </span>
           </button>
         </div>
       </div>
@@ -97,13 +99,13 @@ export default function PricingPage() {
           <div className="flex w-full flex-col" style={{ borderRadius: 19, backgroundColor: "#16161A", padding: 20, gap: 14 }}>
             <div className="flex w-full flex-col" style={{ gap: 8 }}>
               <span style={{ fontSize: 22, fontWeight: 700, color: "#FAFAF9" }}>Pro</span>
-              <div className="flex items-center" style={{ gap: 6 }}>
+              <div className="flex items-center flex-wrap" style={{ gap: 6 }}>
                 <div style={{ borderRadius: 6, backgroundColor: "#E8A83830", padding: "3px 10px" }}>
                   <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, color: "#E8A838" }}>RECOMMENDED</span>
                 </div>
                 {showProTrial && (
-                  <div style={{ borderRadius: 6, backgroundColor: "#22C55E20", padding: "3px 10px" }}>
-                    <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, color: "#22C55E" }}>FIRST WEEK $0.99</span>
+                  <div style={{ borderRadius: 8, backgroundColor: "#22C55E", padding: "4px 12px" }}>
+                    <span style={{ fontFamily: "Sora, sans-serif", fontSize: 13, fontWeight: 800, letterSpacing: 0.3, color: "#FFFFFF" }}>$0.99 FIRST WEEK</span>
                   </div>
                 )}
               </div>
@@ -116,13 +118,16 @@ export default function PricingPage() {
 
             {showProTrial && (
               <p style={{ fontSize: 14, fontWeight: 500, color: "#6B6B70" }}>
-                Then $4.99/week
+                <span style={{ textDecoration: "line-through", color: "#4A4A52" }}>$4.99/week</span>
+                {" → "}
+                <span style={{ fontFamily: "Sora, sans-serif", fontWeight: 700, color: "#22C55E" }}>$0.99 first week</span>
               </p>
             )}
 
             {billing === "yearly" && (
-              <p style={{ fontSize: 14, fontWeight: 600, color: "#E8A838" }}>
-                $184.99/year — Save 29% vs weekly
+              <p style={{ fontSize: 14, fontWeight: 500, color: "#6B6B70" }}>
+                $184.99/year —{" "}
+                <span style={{ fontFamily: "Sora, sans-serif", fontSize: 15, fontWeight: 800, color: "#22C55E" }}>Save 29%</span>
               </p>
             )}
 
@@ -169,8 +174,9 @@ export default function PricingPage() {
             </div>
 
             {billing === "yearly" && (
-              <p style={{ fontSize: 14, fontWeight: 600, color: "#22C55E" }}>
-                $549.99/year — Save 29% vs weekly
+              <p style={{ fontSize: 14, fontWeight: 500, color: "#6B6B70" }}>
+                $549.99/year —{" "}
+                <span style={{ fontFamily: "Sora, sans-serif", fontSize: 15, fontWeight: 800, color: "#22C55E" }}>Save 29%</span>
               </p>
             )}
 
@@ -215,37 +221,51 @@ export default function PricingPage() {
           </p>
 
           <div className="flex flex-col lg:grid lg:grid-cols-2" style={{ gap: 10 }}>
-            {CREDIT_PACKS.map((pack) => (
-              <button
-                key={pack.id}
-                onClick={() => handleBuyPack(pack.id)}
-                disabled={packCheckout.isPending}
-                className="flex w-full items-center justify-between transition-all active:scale-[0.98] disabled:opacity-50"
-                style={{ borderRadius: 16, backgroundColor: "#16161A", padding: "14px 16px" }}
-              >
-                <div className="flex flex-col" style={{ gap: 3 }}>
-                  <div className="flex items-center" style={{ gap: 8 }}>
-                    <span style={{ fontSize: 15, fontWeight: 600, color: "#FAFAF9" }}>{pack.name}</span>
-                    {pack.tag && (
-                      <span style={{ fontSize: 10, fontWeight: 700, color: "#E8A838", backgroundColor: "#E8A83820", borderRadius: 6, padding: "2px 6px" }}>
-                        {pack.tag}
-                      </span>
-                    )}
-                  </div>
-                  <span style={{ fontSize: 12, fontWeight: 400, color: "#6B6B70" }}>
-                    {pack.credits.toLocaleString()} credits{pack.savings ? ` · Save ${pack.savings}%` : ""}
-                  </span>
-                </div>
-                <div
-                  className="flex items-center justify-center"
-                  style={{ borderRadius: 10, backgroundColor: "#E8A83815", padding: "6px 14px" }}
+            {CREDIT_PACKS.map((pack) => {
+              const isPopular = pack.id === "starter";
+              return (
+                <button
+                  key={pack.id}
+                  onClick={() => handleBuyPack(pack.id)}
+                  disabled={packCheckout.isPending}
+                  className="flex w-full items-center justify-between transition-all active:scale-[0.98] disabled:opacity-50"
+                  style={{
+                    borderRadius: 16, padding: "14px 16px",
+                    backgroundColor: "#16161A",
+                    border: isPopular ? "1.5px solid #E8A83860" : "1.5px solid transparent",
+                  }}
                 >
-                  <span style={{ fontSize: 15, fontWeight: 700, color: "#E8A838" }}>
-                    ${(pack.price / 100).toFixed(2)}
-                  </span>
-                </div>
-              </button>
-            ))}
+                  <div className="flex flex-col" style={{ gap: 3 }}>
+                    <div className="flex items-center" style={{ gap: 8 }}>
+                      <span style={{ fontSize: 15, fontWeight: 600, color: "#FAFAF9" }}>{pack.name}</span>
+                      {pack.tag && (
+                        <span style={{ fontSize: 10, fontWeight: 700, color: "#E8A838", backgroundColor: "#E8A83820", borderRadius: 6, padding: "2px 6px" }}>
+                          {pack.tag}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center" style={{ gap: 6 }}>
+                      <span style={{ fontSize: 12, fontWeight: 400, color: "#6B6B70" }}>
+                        {pack.credits.toLocaleString()} credits
+                      </span>
+                      {pack.savings && (
+                        <span style={{ fontFamily: "Sora, sans-serif", fontSize: 12, fontWeight: 800, color: "#22C55E", backgroundColor: "#22C55E15", borderRadius: 6, padding: "2px 8px" }}>
+                          -{pack.savings}%
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div
+                    className="flex items-center justify-center"
+                    style={{ borderRadius: 10, backgroundColor: "#E8A83815", padding: "6px 14px" }}
+                  >
+                    <span style={{ fontSize: 15, fontWeight: 700, color: "#E8A838" }}>
+                      ${(pack.price / 100).toFixed(2)}
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
 
