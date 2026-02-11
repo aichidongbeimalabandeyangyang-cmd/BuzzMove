@@ -3,8 +3,10 @@
 import { useEffect, useRef } from "react";
 import { X, Zap, Check } from "lucide-react";
 import { trpc } from "@/lib/trpc";
-import { CREDIT_PACKS } from "@/lib/constants";
+import { CREDIT_PACKS, PLANS } from "@/lib/constants";
 import { trackPaywallView, trackClickCheckout } from "@/lib/gtag";
+import { trackTikTokInitiateCheckout } from "@/lib/tiktok";
+import { trackFacebookInitiateCheckout } from "@/lib/facebook";
 
 interface PaywallModalProps {
   open: boolean;
@@ -84,7 +86,20 @@ export function PaywallModal({ open, onClose, context = "credits" }: PaywallModa
           {/* Pro */}
           <button
             onClick={() => {
+              const price = (!hasPurchased ? PLANS.pro.trial_price_weekly : PLANS.pro.price_weekly) / 100;
               trackClickCheckout({ type: "subscription", plan: "pro" });
+              trackTikTokInitiateCheckout({
+                content_type: "subscription",
+                content_name: "BuzzMove Pro Plan (weekly)",
+                value: price,
+                currency: "USD",
+              });
+              trackFacebookInitiateCheckout({
+                content_type: "subscription",
+                content_name: "BuzzMove Pro Plan (weekly)",
+                value: price,
+                currency: "USD",
+              });
               subCheckout.mutate({ plan: "pro", billingPeriod: "weekly", withTrial: !hasPurchased });
             }}
             disabled={isPending}
@@ -123,7 +138,20 @@ export function PaywallModal({ open, onClose, context = "credits" }: PaywallModa
           {/* Premium */}
           <button
             onClick={() => {
+              const price = PLANS.premium.price_weekly / 100;
               trackClickCheckout({ type: "subscription", plan: "premium" });
+              trackTikTokInitiateCheckout({
+                content_type: "subscription",
+                content_name: "BuzzMove Premium Plan (weekly)",
+                value: price,
+                currency: "USD",
+              });
+              trackFacebookInitiateCheckout({
+                content_type: "subscription",
+                content_name: "BuzzMove Premium Plan (weekly)",
+                value: price,
+                currency: "USD",
+              });
               subCheckout.mutate({ plan: "premium", billingPeriod: "weekly" });
             }}
             disabled={isPending}
@@ -152,7 +180,23 @@ export function PaywallModal({ open, onClose, context = "credits" }: PaywallModa
             return (
               <button
                 key={pack.id}
-                onClick={() => { trackClickCheckout({ type: "credit_pack", plan: pack.id }); packCheckout.mutate({ packId: pack.id as any }); }}
+                onClick={() => {
+                  const price = pack.price / 100;
+                  trackClickCheckout({ type: "credit_pack", plan: pack.id });
+                  trackTikTokInitiateCheckout({
+                    content_type: "product",
+                    content_name: `${pack.name} (${pack.credits} credits)`,
+                    value: price,
+                    currency: "USD",
+                  });
+                  trackFacebookInitiateCheckout({
+                    content_type: "product",
+                    content_name: `${pack.name} (${pack.credits} credits)`,
+                    value: price,
+                    currency: "USD",
+                  });
+                  packCheckout.mutate({ packId: pack.id as any });
+                }}
                 disabled={isPending}
                 className="flex w-full items-center justify-between transition-all active:scale-[0.98] disabled:opacity-50"
                 style={{

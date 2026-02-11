@@ -15,22 +15,27 @@ function gtag(...args: unknown[]) {
   }
 }
 
-// 1. Sign-up / Login
+// 1. Sign-up
 export function trackSignUp(method: "google" | "email") {
   gtag("event", "sign_up", { method });
 }
 
-// 2. Image uploaded
+// 2. Login
+export function trackLogin(method: "google" | "email") {
+  gtag("event", "login", { method });
+}
+
+// 3. Image uploaded
 export function trackImageUpload() {
   gtag("event", "image_upload");
 }
 
-// 3. Video generation started
+// 4. Video generation started
 export function trackVideoGenerate(params: { mode: string; duration: string; credits: number }) {
   gtag("event", "video_generate", params);
 }
 
-// 4. Purchase completed (called on redirect back from Stripe)
+// 5. Purchase completed (called on redirect back from Stripe)
 export function trackPurchase(params: {
   value: number;
   transactionId?: string;
@@ -54,27 +59,27 @@ export function trackPurchase(params: {
   });
 }
 
-// 5. Video download click
+// 6. Video download click
 export function trackVideoDownload() {
   gtag("event", "video_download_click");
 }
 
-// 6. Share click
+// 7. Share click
 export function trackShareClick() {
   gtag("event", "click_share");
 }
 
-// 7. Login modal opened
+// 8. Login modal opened
 export function trackLoginModalView() {
   gtag("event", "login_modal_view");
 }
 
-// 8. Paywall shown
+// 9. Paywall shown
 export function trackPaywallView() {
   gtag("event", "paywall_view");
 }
 
-// 8. Click checkout button (before Stripe redirect)
+// 10. Click checkout button (before Stripe redirect)
 export function trackClickCheckout(params: { type: "credit_pack" | "subscription"; plan: string }) {
   gtag("event", "click_checkout", params);
 }

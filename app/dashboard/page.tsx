@@ -3,6 +3,9 @@
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { trackPurchase, trackVideoDownload, trackShareClick } from "@/lib/gtag";
+import { trackAdjustPurchase } from "@/lib/adjust";
+import { trackTikTokPurchase, trackTikTokVideoDownload, trackTikTokShare } from "@/lib/tiktok";
+import { trackFacebookPurchase, trackFacebookVideoDownload, trackFacebookShare } from "@/lib/facebook";
 import { PLANS, CREDIT_PACKS } from "@/lib/constants";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -48,6 +51,8 @@ function VideoDetail({ videoId, onBack, isFirstCompletedVideo }: { videoId: stri
   const handleShare = async () => {
     if (!videoUrl) return;
     trackShareClick();
+    trackTikTokShare();
+    trackFacebookShare();
     if (navigator.share) {
       try { await navigator.share({ title: "Check out my AI video!", url: shareUrl }); } catch {}
     } else {
@@ -64,6 +69,8 @@ function VideoDetail({ videoId, onBack, isFirstCompletedVideo }: { videoId: stri
       return;
     }
     trackVideoDownload();
+    trackTikTokVideoDownload();
+    trackFacebookVideoDownload();
     markDownloaded.mutate({ videoId });
     const a = document.createElement("a");
     a.href = videoUrl;
@@ -442,7 +449,22 @@ function SearchParamsHandler({ onVideoId }: { onVideoId: (id: string) => void })
         itemCategory = "credit_pack";
       }
 
+      // Track purchase across all platforms
       trackPurchase({ value: amount, transactionId: sessionId, itemId, itemName, itemCategory });
+      trackAdjustPurchase(amount, sessionId);
+      trackTikTokPurchase({
+        content_type: itemCategory === "subscription" ? "subscription" : "product",
+        content_name: itemName,
+        value: amount,
+        currency: "USD",
+      });
+      trackFacebookPurchase({
+        content_type: itemCategory === "subscription" ? "subscription" : "product",
+        content_name: itemName,
+        value: amount,
+        currency: "USD",
+      });
+      
       window.history.replaceState({}, "", "/dashboard");
     }
     const videoId = searchParams.get("video");

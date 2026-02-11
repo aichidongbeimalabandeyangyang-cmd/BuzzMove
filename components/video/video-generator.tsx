@@ -8,6 +8,9 @@ import { getDeviceKey } from "@/components/tracking/device-key-ensurer";
 import { CREDIT_COSTS } from "@/lib/constants";
 import { useApp } from "@/components/layout/app-shell";
 import { trackVideoGenerate } from "@/lib/gtag";
+import { trackAdjustVideoGenerate } from "@/lib/adjust";
+import { trackTikTokVideoGenerate } from "@/lib/tiktok";
+import { trackFacebookVideoGenerate } from "@/lib/facebook";
 import { PaywallModal } from "@/components/paywall-modal";
 import { VideoProgress } from "./video-progress";
 
@@ -64,7 +67,12 @@ export function VideoGenerator({ imageUrl, imagePreview, onReset, onBackHome, in
       prev ? { ...prev, balance: Math.max(0, prev.balance - cost) } : prev
     );
 
+    // Track video generation across all platforms
     trackVideoGenerate({ mode, duration, credits: cost });
+    trackAdjustVideoGenerate();
+    trackTikTokVideoGenerate();
+    trackFacebookVideoGenerate();
+    
     setStatus("submitting");
     generateMutation.mutate({
       imageUrl, prompt: prompt || undefined, duration, mode,

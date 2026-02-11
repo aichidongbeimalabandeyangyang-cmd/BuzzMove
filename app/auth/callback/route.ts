@@ -5,6 +5,9 @@ import { REFERRAL_REWARD_CREDITS } from "@/lib/constants";
 import { isDisposableEmail } from "@/server/services/email-validation";
 import { validateDeviceKey } from "@/server/services/device-fingerprint";
 import { logServerEvent } from "@/server/services/events";
+import { trackTikTokCAPISignUp } from "@/server/services/tiktok-capi";
+import { trackFacebookCAPISignUp } from "@/server/services/facebook-capi";
+import { getFacebookAdsIdsFromCookies } from "@/lib/facebook-ads-ids";
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
@@ -63,6 +66,46 @@ export async function GET(request: NextRequest) {
             email: user.email,
             credits_balance: 0,
           });
+
+          // Mark as new signup for client-side event tracking
+          response.cookies.set("buzzmove_new_signup", "1", {
+            path: "/",
+            maxAge: 60,
+            httpOnly: false,
+          });
+
+          // TikTok CAPI: track sign up server-side
+          const ttclid = request.cookies.get("ttclid")?.value;
+          if (ttclid) {
+            const userAgent = request.headers.get("user-agent") || undefined;
+            const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+                       request.headers.get("x-real-ip") || undefined;
+            await trackTikTokCAPISignUp({
+              eventId: `signup_${user.id}_${Date.now()}`,
+              email: user.email || undefined,
+              ttclid,
+              userAgent,
+              ip,
+            });
+          }
+
+          // Facebook CAPI: track sign up server-side
+          const cookieHeader = request.headers.get("cookie");
+          const { fbclid, fbp, fbc } = getFacebookAdsIdsFromCookies(cookieHeader);
+          if (fbclid || fbp || fbc) {
+            const userAgent = request.headers.get("user-agent") || undefined;
+            const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+                       request.headers.get("x-real-ip") || undefined;
+            await trackFacebookCAPISignUp({
+              eventId: `signup_${user.id}_${Date.now()}`,
+              email: user.email || undefined,
+              fbclid,
+              fbp,
+              fbc,
+              userAgent,
+              ip,
+            });
+          }
         }
 
         // Claim free signup credits (idempotent — safe to call for existing users too).
