@@ -8,8 +8,11 @@ import { CREDIT_PACKS } from "@/lib/constants";
 import { trackClickCheckout } from "@/lib/gtag";
 
 export default function PricingPage() {
-  const [billing, setBilling] = useState<"monthly" | "yearly">("yearly");
+  const [billing, setBilling] = useState<"weekly" | "yearly">("yearly");
   const { user, openLogin } = useApp();
+
+  const creditData = trpc.credit.getBalance.useQuery(undefined, { enabled: !!user });
+  const hasPurchased = creditData.data?.hasPurchased ?? false;
 
   const subCheckout = trpc.payment.createSubscriptionCheckout.useMutation({
     onSuccess(data) { if (data.url) window.location.href = data.url; },
@@ -21,7 +24,8 @@ export default function PricingPage() {
   const handleSubscribe = (plan: "pro" | "premium") => {
     if (!user) { openLogin(); return; }
     trackClickCheckout({ type: "subscription", plan });
-    subCheckout.mutate({ plan, billingPeriod: billing });
+    const withTrial = plan === "pro" && billing === "weekly" && !hasPurchased;
+    subCheckout.mutate({ plan, billingPeriod: billing, withTrial });
   };
 
   const handleBuyPack = (packId: string) => {
@@ -30,10 +34,12 @@ export default function PricingPage() {
     packCheckout.mutate({ packId: packId as any });
   };
 
-  const proPrice = billing === "yearly" ? "$15.99" : "$19.99";
-  const premiumPrice = billing === "yearly" ? "$69.99" : "$69.99";
-  const proPerLabel = billing === "yearly" ? "/mo, billed yearly" : "/month";
-  const premiumPerLabel = billing === "yearly" ? "/mo, billed yearly" : "/month";
+  // Pro trial: $0.99 first week for new users
+  const showProTrial = billing === "weekly" && !hasPurchased;
+  const proPrice = showProTrial ? "$0.99" : billing === "yearly" ? "$3.56" : "$4.99";
+  const proPerLabel = showProTrial ? " first week" : billing === "yearly" ? "/wk, billed yearly" : "/week";
+  const premiumPrice = billing === "yearly" ? "$10.58" : "$14.99";
+  const premiumPerLabel = billing === "yearly" ? "/wk, billed yearly" : "/week";
 
   return (
     <div className="flex w-full flex-1 flex-col overflow-y-auto desktop-container">
@@ -49,16 +55,16 @@ export default function PricingPage() {
         {/* Billing Toggle */}
         <div className="flex" style={{ borderRadius: 12, backgroundColor: "#16161A", gap: 4, padding: 4 }}>
           <button
-            onClick={() => setBilling("monthly")}
+            onClick={() => setBilling("weekly")}
             className="flex items-center justify-center"
             style={{
               borderRadius: 10, padding: "8px 20px",
-              fontSize: 14, fontWeight: billing === "monthly" ? 600 : 500,
-              color: billing === "monthly" ? "#0B0B0E" : "#6B6B70",
-              backgroundColor: billing === "monthly" ? "#E8A838" : "transparent",
+              fontSize: 14, fontWeight: billing === "weekly" ? 600 : 500,
+              color: billing === "weekly" ? "#0B0B0E" : "#6B6B70",
+              backgroundColor: billing === "weekly" ? "#E8A838" : "transparent",
             }}
           >
-            Monthly
+            Weekly
           </button>
           <button
             onClick={() => setBilling("yearly")}
@@ -73,7 +79,7 @@ export default function PricingPage() {
             Yearly
             {billing === "yearly" && (
               <span style={{ borderRadius: 8, backgroundColor: "#22C55E", padding: "2px 8px", fontSize: 13, fontWeight: 800, color: "#FFFFFF" }}>
-                -20%
+                -29%
               </span>
             )}
           </button>
@@ -91,8 +97,15 @@ export default function PricingPage() {
           <div className="flex w-full flex-col" style={{ borderRadius: 19, backgroundColor: "#16161A", padding: 20, gap: 14 }}>
             <div className="flex w-full flex-col" style={{ gap: 8 }}>
               <span style={{ fontSize: 22, fontWeight: 700, color: "#FAFAF9" }}>Pro</span>
-              <div style={{ borderRadius: 6, backgroundColor: "#E8A83830", padding: "3px 10px", alignSelf: "flex-start" }}>
-                <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, color: "#E8A838" }}>RECOMMENDED</span>
+              <div className="flex items-center" style={{ gap: 6 }}>
+                <div style={{ borderRadius: 6, backgroundColor: "#E8A83830", padding: "3px 10px" }}>
+                  <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, color: "#E8A838" }}>RECOMMENDED</span>
+                </div>
+                {showProTrial && (
+                  <div style={{ borderRadius: 6, backgroundColor: "#22C55E20", padding: "3px 10px" }}>
+                    <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, color: "#22C55E" }}>FIRST WEEK $0.99</span>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -101,15 +114,21 @@ export default function PricingPage() {
               <span style={{ fontSize: 15, fontWeight: 400, color: "#6B6B70" }}>{proPerLabel}</span>
             </div>
 
+            {showProTrial && (
+              <p style={{ fontSize: 14, fontWeight: 500, color: "#6B6B70" }}>
+                Then $4.99/week
+              </p>
+            )}
+
             {billing === "yearly" && (
               <p style={{ fontSize: 14, fontWeight: 600, color: "#E8A838" }}>
-                $191.90/year — Save $48 vs monthly
+                $184.99/year — Save 29% vs weekly
               </p>
             )}
 
             <div className="flex w-full flex-col" style={{ gap: 10 }}>
               {[
-                "4,000 credits every month",
+                billing === "yearly" ? "4,000 credits every month" : "1,000 credits every week",
                 "Watermark-free HD downloads",
                 "Generate 3 videos in parallel",
                 "Commercial license included",
@@ -151,13 +170,13 @@ export default function PricingPage() {
 
             {billing === "yearly" && (
               <p style={{ fontSize: 14, fontWeight: 600, color: "#22C55E" }}>
-                $839.90/year — Save $168 vs monthly
+                $549.99/year — Save 29% vs weekly
               </p>
             )}
 
             <div className="flex w-full flex-col" style={{ gap: 10 }}>
               {[
-                "17,500 credits every month",
+                billing === "yearly" ? "17,500 credits every month" : "4,375 credits every week",
                 "Watermark-free HD downloads",
                 "Generate up to 10 videos at once",
                 "Commercial license included",

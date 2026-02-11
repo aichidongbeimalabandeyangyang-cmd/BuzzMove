@@ -33,8 +33,8 @@ function getRevenueCents(tx: { type: string; description: string | null; price_c
     }
   }
   if (tx.type === "subscription") {
-    if (desc.includes("Pro") && !desc.includes("Premium")) return PLANS.pro.price_monthly;
-    if (desc.includes("Premium")) return PLANS.premium.price_monthly;
+    if (desc.includes("Pro") && !desc.includes("Premium")) return PLANS.pro.price_weekly;
+    if (desc.includes("Premium")) return PLANS.premium.price_weekly;
   }
   return 0;
 }

@@ -108,8 +108,25 @@ async function handleSubscriptionCreated(
   if (!plan || !(plan in PLANS) || plan === "free") return;
   if (!stripeSubId) return;
 
-  const planConfig = PLANS[plan];
-  const creditsPerPeriod = planConfig.credits_per_month;
+  const planConfig = PLANS[plan] as any;
+  const withTrial = session.metadata?.with_trial === "true";
+
+  // Determine credits for this period
+  let creditsPerPeriod: number;
+  let initialCredits: number;
+
+  if (billingPeriod === "yearly") {
+    // Yearly: use monthly credits (refreshed monthly by invoice)
+    creditsPerPeriod = planConfig.credits_per_month;
+    initialCredits = planConfig.credits_per_month;
+  } else {
+    // Weekly: use weekly credits
+    creditsPerPeriod = planConfig.credits_per_week;
+    // Trial week gets reduced credits
+    initialCredits = withTrial && planConfig.trial_credits
+      ? planConfig.trial_credits
+      : planConfig.credits_per_week;
+  }
 
   // INSERT subscription record — if it already exists, skip.
   const { error: subError } = await supabase.from("subscriptions").insert({
@@ -142,23 +159,31 @@ async function handleSubscriptionCreated(
 
   const { error: rpcError } = await supabase.rpc("refund_credits", {
     p_user_id: userId,
-    p_amount: creditsPerPeriod,
+    p_amount: initialCredits,
   });
   if (rpcError) {
     console.error(`[stripe:subscription] refund_credits RPC failed:`, rpcError.message);
     throw new Error(`refund_credits failed: ${rpcError.message}`);
   }
 
+  const priceCents = billingPeriod === "yearly"
+    ? planConfig.price_yearly
+    : withTrial && planConfig.trial_price_weekly
+      ? planConfig.trial_price_weekly
+      : planConfig.price_weekly;
+
   await supabase.from("credit_transactions").insert({
     user_id: userId,
-    amount: creditsPerPeriod,
+    amount: initialCredits,
     type: "subscription",
-    description: `${planConfig.name} subscription activated`,
+    description: withTrial
+      ? `${planConfig.name} trial activated ($0.99 first week)`
+      : `${planConfig.name} subscription activated`,
     stripe_payment_id: `sub_activated_${stripeSubId}`,
-    price_cents: billingPeriod === "yearly" ? planConfig.price_yearly : planConfig.price_monthly,
+    price_cents: priceCents,
   });
 
-  console.log(`[stripe:subscription] ${plan} activated for ${userId}, +${creditsPerPeriod} credits`);
+  console.log(`[stripe:subscription] ${plan} activated for ${userId}, +${initialCredits} credits${withTrial ? " (trial)" : ""}`);
 }
 
 // ── Invoice Paid (Subscription Renewal) ──────────────────────
@@ -197,8 +222,9 @@ export async function handleInvoicePaid(invoice: Stripe.Invoice) {
 
   // Look up plan config for price
   const planKey = sub.plan as keyof typeof PLANS;
-  const planConfig = planKey in PLANS ? PLANS[planKey] : null;
-  const priceCents = planConfig && "price_monthly" in planConfig ? planConfig.price_monthly : 0;
+  const planConfig = planKey in PLANS ? (PLANS[planKey] as any) : null;
+  // Weekly renewals use price_weekly, yearly renewals use price_yearly / 12 (approx)
+  const priceCents = planConfig && "price_weekly" in planConfig ? planConfig.price_weekly : 0;
 
   const { error: txError } = await supabase.from("credit_transactions").insert({
     user_id: sub.user_id,

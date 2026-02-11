@@ -1,4 +1,5 @@
 import { router, protectedProcedure } from "../trpc";
+import { ADMIN_EMAILS } from "@/lib/constants";
 
 export const creditRouter = router({
   // Get current credit balance
@@ -30,11 +31,14 @@ export const creditRouter = router({
       .eq("user_id", ctx.user.id)
       .eq("status", "completed");
 
+    const isAdmin = ADMIN_EMAILS.includes(ctx.user.email ?? "");
+
     return {
       balance: data?.credits_balance ?? 0,
       plan,
       hasPurchased,
       completedVideoCount: completedVideoCount ?? 0,
+      isAdmin,
     };
   }),
 

@@ -18,9 +18,12 @@ export const PLANS = {
   },
   pro: {
     name: "Pro",
-    price_monthly: 1999, // $19.99
-    price_yearly: 19190, // $191.90 (-20%)
-    credits_per_month: 4000, // 40 std 5s videos, $0.50/video
+    price_weekly: 499, // $4.99/week
+    price_yearly: 18499, // $184.99/year (-29%)
+    credits_per_week: 1000, // 10 std 5s videos
+    credits_per_month: 4000, // yearly subscribers get monthly refresh
+    trial_price_weekly: 99, // $0.99 first week
+    trial_credits: 500, // 500 credits during trial week
     max_concurrent: 3,
     watermark: false,
     max_quality: "1080p",
@@ -28,9 +31,10 @@ export const PLANS = {
   },
   premium: {
     name: "Premium",
-    price_monthly: 6999, // $69.99
-    price_yearly: 83990, // $839.90 (-20%)
-    credits_per_month: 17500, // 175 std 5s videos, $0.40/video
+    price_weekly: 1499, // $14.99/week
+    price_yearly: 54999, // $549.99/year (-29%)
+    credits_per_week: 4375, // ~44 std 5s videos
+    credits_per_month: 17500, // yearly subscribers get monthly refresh
     max_concurrent: 10,
     watermark: false,
     max_quality: "1080p",

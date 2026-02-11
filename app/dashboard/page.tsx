@@ -30,8 +30,9 @@ function VideoDetail({ videoId, onBack, isFirstCompletedVideo }: { videoId: stri
   const [copied, setCopied] = useState(false);
 
   const isPaid = creditData?.hasPurchased ?? false;
+  const isAdmin = creditData?.isAdmin ?? false;
   // Only apply blur once we have enough data to decide (avoid flash of blur)
-  const shouldBlur = creditData !== undefined && !isPaid && isFirstCompletedVideo === false;
+  const shouldBlur = creditData !== undefined && !isPaid && !isAdmin && isFirstCompletedVideo === false;
 
   const deleteMutation = trpc.video.delete.useMutation({
     onSuccess() {
@@ -112,7 +113,7 @@ function VideoDetail({ videoId, onBack, isFirstCompletedVideo }: { videoId: stri
                   </div>
                   <span style={{ fontFamily: "Sora, sans-serif", fontSize: 18, fontWeight: 700, color: "#FAFAF9" }}>Video Locked</span>
                   <span style={{ fontSize: 13, color: "#9898A4", textAlign: "center", maxWidth: 240, lineHeight: 1.5 }}>
-                    Purchase credits or subscribe to unlock all your videos
+                    Try Pro for $0.99/week — unlock all videos
                   </span>
                   <button
                     onClick={() => setShowPaywall(true)}
@@ -120,7 +121,7 @@ function VideoDetail({ videoId, onBack, isFirstCompletedVideo }: { videoId: stri
                     style={{ height: 48, padding: "0 32px", borderRadius: 14, border: "none", background: "linear-gradient(135deg, #F0C060, #E8A838)", boxShadow: "0 4px 20px rgba(232,168,56,0.25)", gap: 8 }}
                   >
                     <Lock style={{ width: 18, height: 18, color: "#0B0B0E" }} strokeWidth={1.5} />
-                    <span style={{ fontSize: 15, fontWeight: 700, color: "#0B0B0E" }}>Unlock Now</span>
+                    <span style={{ fontSize: 15, fontWeight: 700, color: "#0B0B0E" }}>Unlock for $0.99</span>
                   </button>
                 </div>
               )}
@@ -181,7 +182,9 @@ function VideoDetail({ videoId, onBack, isFirstCompletedVideo }: { videoId: stri
                   ) : (
                     <Lock style={{ width: 18, height: 18, color: "#0B0B0E" }} strokeWidth={1.5} />
                   )}
-                  <span style={{ fontSize: 15, fontWeight: 700, color: "#0B0B0E" }}>Download</span>
+                  <span style={{ fontSize: 15, fontWeight: 700, color: "#0B0B0E" }}>
+                    {isPaid ? "Download" : "Unlock for $0.99"}
+                  </span>
                 </button>
                 {!shouldBlur && (
                   <button
@@ -475,6 +478,7 @@ export default function AssetsPage() {
   const videos = data?.videos;
   const { data: creditData } = trpc.credit.getBalance.useQuery();
   const isPaid = creditData?.hasPurchased ?? false;
+  const isAdmin = creditData?.isAdmin ?? false;
 
   // Find the first (oldest) completed video to allow it to be viewed for free
   const firstCompletedVideoId = videos
@@ -551,7 +555,7 @@ export default function AssetsPage() {
                 const isFailed = video.status === "failed";
                 const isGenerating = video.status === "generating" || video.status === "pending";
                 const isCompleted = video.status === "completed";
-                const gridBlur = creditData !== undefined && !isPaid && isCompleted && video.id !== firstCompletedVideoId;
+                const gridBlur = creditData !== undefined && !isPaid && !isAdmin && isCompleted && video.id !== firstCompletedVideoId;
 
                 return (
                   <button

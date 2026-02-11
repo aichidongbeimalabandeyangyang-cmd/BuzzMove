@@ -39,7 +39,8 @@ export const paymentRouter = router({
     .input(
       z.object({
         plan: z.enum(["pro", "premium"]),
-        billingPeriod: z.enum(["monthly", "yearly"]),
+        billingPeriod: z.enum(["weekly", "yearly"]),
+        withTrial: z.boolean().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -55,6 +56,31 @@ export const paymentRouter = router({
         ctx.supabase, ctx.user.id, profile.stripe_customer_id, profile.email || ctx.user.email
       );
 
+      const planConfig = PLANS[input.plan] as any;
+      const unitAmount =
+        input.billingPeriod === "yearly"
+          ? planConfig.price_yearly
+          : planConfig.price_weekly;
+      const interval = input.billingPeriod === "yearly" ? "year" : "week";
+
+      // $0.99 trial: create a one-time Stripe coupon ($4.00 off first invoice)
+      // Only for Pro plan, weekly billing, when withTrial is requested
+      const isTrialEligible =
+        input.withTrial && input.plan === "pro" && input.billingPeriod === "weekly";
+      let discounts: { coupon: string }[] | undefined;
+
+      if (isTrialEligible) {
+        const coupon = await stripe.coupons.create({
+          amount_off: planConfig.price_weekly - planConfig.trial_price_weekly, // $4.99 - $0.99 = $4.00
+          currency: "usd",
+          duration: "once",
+          name: "Pro Trial - First Week $0.99",
+        });
+        discounts = [{ coupon: coupon.id }];
+      }
+
+      const displayAmount = isTrialEligible ? planConfig.trial_price_weekly : unitAmount;
+
       const session = await stripe.checkout.sessions.create({
         customer: customerId,
         mode: "subscription",
@@ -65,27 +91,22 @@ export const paymentRouter = router({
               product_data: {
                 name: `BuzzMove ${PLANS[input.plan].name} Plan`,
               },
-              unit_amount:
-                input.billingPeriod === "yearly"
-                  ? (PLANS[input.plan] as any).price_yearly
-                  : (PLANS[input.plan] as any).price_monthly,
-              recurring: {
-                interval: input.billingPeriod === "yearly" ? "year" : "month",
-              },
+              unit_amount: unitAmount,
+              recurring: { interval },
             },
             quantity: 1,
           },
         ],
+        ...(discounts ? { discounts } : {}),
         success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?payment=success&amount=${
-          (input.billingPeriod === "yearly"
-            ? (PLANS[input.plan] as any).price_yearly
-            : (PLANS[input.plan] as any).price_monthly) / 100
+          displayAmount / 100
         }&session_id={CHECKOUT_SESSION_ID}&type=subscription&plan=${input.plan}&billing=${input.billingPeriod}`,
         cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing?payment=cancelled`,
         metadata: {
           supabase_user_id: ctx.user.id,
           plan: input.plan,
           billing_period: input.billingPeriod,
+          with_trial: isTrialEligible ? "true" : "false",
         },
       });
 

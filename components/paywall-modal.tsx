@@ -14,6 +14,9 @@ interface PaywallModalProps {
 export function PaywallModal({ open, onClose }: PaywallModalProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
 
+  const creditData = trpc.credit.getBalance.useQuery();
+  const hasPurchased = creditData.data?.hasPurchased ?? false;
+
   const packCheckout = trpc.payment.createCreditPackCheckout.useMutation({
     onSuccess(data) { if (data.url) window.location.href = data.url; },
   });
@@ -111,19 +114,33 @@ export function PaywallModal({ open, onClose }: PaywallModalProps) {
 
           {/* Pro */}
           <button
-            onClick={() => { trackClickCheckout({ type: "subscription", plan: "pro" }); subCheckout.mutate({ plan: "pro", billingPeriod: "yearly" }); }}
+            onClick={() => {
+              trackClickCheckout({ type: "subscription", plan: "pro" });
+              subCheckout.mutate({ plan: "pro", billingPeriod: "weekly", withTrial: !hasPurchased });
+            }}
             disabled={isPending}
             className="flex w-full flex-col transition-all active:scale-[0.98] disabled:opacity-50"
-            style={{ borderRadius: 14, backgroundColor: "#16161A", padding: "12px 14px", gap: 8 }}
+            style={{ borderRadius: 14, backgroundColor: "#16161A", padding: "12px 14px", gap: 8, border: !hasPurchased ? "1.5px solid #E8A83860" : "1.5px solid transparent" }}
           >
             <div className="flex w-full items-center justify-between">
               <div className="flex items-center" style={{ gap: 8 }}>
                 <span style={{ fontSize: 15, fontWeight: 600, color: "#FAFAF9" }}>Pro</span>
-                <span style={{ fontSize: 10, fontWeight: 700, color: "#22C55E", backgroundColor: "#22C55E20", borderRadius: 6, padding: "2px 6px" }}>
-                  -20% YEARLY
-                </span>
+                {!hasPurchased && (
+                  <span style={{ fontSize: 10, fontWeight: 700, color: "#22C55E", backgroundColor: "#22C55E20", borderRadius: 6, padding: "2px 6px" }}>
+                    $0.99 FIRST WEEK
+                  </span>
+                )}
               </div>
-              <span style={{ fontSize: 16, fontWeight: 700, color: "#FAFAF9" }}>$15.99/mo</span>
+              <div className="flex flex-col items-end">
+                {!hasPurchased ? (
+                  <>
+                    <span style={{ fontSize: 16, fontWeight: 700, color: "#E8A838" }}>$0.99/wk</span>
+                    <span style={{ fontSize: 11, fontWeight: 400, color: "#6B6B70" }}>then $4.99/wk</span>
+                  </>
+                ) : (
+                  <span style={{ fontSize: 16, fontWeight: 700, color: "#FAFAF9" }}>$4.99/wk</span>
+                )}
+              </div>
             </div>
             <div className="flex flex-wrap" style={{ gap: 4 }}>
               {["No watermark", "HD download", "3x parallel", "Commercial use"].map((b) => (
@@ -136,14 +153,17 @@ export function PaywallModal({ open, onClose }: PaywallModalProps) {
 
           {/* Premium */}
           <button
-            onClick={() => { trackClickCheckout({ type: "subscription", plan: "premium" }); subCheckout.mutate({ plan: "premium", billingPeriod: "yearly" }); }}
+            onClick={() => {
+              trackClickCheckout({ type: "subscription", plan: "premium" });
+              subCheckout.mutate({ plan: "premium", billingPeriod: "weekly" });
+            }}
             disabled={isPending}
             className="flex w-full flex-col transition-all active:scale-[0.98] disabled:opacity-50"
             style={{ borderRadius: 14, backgroundColor: "#16161A", padding: "12px 14px", gap: 8 }}
           >
             <div className="flex w-full items-center justify-between">
               <span style={{ fontSize: 15, fontWeight: 600, color: "#FAFAF9" }}>Premium</span>
-              <span style={{ fontSize: 16, fontWeight: 700, color: "#FAFAF9" }}>$69.99/mo</span>
+              <span style={{ fontSize: 16, fontWeight: 700, color: "#FAFAF9" }}>$14.99/wk</span>
             </div>
             <div className="flex flex-wrap" style={{ gap: 4 }}>
               {["No watermark", "HD download", "10x parallel", "Commercial use", "30% cheaper credits"].map((b) => (
