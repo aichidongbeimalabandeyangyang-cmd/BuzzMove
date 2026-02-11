@@ -147,36 +147,47 @@ export function PaywallModal({ open, onClose, context = "credits" }: PaywallModa
         {/* ---- CREDIT PACKS ---- */}
         <div className="flex flex-col" style={{ gap: 8 }}>
           <span style={{ fontSize: 12, fontWeight: 600, letterSpacing: 1, color: "#6B6B70" }}>ONE-TIME PACKS</span>
-          {CREDIT_PACKS.map((pack) => (
-            <button
-              key={pack.id}
-              onClick={() => { trackClickCheckout({ type: "credit_pack", plan: pack.id }); packCheckout.mutate({ packId: pack.id as any }); }}
-              disabled={isPending}
-              className="flex w-full items-center justify-between transition-all active:scale-[0.98] disabled:opacity-50"
-              style={{
-                borderRadius: 14,
-                backgroundColor: "#16161A",
-                padding: "12px 14px",
-              }}
-            >
-              <div className="flex flex-col" style={{ gap: 2 }}>
-                <div className="flex items-center" style={{ gap: 8 }}>
-                  <span style={{ fontSize: 15, fontWeight: 600, color: "#FAFAF9" }}>{pack.name}</span>
-                  {pack.tag && (
-                    <span style={{ fontSize: 10, fontWeight: 700, color: "#E8A838", backgroundColor: "#E8A83820", borderRadius: 6, padding: "2px 6px" }}>
-                      {pack.tag}
+          {CREDIT_PACKS.map((pack) => {
+            const isPopular = pack.id === "starter";
+            return (
+              <button
+                key={pack.id}
+                onClick={() => { trackClickCheckout({ type: "credit_pack", plan: pack.id }); packCheckout.mutate({ packId: pack.id as any }); }}
+                disabled={isPending}
+                className="flex w-full items-center justify-between transition-all active:scale-[0.98] disabled:opacity-50"
+                style={{
+                  borderRadius: 14,
+                  backgroundColor: "#16161A",
+                  padding: "12px 14px",
+                  border: isPopular ? "1.5px solid #E8A83860" : "1.5px solid transparent",
+                }}
+              >
+                <div className="flex flex-col" style={{ gap: 2 }}>
+                  <div className="flex items-center" style={{ gap: 8 }}>
+                    <span style={{ fontSize: 15, fontWeight: 600, color: "#FAFAF9" }}>{pack.name}</span>
+                    {pack.tag && (
+                      <span style={{ fontSize: 10, fontWeight: 700, color: "#E8A838", backgroundColor: "#E8A83820", borderRadius: 6, padding: "2px 6px" }}>
+                        {pack.tag}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center" style={{ gap: 6 }}>
+                    <span style={{ fontSize: 12, fontWeight: 400, color: "#6B6B70" }}>
+                      {pack.credits.toLocaleString()} credits
                     </span>
-                  )}
+                    {pack.savings && (
+                      <span style={{ fontFamily: "Sora, sans-serif", fontSize: 12, fontWeight: 800, color: "#22C55E", backgroundColor: "#22C55E15", borderRadius: 6, padding: "2px 8px" }}>
+                        -{pack.savings}%
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <span style={{ fontSize: 12, fontWeight: 400, color: "#6B6B70" }}>
-                  {pack.credits.toLocaleString()} credits{pack.savings ? ` · Save ${pack.savings}%` : ""}
+                <span style={{ fontSize: 16, fontWeight: 700, color: "#E8A838" }}>
+                  ${(pack.price / 100).toFixed(2)}
                 </span>
-              </div>
-              <span style={{ fontSize: 16, fontWeight: 700, color: "#E8A838" }}>
-                ${(pack.price / 100).toFixed(2)}
-              </span>
-            </button>
-          ))}
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>
