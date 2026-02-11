@@ -4,8 +4,10 @@ import { useState } from "react";
 import { Check, Zap } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { useApp } from "@/components/layout/app-shell";
-import { CREDIT_PACKS } from "@/lib/constants";
+import { CREDIT_PACKS, PLANS } from "@/lib/constants";
 import { trackClickCheckout } from "@/lib/gtag";
+import { trackTikTokInitiateCheckout } from "@/lib/tiktok";
+import { trackFacebookInitiateCheckout } from "@/lib/facebook";
 
 export default function PricingPage() {
   const [billing, setBilling] = useState<"weekly" | "yearly">("weekly");
@@ -23,14 +25,59 @@ export default function PricingPage() {
 
   const handleSubscribe = (plan: "pro" | "premium") => {
     if (!user) { openLogin(); return; }
-    trackClickCheckout({ type: "subscription", plan });
     const withTrial = plan === "pro" && billing === "weekly" && !hasPurchased;
+    
+    // Calculate price
+    let price = 0;
+    if (plan === "pro") {
+      price = withTrial 
+        ? PLANS.pro.trial_price_weekly / 100 
+        : (billing === "weekly" ? PLANS.pro.price_weekly / 100 : PLANS.pro.price_yearly / 100);
+    } else {
+      price = billing === "weekly" ? PLANS.premium.price_weekly / 100 : PLANS.premium.price_yearly / 100;
+    }
+    
+    const planName = `BuzzMove ${plan === "pro" ? "Pro" : "Premium"} Plan (${billing})`;
+    
+    trackClickCheckout({ type: "subscription", plan });
+    trackTikTokInitiateCheckout({
+      content_type: "subscription",
+      content_name: planName,
+      value: price,
+      currency: "USD",
+    });
+    trackFacebookInitiateCheckout({
+      content_type: "subscription",
+      content_name: planName,
+      value: price,
+      currency: "USD",
+    });
+    
     subCheckout.mutate({ plan, billingPeriod: billing, withTrial });
   };
 
   const handleBuyPack = (packId: string) => {
     if (!user) { openLogin(); return; }
+    const pack = CREDIT_PACKS.find(p => p.id === packId);
+    if (!pack) return;
+    
+    const price = pack.price / 100;
+    const packName = `${pack.name} (${pack.credits} credits)`;
+    
     trackClickCheckout({ type: "credit_pack", plan: packId });
+    trackTikTokInitiateCheckout({
+      content_type: "product",
+      content_name: packName,
+      value: price,
+      currency: "USD",
+    });
+    trackFacebookInitiateCheckout({
+      content_type: "product",
+      content_name: packName,
+      value: price,
+      currency: "USD",
+    });
+    
     packCheckout.mutate({ packId: packId as any });
   };
 
