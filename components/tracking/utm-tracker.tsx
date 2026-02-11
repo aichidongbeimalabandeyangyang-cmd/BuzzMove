@@ -3,6 +3,18 @@
 import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { trpc } from "@/lib/trpc";
+import {
+  extractGoogleAdsIdsFromParams,
+  storeGoogleAdsIds,
+} from "@/lib/google-ads-ids";
+import {
+  extractTikTokAdsIdsFromParams,
+  storeTikTokAdsIds,
+} from "@/lib/tiktok-ads-ids";
+import {
+  extractFacebookAdsIdsFromParams,
+  storeFacebookAdsIds,
+} from "@/lib/facebook-ads-ids";
 
 const UTM_STORAGE_KEY = "vv_utm_data";
 
@@ -19,6 +31,22 @@ export function UtmTracker() {
   const trackUtm = trpc.user.trackUtm.useMutation();
 
   useEffect(() => {
+    // Extract and persist ad platform IDs (gclid, gbraid, wbraid, ttclid, fbclid, fbp, fbc)
+    const googleAdsIds = extractGoogleAdsIdsFromParams(searchParams);
+    if (googleAdsIds.gclid || googleAdsIds.gbraid || googleAdsIds.wbraid) {
+      storeGoogleAdsIds(googleAdsIds);
+    }
+
+    const tiktokAdsIds = extractTikTokAdsIdsFromParams(searchParams);
+    if (tiktokAdsIds.ttclid) {
+      storeTikTokAdsIds(tiktokAdsIds);
+    }
+
+    const facebookAdsIds = extractFacebookAdsIdsFromParams(searchParams);
+    if (facebookAdsIds.fbclid) {
+      storeFacebookAdsIds(facebookAdsIds);
+    }
+
     // Only capture on first visit (don't overwrite existing UTM data)
     const existing = localStorage.getItem(UTM_STORAGE_KEY);
     if (existing) return;
@@ -27,12 +55,14 @@ export function UtmTracker() {
     const gclid = searchParams.get("gclid");   // Google Ads
     const fbclid = searchParams.get("fbclid");  // Facebook/Meta Ads
     const msclkid = searchParams.get("msclkid"); // Microsoft Ads
+    const ttclid = searchParams.get("ttclid");   // TikTok Ads
 
     let inferredSource = searchParams.get("utm_source");
     let inferredMedium = searchParams.get("utm_medium");
     if (!inferredSource) {
       if (gclid) { inferredSource = "google"; inferredMedium = inferredMedium || "cpc"; }
       else if (fbclid) { inferredSource = "facebook"; inferredMedium = inferredMedium || "cpc"; }
+      else if (ttclid) { inferredSource = "tiktok"; inferredMedium = inferredMedium || "cpc"; }
       else if (msclkid) { inferredSource = "bing"; inferredMedium = inferredMedium || "cpc"; }
     }
 

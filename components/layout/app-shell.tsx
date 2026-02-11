@@ -9,8 +9,12 @@ import { LoginModal } from "@/components/auth/login-modal";
 import { ReferralLinker } from "@/components/tracking/referral-linker";
 import { UtmLinker } from "@/components/tracking/utm-linker";
 import { trackSignUp } from "@/lib/gtag";
+import { trackAdjustSignUp, trackAdjustLogin } from "@/lib/adjust";
+import { trackTikTokSignUp } from "@/lib/tiktok";
+import { trackFacebookSignUp } from "@/lib/facebook";
 import { SwRegister } from "@/components/pwa/sw-register";
 import { InstallPrompt } from "@/components/pwa/install-prompt";
+import { AdjustInit } from "@/components/tracking/adjust-init";
 
 // ---------- HomeView Context ----------
 type HomeView = "home" | "upload" | "generator" | "progress" | "result";
@@ -48,7 +52,32 @@ export function AppShell({ children }: { children: ReactNode }) {
       setUser(session?.user ?? null);
       if (event === "SIGNED_IN" && session?.user) {
         const provider = session.user.app_metadata?.provider;
-        trackSignUp(provider === "google" ? "google" : "email");
+        const loginMethod = provider === "google" ? "google" : "email";
+        
+        // Check if this is a new signup (cookie set by server)
+        const isNewSignup = document.cookie.includes("buzzmove_new_signup=1");
+        
+        // Track GA event
+        trackSignUp(loginMethod);
+        
+        // Track Adjust event (sign_up or login)
+        if (isNewSignup) {
+          trackAdjustSignUp();
+          // Clear the signup flag cookie
+          document.cookie = "buzzmove_new_signup=; path=/; max-age=0";
+        } else {
+          trackAdjustLogin();
+        }
+        
+        // Track TikTok event (CompleteRegistration)
+        if (isNewSignup) {
+          trackTikTokSignUp(loginMethod);
+        }
+        
+        // Track Facebook event (CompleteRegistration)
+        if (isNewSignup) {
+          trackFacebookSignUp(loginMethod);
+        }
       }
     });
     return () => subscription.unsubscribe();
@@ -91,6 +120,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <LoginModal open={showLogin} onClose={() => setShowLogin(false)} redirectTo={redirectTo} />
       {user && <ReferralLinker userId={user.id} />}
       {user && <UtmLinker userId={user.id} />}
+      <AdjustInit />
       <SwRegister />
       <InstallPrompt />
     </AppContext.Provider>
