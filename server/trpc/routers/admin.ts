@@ -208,9 +208,7 @@ export const adminRouter = router({
         types: [
           "payment_intent.succeeded",
           "payment_intent.payment_failed",
-          "checkout.session.completed",
           "customer.subscription.deleted",
-          "invoice.paid",
           "charge.refunded",
         ],
         ...(input.startingAfter ? { starting_after: input.startingAfter } : {}),
@@ -241,33 +239,14 @@ export const adminRouter = router({
               ?? obj.last_payment_error?.decline_code
               ?? obj.charges?.data?.[0]?.failure_message
               ?? obj.charges?.data?.[0]?.failure_code
-              ?? obj.cancellation_reason
               ?? "Payment failed";
-            break;
-          case "checkout.session.completed":
-            email = obj.customer_email ?? obj.customer_details?.email ?? "";
-            amountCents = obj.amount_total ?? 0;
-            currency = obj.currency ?? "usd";
-            status = "checkout";
-            description = obj.metadata?.pack_id
-              ? `Pack: ${obj.metadata.pack_id}`
-              : obj.metadata?.plan
-                ? `Plan: ${obj.metadata.plan}`
-                : "Checkout";
             break;
           case "customer.subscription.deleted":
             email = "";
             amountCents = 0;
             currency = obj.currency ?? "usd";
             status = "canceled";
-            description = `Subscription canceled`;
-            break;
-          case "invoice.paid":
-            email = obj.customer_email ?? "";
-            amountCents = obj.amount_paid ?? 0;
-            currency = obj.currency ?? "usd";
-            status = "invoice_paid";
-            description = "Invoice paid";
+            description = "Subscription canceled";
             break;
           case "charge.refunded":
             email = obj.receipt_email ?? obj.billing_details?.email ?? "";

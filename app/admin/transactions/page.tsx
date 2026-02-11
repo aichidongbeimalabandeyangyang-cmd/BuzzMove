@@ -11,8 +11,6 @@ const STATUS_STYLES: Record<string, { color: string; bg: string; label: string }
   succeeded: { color: "#22C55E", bg: "#22C55E15", label: "Succeeded" },
   failed: { color: "#EF4444", bg: "#EF444415", label: "Failed" },
   canceled: { color: "#EF4444", bg: "#EF444415", label: "Canceled" },
-  checkout: { color: "#3B82F6", bg: "#3B82F615", label: "Checkout" },
-  invoice_paid: { color: "#22C55E", bg: "#22C55E15", label: "Invoice Paid" },
   refunded: { color: "#E8A838", bg: "#E8A83815", label: "Refunded" },
 };
 
