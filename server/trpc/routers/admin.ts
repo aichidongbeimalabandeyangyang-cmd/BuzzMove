@@ -152,7 +152,7 @@ export const adminRouter = router({
       // Build query
       let query = supabase
         .from("videos")
-        .select("id, user_id, input_image_url, output_video_url, prompt, status, mode, duration, created_at", { count: "exact" })
+        .select("id, user_id, input_image_url, output_video_url, prompt, status, mode, duration, created_at, downloaded_at", { count: "exact" })
         .order("created_at", { ascending: false })
         .range(input.offset, input.offset + input.limit - 1);
 
@@ -186,6 +186,7 @@ export const adminRouter = router({
           mode: v.mode,
           duration: v.duration,
           createdAt: v.created_at,
+          downloadedAt: v.downloaded_at,
         })),
         total: count ?? 0,
       };

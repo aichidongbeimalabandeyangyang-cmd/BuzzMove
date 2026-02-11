@@ -55,6 +55,8 @@ function VideoDetail({ videoId, onBack, isFirstCompletedVideo }: { videoId: stri
     }
   };
 
+  const markDownloaded = trpc.video.markDownloaded.useMutation();
+
   const handleDownload = () => {
     if (!videoUrl) return;
     if (!isPaid) {
@@ -62,6 +64,7 @@ function VideoDetail({ videoId, onBack, isFirstCompletedVideo }: { videoId: stri
       return;
     }
     trackVideoDownload();
+    markDownloaded.mutate({ videoId });
     const a = document.createElement("a");
     a.href = videoUrl;
     a.download = "";

@@ -387,6 +387,20 @@ export const videoRouter = router({
       return { videos: data || [], total: count || 0 };
     }),
 
+  // Mark video as downloaded (first download only)
+  markDownloaded: protectedProcedure
+    .input(z.object({ videoId: z.string().uuid() }))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.supabase
+        .from("videos")
+        .update({ downloaded_at: new Date().toISOString() })
+        .eq("id", input.videoId)
+        .eq("user_id", ctx.user.id)
+        .is("downloaded_at", null);
+
+      return { success: true };
+    }),
+
   // Delete a video
   delete: protectedProcedure
     .input(z.object({ videoId: z.string().uuid() }))

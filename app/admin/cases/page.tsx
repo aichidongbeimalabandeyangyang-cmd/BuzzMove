@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Search, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ArrowLeft, Search, ChevronLeft, ChevronRight, X, Download } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 
 const PAGE_SIZE = 30;
@@ -140,6 +140,11 @@ export default function CasesPage() {
                       {c.email}
                     </span>
                     <div className="flex items-center" style={{ gap: 6 }}>
+                      {c.downloadedAt && (
+                        <span className="flex items-center" style={{ gap: 2, fontSize: 10, fontWeight: 600, borderRadius: 4, padding: "1px 6px", color: "#3B82F6", backgroundColor: "#3B82F615" }} title={`Downloaded ${new Date(c.downloadedAt).toLocaleString()}`}>
+                          <Download style={{ width: 10, height: 10 }} strokeWidth={2} />
+                        </span>
+                      )}
                       <span style={{
                         fontSize: 10, fontWeight: 600, borderRadius: 4, padding: "1px 6px",
                         color: c.status === "completed" ? "#22C55E" : c.status === "failed" ? "#EF4444" : "#E8A838",

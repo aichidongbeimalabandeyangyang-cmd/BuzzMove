@@ -37,12 +37,15 @@ export function VideoPlayer({ videoId, onReset, onBackHome, creditCost }: VideoP
     }
   };
 
+  const markDownloaded = trpc.video.markDownloaded.useMutation();
+
   const handleDownload = () => {
     if (!isPaid) {
       setShowPaywall(true);
       return;
     }
     trackVideoDownload();
+    markDownloaded.mutate({ videoId });
     const a = document.createElement("a");
     a.href = video.output_video_url;
     a.download = "";
