@@ -237,7 +237,12 @@ export const adminRouter = router({
             amountCents = obj.amount ?? 0;
             currency = obj.currency ?? "usd";
             status = "failed";
-            description = obj.last_payment_error?.message ?? "Payment failed";
+            description = obj.last_payment_error?.message
+              ?? obj.last_payment_error?.decline_code
+              ?? obj.charges?.data?.[0]?.failure_message
+              ?? obj.charges?.data?.[0]?.failure_code
+              ?? obj.cancellation_reason
+              ?? "Payment failed";
             break;
           case "checkout.session.completed":
             email = obj.customer_email ?? obj.customer_details?.email ?? "";
