@@ -353,6 +353,39 @@ async function fetchSupabaseDailyTrend() {
   });
 }
 
+// ---- GitHub Commits ----
+const GITHUB_REPO = "superlion8/BuzzMove";
+
+type CommitInfo = { sha: string; date: string; message: string; author: string };
+
+async function fetchRecentCommits(days: number): Promise<CommitInfo[]> {
+  const since = new Date();
+  since.setDate(since.getDate() - days);
+
+  const url = `https://api.github.com/repos/${GITHUB_REPO}/commits?since=${since.toISOString()}&per_page=100`;
+  const headers: Record<string, string> = {
+    Accept: "application/vnd.github+json",
+    "User-Agent": "BuzzMove-Analytics",
+  };
+  // Use token if available (higher rate limit), otherwise public API
+  const token = process.env.GITHUB_TOKEN;
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  try {
+    const res = await fetch(url, { headers, signal: AbortSignal.timeout(10000) });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data as any[]).map((c) => ({
+      sha: c.sha?.slice(0, 7) ?? "",
+      date: c.commit?.author?.date?.slice(0, 10) ?? "",
+      message: (c.commit?.message ?? "").split("\n")[0].slice(0, 120),
+      author: c.commit?.author?.name ?? "",
+    }));
+  } catch {
+    return []; // Non-critical, don't break report if GitHub is unreachable
+  }
+}
+
 // ---- Format collected data as structured text for LLM ----
 function formatDataForLLM(
   ga4: Awaited<ReturnType<typeof fetchGA4Data>>,
@@ -361,6 +394,7 @@ function formatDataForLLM(
   periodLabel: string,
   ga4Trend?: Awaited<ReturnType<typeof fetchGA4DailyTrend>>,
   supabaseTrend?: Awaited<ReturnType<typeof fetchSupabaseDailyTrend>>,
+  commits?: CommitInfo[],
 ) {
   const lines: string[] = [];
   lines.push(`# BuzzMove Analytics Data (${periodLabel})\n`);
@@ -584,6 +618,28 @@ function formatDataForLLM(
     lines.push("");
   }
 
+  // ---- Recent Code Changes (Git Commits) ----
+  if (commits && commits.length > 0) {
+    lines.push("## Recent Code Changes (Git Commits)");
+    lines.push("以下是报告周期内的产品/代码改动，请结合数据指标变化分析这些改动的潜在影响：\n");
+
+    // Group commits by date
+    const byDate = new Map<string, CommitInfo[]>();
+    for (const c of commits) {
+      const list = byDate.get(c.date) ?? [];
+      list.push(c);
+      byDate.set(c.date, list);
+    }
+
+    for (const [date, dateCommits] of byDate) {
+      lines.push(`### ${date}`);
+      for (const c of dateCommits) {
+        lines.push(`- [${c.sha}] ${c.message}`);
+      }
+      lines.push("");
+    }
+  }
+
   return lines.join("\n");
 }
 
@@ -609,21 +665,25 @@ export async function collectAnalyticsData(type: ReportType = "daily"): Promise<
   ] as const;
 
   if (isDaily) {
-    // Daily: also fetch 7-day trends
-    const [ga4, gsc, internal, ga4Trend, supabaseTrend] = await Promise.all([
+    // Daily: also fetch 7-day trends + commits
+    const [ga4, gsc, internal, ga4Trend, supabaseTrend, commits] = await Promise.all([
       ...baseFetches,
       fetchGA4DailyTrend(),
       fetchSupabaseDailyTrend(),
+      fetchRecentCommits(7),
     ]);
 
     const periodLabel = "Last 24 hours + 7-day trend";
-    const formattedText = formatDataForLLM(ga4, gsc, internal, periodLabel, ga4Trend, supabaseTrend);
+    const formattedText = formatDataForLLM(ga4, gsc, internal, periodLabel, ga4Trend, supabaseTrend, commits);
     return { ga4, gsc, internal, formattedText };
   } else {
-    // Half-day
-    const [ga4, gsc, internal] = await Promise.all(baseFetches);
+    // Half-day: fetch last 1 day of commits
+    const [ga4, gsc, internal, commits] = await Promise.all([
+      ...baseFetches,
+      fetchRecentCommits(1),
+    ]);
     const periodLabel = "Last 12 hours";
-    const formattedText = formatDataForLLM(ga4, gsc, internal, periodLabel);
+    const formattedText = formatDataForLLM(ga4, gsc, internal, periodLabel, undefined, undefined, commits);
     return { ga4, gsc, internal, formattedText };
   }
 }

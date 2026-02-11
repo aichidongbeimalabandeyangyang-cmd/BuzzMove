@@ -97,7 +97,8 @@ const HALF_DAY_PROMPT = `${BASE_CONTEXT}
    - 用 SVG 水平柱状图可视化漏斗各步骤
 3. **流量快照** — 用表格展示渠道数据，campaign 级别表现，Google Ads 关键词和广告组效果
 4. **收入快照** — 总收入、积分包 vs 订阅分布（用 SVG 堆叠条展示占比）
-5. **异常与关注点** — 2-3 条需要关注的异常或机会`;
+5. **产品改动速览**（如果数据中包含 Git Commits）— 列出近期代码改动，简要点评可能对指标产生的影响
+6. **异常与关注点** — 2-3 条需要关注的异常或机会`;
 
 const DAILY_PROMPT = `${BASE_CONTEXT}
 
@@ -133,9 +134,16 @@ const DAILY_PROMPT = `${BASE_CONTEXT}
 
 6. **SEO 表现** — 表格展示搜索词、展示量、点击率、排名
 
-7. **关键洞察** — 3-5 条数据驱动的发现
+7. **产品改动与数据归因**（如果数据中包含 Git Commits）— 这是很有价值的分析板块
+   - 列出过去7天的主要代码改动（按日期分组）
+   - 将改动与同期的数据指标变化做关联分析（例如：某天上线了新 landing page，第二天该页面流量和转化是否有变化）
+   - 区分"可能相关"和"大概率相关"的归因，避免过度推断
+   - 如果某个改动明显对应数据变化，用高亮标注
+   - 如果没有 commit 数据，跳过此板块
 
-8. **优化建议** — 3-5 条具体可落地的方向`;
+8. **关键洞察** — 3-5 条数据驱动的发现
+
+9. **优化建议** — 3-5 条具体可落地的方向`;
 
 export async function generateReport(formattedData: string, type: ReportType = "daily"): Promise<string> {
   const apiKey = process.env.GEMINI_API_KEY;
