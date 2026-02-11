@@ -52,23 +52,21 @@ export function AppShell({ children }: { children: ReactNode }) {
       setUser(session?.user ?? null);
       if (event === "SIGNED_IN" && session?.user) {
         const provider = session.user.app_metadata?.provider;
-        const loginMethod = provider === "google" ? "google" : "email";
-        
-        // Check if this is a new signup (cookie set by server)
+
+        // Email OTP tracking is handled in login-modal.tsx — skip here to avoid double-firing
+        if (provider !== "google") return;
+
+        // Check if this is a new signup (cookie set by auth/callback)
         const isNewSignup = document.cookie.includes("buzzmove_new_signup=1");
-        
+
         if (isNewSignup) {
-          // Track sign_up events for all platforms
-          trackSignUp(loginMethod);
+          trackSignUp("google");
           trackAdjustSignUp();
-          trackTikTokSignUp(loginMethod);
-          trackFacebookSignUp(loginMethod);
-          
-          // Clear the signup flag cookie
+          trackTikTokSignUp("google");
+          trackFacebookSignUp("google");
           document.cookie = "buzzmove_new_signup=; path=/; max-age=0";
         } else {
-          // Track login events for returning users
-          trackLogin(loginMethod);
+          trackLogin("google");
           trackAdjustLogin();
         }
       }

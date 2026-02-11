@@ -3,6 +3,8 @@ import { TRPCError } from "@trpc/server";
 import { router, protectedProcedure } from "../trpc";
 import { stripe } from "@/server/stripe/client";
 import { PLANS, CREDIT_PACKS } from "@/lib/constants";
+import { trackTikTokCAPIInitiateCheckout } from "@/server/services/tiktok-capi";
+import { trackFacebookCAPIInitiateCheckout } from "@/server/services/facebook-capi";
 
 /** Validate or recreate Stripe customer. Handles stale/invalid customer IDs. */
 async function ensureStripeCustomer(
@@ -41,6 +43,14 @@ export const paymentRouter = router({
         plan: z.enum(["pro", "premium"]),
         billingPeriod: z.enum(["weekly", "yearly"]),
         withTrial: z.boolean().optional(),
+        // Ad attribution params
+        gclid: z.string().optional(),
+        gbraid: z.string().optional(),
+        wbraid: z.string().optional(),
+        ttclid: z.string().optional(),
+        fbclid: z.string().optional(),
+        fbp: z.string().optional(),
+        fbc: z.string().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -92,6 +102,37 @@ export const paymentRouter = router({
 
       const displayAmount = isTrialEligible ? planConfig.trial_price_weekly : unitAmount;
 
+      // CAPI: InitiateCheckout (fire-and-forget)
+      const checkoutEventId = `checkout_${ctx.user.id}_${Date.now()}`;
+      const planName = `${planConfig.name} ${input.billingPeriod}`;
+      trackTikTokCAPIInitiateCheckout({
+        userId: ctx.user.id,
+        email: ctx.user.email || undefined,
+        contentType: "subscription",
+        contentName: planName,
+        value: displayAmount / 100,
+        currency: "USD",
+        userAgent: ctx.userAgent,
+        ip: ctx.ip,
+        eventId: checkoutEventId,
+        ttclid: input.ttclid,
+      }).catch((e: unknown) => console.error("[payment:sub] TikTok CAPI InitiateCheckout error:", e));
+
+      trackFacebookCAPIInitiateCheckout({
+        userId: ctx.user.id,
+        email: ctx.user.email || undefined,
+        contentType: "subscription",
+        contentName: planName,
+        value: displayAmount / 100,
+        currency: "USD",
+        userAgent: ctx.userAgent,
+        ip: ctx.ip,
+        eventId: checkoutEventId,
+        fbclid: input.fbclid,
+        fbp: input.fbp,
+        fbc: input.fbc,
+      }).catch((e: unknown) => console.error("[payment:sub] Facebook CAPI InitiateCheckout error:", e));
+
       const session = await stripe.checkout.sessions.create({
         customer: customerId,
         mode: "subscription",
@@ -109,15 +150,29 @@ export const paymentRouter = router({
           },
         ],
         ...(discounts ? { discounts } : {}),
-        success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?payment=success&amount=${
-          displayAmount / 100
-        }&session_id={CHECKOUT_SESSION_ID}&type=subscription&plan=${input.plan}&billing=${input.billingPeriod}`,
+        success_url: (() => {
+          const base = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?payment=success&amount=${displayAmount / 100}&session_id={CHECKOUT_SESSION_ID}&type=subscription&plan=${input.plan}&billing=${input.billingPeriod}`;
+          const adsParams: string[] = [];
+          if (input.gclid) adsParams.push(`gclid=${encodeURIComponent(input.gclid)}`);
+          if (input.gbraid) adsParams.push(`gbraid=${encodeURIComponent(input.gbraid)}`);
+          if (input.wbraid) adsParams.push(`wbraid=${encodeURIComponent(input.wbraid)}`);
+          if (input.ttclid) adsParams.push(`ttclid=${encodeURIComponent(input.ttclid)}`);
+          if (input.fbclid) adsParams.push(`fbclid=${encodeURIComponent(input.fbclid)}`);
+          return adsParams.length > 0 ? `${base}&${adsParams.join("&")}` : base;
+        })(),
         cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing?payment=cancelled`,
         metadata: {
           supabase_user_id: ctx.user.id,
           plan: input.plan,
           billing_period: input.billingPeriod,
           with_trial: isTrialEligible ? "true" : "false",
+          gclid: input.gclid || "",
+          gbraid: input.gbraid || "",
+          wbraid: input.wbraid || "",
+          ttclid: input.ttclid || "",
+          fbclid: input.fbclid || "",
+          fbp: input.fbp || "",
+          fbc: input.fbc || "",
         },
       });
 
@@ -126,7 +181,17 @@ export const paymentRouter = router({
 
   // Create a Stripe Checkout session for credit pack purchase
   createCreditPackCheckout: protectedProcedure
-    .input(z.object({ packId: z.enum(["mini", "starter", "creator", "pro"]) }))
+    .input(z.object({
+      packId: z.enum(["mini", "starter", "creator", "pro"]),
+      // Ad attribution params
+      gclid: z.string().optional(),
+      gbraid: z.string().optional(),
+      wbraid: z.string().optional(),
+      ttclid: z.string().optional(),
+      fbclid: z.string().optional(),
+      fbp: z.string().optional(),
+      fbc: z.string().optional(),
+    }))
     .mutation(async ({ ctx, input }) => {
       const pack = CREDIT_PACKS.find((p) => p.id === input.packId);
       if (!pack) throw new TRPCError({ code: "NOT_FOUND" });
@@ -143,6 +208,37 @@ export const paymentRouter = router({
         ctx.supabase, ctx.user.id, profile.stripe_customer_id, profile.email || ctx.user.email
       );
 
+      // CAPI: InitiateCheckout (fire-and-forget)
+      const checkoutEventId = `checkout_${ctx.user.id}_${Date.now()}`;
+      const packName = `${pack.name} (${pack.credits} credits)`;
+      trackTikTokCAPIInitiateCheckout({
+        userId: ctx.user.id,
+        email: ctx.user.email || undefined,
+        contentType: "product",
+        contentName: packName,
+        value: pack.price / 100,
+        currency: "USD",
+        userAgent: ctx.userAgent,
+        ip: ctx.ip,
+        eventId: checkoutEventId,
+        ttclid: input.ttclid,
+      }).catch((e: unknown) => console.error("[payment:pack] TikTok CAPI InitiateCheckout error:", e));
+
+      trackFacebookCAPIInitiateCheckout({
+        userId: ctx.user.id,
+        email: ctx.user.email || undefined,
+        contentType: "product",
+        contentName: packName,
+        value: pack.price / 100,
+        currency: "USD",
+        userAgent: ctx.userAgent,
+        ip: ctx.ip,
+        eventId: checkoutEventId,
+        fbclid: input.fbclid,
+        fbp: input.fbp,
+        fbc: input.fbc,
+      }).catch((e: unknown) => console.error("[payment:pack] Facebook CAPI InitiateCheckout error:", e));
+
       const session = await stripe.checkout.sessions.create({
         customer: customerId,
         mode: "payment",
@@ -158,13 +254,29 @@ export const paymentRouter = router({
             quantity: 1,
           },
         ],
-        success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?payment=success&amount=${pack.price / 100}&session_id={CHECKOUT_SESSION_ID}&type=credit_pack&pack=${pack.id}`,
+        success_url: (() => {
+          const base = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?payment=success&amount=${pack.price / 100}&session_id={CHECKOUT_SESSION_ID}&type=credit_pack&pack=${pack.id}`;
+          const adsParams: string[] = [];
+          if (input.gclid) adsParams.push(`gclid=${encodeURIComponent(input.gclid)}`);
+          if (input.gbraid) adsParams.push(`gbraid=${encodeURIComponent(input.gbraid)}`);
+          if (input.wbraid) adsParams.push(`wbraid=${encodeURIComponent(input.wbraid)}`);
+          if (input.ttclid) adsParams.push(`ttclid=${encodeURIComponent(input.ttclid)}`);
+          if (input.fbclid) adsParams.push(`fbclid=${encodeURIComponent(input.fbclid)}`);
+          return adsParams.length > 0 ? `${base}&${adsParams.join("&")}` : base;
+        })(),
         cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing?payment=cancelled`,
         metadata: {
           supabase_user_id: ctx.user.id,
           type: "credit_pack",
           pack_id: pack.id,
           credits: String(pack.credits),
+          gclid: input.gclid || "",
+          gbraid: input.gbraid || "",
+          wbraid: input.wbraid || "",
+          ttclid: input.ttclid || "",
+          fbclid: input.fbclid || "",
+          fbp: input.fbp || "",
+          fbc: input.fbc || "",
         },
       });
 

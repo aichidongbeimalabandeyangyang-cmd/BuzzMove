@@ -8,6 +8,9 @@ import { CREDIT_PACKS, PLANS } from "@/lib/constants";
 import { trackClickCheckout } from "@/lib/gtag";
 import { trackTikTokInitiateCheckout } from "@/lib/tiktok";
 import { trackFacebookInitiateCheckout } from "@/lib/facebook";
+import { getGoogleAdsIds } from "@/lib/google-ads-ids";
+import { getTikTokAdsIds } from "@/lib/tiktok-ads-ids";
+import { getFacebookAdsIds } from "@/lib/facebook-ads-ids";
 
 export default function PricingPage() {
   const [billing, setBilling] = useState<"weekly" | "yearly">("weekly");
@@ -53,7 +56,15 @@ export default function PricingPage() {
       currency: "USD",
     });
     
-    subCheckout.mutate({ plan, billingPeriod: billing, withTrial });
+    const gads = getGoogleAdsIds();
+    const tads = getTikTokAdsIds();
+    const fads = getFacebookAdsIds();
+    subCheckout.mutate({
+      plan, billingPeriod: billing, withTrial,
+      gclid: gads.gclid, gbraid: gads.gbraid, wbraid: gads.wbraid,
+      ttclid: tads.ttclid,
+      fbclid: fads.fbclid, fbp: fads.fbp, fbc: fads.fbc,
+    });
   };
 
   const handleBuyPack = (packId: string) => {
@@ -78,7 +89,15 @@ export default function PricingPage() {
       currency: "USD",
     });
     
-    packCheckout.mutate({ packId: packId as any });
+    const gads = getGoogleAdsIds();
+    const tads = getTikTokAdsIds();
+    const fads = getFacebookAdsIds();
+    packCheckout.mutate({
+      packId: packId as any,
+      gclid: gads.gclid, gbraid: gads.gbraid, wbraid: gads.wbraid,
+      ttclid: tads.ttclid,
+      fbclid: fads.fbclid, fbp: fads.fbp, fbc: fads.fbc,
+    });
   };
 
   // Pro trial: $0.99 first week for new users

@@ -3,10 +3,15 @@
 import { useState, useEffect, useRef } from "react";
 import { createSupabaseBrowserClient } from "@/server/supabase/client";
 import { Play, Mail, ArrowLeft } from "lucide-react";
-import { trackLoginModalView } from "@/lib/gtag";
+import { trackSignUp, trackLoginModalView } from "@/lib/gtag";
+import { trackAdjustSignUp, trackAdjustLogin } from "@/lib/adjust";
+import { trackTikTokSignUp } from "@/lib/tiktok";
+import { trackFacebookSignUp } from "@/lib/facebook";
 import { logEvent } from "@/lib/events";
 import { trpc } from "@/lib/trpc";
 import { getDeviceKey } from "@/components/tracking/device-key-ensurer";
+import { getTikTokAdsIds } from "@/lib/tiktok-ads-ids";
+import { getFacebookAdsIds } from "@/lib/facebook-ads-ids";
 
 interface LoginModalProps {
   open: boolean;
@@ -42,6 +47,7 @@ export function LoginModal({ open, onClose, redirectTo }: LoginModalProps) {
   }, [open]);
 
   const validateEmail = trpc.user.validateEmail.useMutation();
+  const trackServerSignUp = trpc.tracking.trackSignUp.useMutation();
 
   if (!open) return null;
 
@@ -116,7 +122,31 @@ export function LoginModal({ open, onClose, redirectTo }: LoginModalProps) {
       }
 
       logEvent("otp_verify_ok", { email: email.trim() });
-      // Note: sign_up/login tracking is handled by app-shell.tsx auth state listener
+      // Email OTP: detect new vs returning user by created_at
+      const supabaseForCheck = createSupabaseBrowserClient();
+      const { data: { user: verifiedUser } } = await supabaseForCheck.auth.getUser();
+      const createdAt = verifiedUser?.created_at;
+      const isNewUser = createdAt && Date.now() - new Date(createdAt).getTime() < 60_000;
+      if (isNewUser) {
+        trackSignUp("email");
+        trackAdjustSignUp();
+        trackTikTokSignUp("email");
+        trackFacebookSignUp("email");
+        // Server-side CAPI with attribution IDs (fire-and-forget)
+        const tads = getTikTokAdsIds();
+        const fads = getFacebookAdsIds();
+        trackServerSignUp.mutate({
+          method: "email",
+          isNewUser: true,
+          url: window.location.href,
+          ttclid: tads.ttclid,
+          fbclid: fads.fbclid,
+          fbp: fads.fbp,
+          fbc: fads.fbc,
+        });
+      } else {
+        trackAdjustLogin();
+      }
       onClose();
       window.location.href = redirectTo || "/";
     } catch (err: any) {

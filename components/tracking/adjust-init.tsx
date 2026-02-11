@@ -44,7 +44,9 @@ export function AdjustInit() {
           init();
         }
       }, 50);
-      return () => clearInterval(check);
+      // Stop polling after 10s if SDK never loads (CDN blocked/failed)
+      const timeout = setTimeout(() => clearInterval(check), 10_000);
+      return () => { clearInterval(check); clearTimeout(timeout); };
     }
   }, []);
 

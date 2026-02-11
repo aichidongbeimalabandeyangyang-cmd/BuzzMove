@@ -7,6 +7,8 @@ import { CREDIT_COSTS, PLANS } from "@/lib/constants";
 import { persistVideoToStorage } from "@/server/services/video-persist";
 import { after } from "next/server";
 import { logServerEvent } from "@/server/services/events";
+import { trackTikTokCAPIVideoGenerate } from "@/server/services/tiktok-capi";
+import { trackFacebookCAPIVideoGenerate } from "@/server/services/facebook-capi";
 
 const MAX_CONCURRENT: Record<string, number> = {
   free: PLANS.free.max_concurrent,
@@ -161,6 +163,26 @@ export const videoRouter = router({
             status: "generating",
           })
           .eq("id", video.id);
+
+        // CAPI: track video generation server-side (fire-and-forget)
+        const eventId = `video_${video.id}`;
+        trackTikTokCAPIVideoGenerate({
+          userId: ctx.user.id,
+          email: ctx.user.email || undefined,
+          userAgent: ctx.userAgent,
+          ip: ctx.ip,
+          eventId,
+          metadata: { mode: input.mode, duration, credits: creditCost },
+        }).catch((e: unknown) => console.error("[video:generate] TikTok CAPI error:", e));
+
+        trackFacebookCAPIVideoGenerate({
+          userId: ctx.user.id,
+          email: ctx.user.email || undefined,
+          userAgent: ctx.userAgent,
+          ip: ctx.ip,
+          eventId,
+          metadata: { mode: input.mode, duration, credits: creditCost },
+        }).catch((e: unknown) => console.error("[video:generate] Facebook CAPI error:", e));
 
         return {
           videoId: video.id,

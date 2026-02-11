@@ -7,6 +7,9 @@ import { CREDIT_PACKS, PLANS } from "@/lib/constants";
 import { trackPaywallView, trackClickCheckout } from "@/lib/gtag";
 import { trackTikTokInitiateCheckout } from "@/lib/tiktok";
 import { trackFacebookInitiateCheckout } from "@/lib/facebook";
+import { getGoogleAdsIds } from "@/lib/google-ads-ids";
+import { getTikTokAdsIds } from "@/lib/tiktok-ads-ids";
+import { getFacebookAdsIds } from "@/lib/facebook-ads-ids";
 
 interface PaywallModalProps {
   open: boolean;
@@ -100,7 +103,15 @@ export function PaywallModal({ open, onClose, context = "credits" }: PaywallModa
                 value: price,
                 currency: "USD",
               });
-              subCheckout.mutate({ plan: "pro", billingPeriod: "weekly", withTrial: !hasPurchased });
+              const gads = getGoogleAdsIds();
+              const tads = getTikTokAdsIds();
+              const fads = getFacebookAdsIds();
+              subCheckout.mutate({
+                plan: "pro", billingPeriod: "weekly", withTrial: !hasPurchased,
+                gclid: gads.gclid, gbraid: gads.gbraid, wbraid: gads.wbraid,
+                ttclid: tads.ttclid,
+                fbclid: fads.fbclid, fbp: fads.fbp, fbc: fads.fbc,
+              });
             }}
             disabled={isPending}
             className="flex w-full flex-col transition-all active:scale-[0.98] disabled:opacity-50"
@@ -152,7 +163,15 @@ export function PaywallModal({ open, onClose, context = "credits" }: PaywallModa
                 value: price,
                 currency: "USD",
               });
-              subCheckout.mutate({ plan: "premium", billingPeriod: "weekly" });
+              const gads = getGoogleAdsIds();
+              const tads = getTikTokAdsIds();
+              const fads = getFacebookAdsIds();
+              subCheckout.mutate({
+                plan: "premium", billingPeriod: "weekly",
+                gclid: gads.gclid, gbraid: gads.gbraid, wbraid: gads.wbraid,
+                ttclid: tads.ttclid,
+                fbclid: fads.fbclid, fbp: fads.fbp, fbc: fads.fbc,
+              });
             }}
             disabled={isPending}
             className="flex w-full flex-col transition-all active:scale-[0.98] disabled:opacity-50"
@@ -195,7 +214,15 @@ export function PaywallModal({ open, onClose, context = "credits" }: PaywallModa
                     value: price,
                     currency: "USD",
                   });
-                  packCheckout.mutate({ packId: pack.id as any });
+                  const gads = getGoogleAdsIds();
+                  const tads = getTikTokAdsIds();
+                  const fads = getFacebookAdsIds();
+                  packCheckout.mutate({
+                    packId: pack.id as any,
+                    gclid: gads.gclid, gbraid: gads.gbraid, wbraid: gads.wbraid,
+                    ttclid: tads.ttclid,
+                    fbclid: fads.fbclid, fbp: fads.fbp, fbc: fads.fbc,
+                  });
                 }}
                 disabled={isPending}
                 className="flex w-full items-center justify-between transition-all active:scale-[0.98] disabled:opacity-50"

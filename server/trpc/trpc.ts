@@ -6,14 +6,22 @@ import {
 } from "@/server/supabase/server";
 import { ADMIN_EMAILS } from "@/lib/constants";
 
-export const createTRPCContext = async () => {
+export const createTRPCContext = async (req?: Request) => {
   const supabase = await createSupabaseServerClient();
   const adminSupabase = createSupabaseAdminClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  return { supabase, adminSupabase, user };
+  // Extract request metadata for server-side CAPI tracking
+  const headers = req?.headers;
+  const userAgent = headers?.get("user-agent") || undefined;
+  const ip =
+    headers?.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    headers?.get("x-real-ip") ||
+    undefined;
+
+  return { supabase, adminSupabase, user, userAgent, ip };
 };
 
 const t = initTRPC.context<typeof createTRPCContext>().create({

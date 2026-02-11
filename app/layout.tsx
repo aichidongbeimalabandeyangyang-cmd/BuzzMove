@@ -106,7 +106,9 @@ export default function RootLayout({
           />
         )}
         {/* Adjust Web SDK */}
-        <script src="https://cdn.adjust.com/adjust-latest.min.js" />
+        {process.env.NEXT_PUBLIC_ADJUST_APP_TOKEN && (
+          <script src="https://cdn.adjust.com/adjust-latest.min.js" />
+        )}
         {/* TikTok Pixel */}
         {process.env.NEXT_PUBLIC_TIKTOK_PIXEL_ID && (
           <script

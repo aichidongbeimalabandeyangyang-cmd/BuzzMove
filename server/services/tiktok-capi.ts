@@ -148,6 +148,7 @@ export async function trackTikTokCAPIInitiateCheckout(opts: {
   ip?: string;
   url?: string;
   eventId?: string;
+  ttclid?: string;
 }) {
   await sendTikTokCAPIEvent({
     pixel_code: TIKTOK_PIXEL_ID,
@@ -158,6 +159,7 @@ export async function trackTikTokCAPIInitiateCheckout(opts: {
       user: {
         external_id: opts.userId,
         email: opts.email,
+        ttclid: opts.ttclid,
       },
       user_agent: opts.userAgent,
       ip: opts.ip,

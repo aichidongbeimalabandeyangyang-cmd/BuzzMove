@@ -8,6 +8,7 @@ import { logServerEvent } from "@/server/services/events";
 import { trackTikTokCAPISignUp } from "@/server/services/tiktok-capi";
 import { trackFacebookCAPISignUp } from "@/server/services/facebook-capi";
 import { getFacebookAdsIdsFromCookies } from "@/lib/facebook-ads-ids";
+import { getTikTokAdsIdsFromCookies } from "@/lib/tiktok-ads-ids";
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
@@ -74,37 +75,36 @@ export async function GET(request: NextRequest) {
             httpOnly: false,
           });
 
-          // TikTok CAPI: track sign up server-side
-          const ttclid = request.cookies.get("ttclid")?.value;
+          // CAPI: track sign up server-side (fire-and-forget, don't block redirect)
+          const capiUserAgent = request.headers.get("user-agent") || undefined;
+          const capiIp = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+                         request.headers.get("x-real-ip") || undefined;
+          const signupEventId = `signup_${user.id}_${Date.now()}`;
+
+          const cookieHeaderForTiktok = request.headers.get("cookie");
+          const { ttclid } = getTikTokAdsIdsFromCookies(cookieHeaderForTiktok);
           if (ttclid) {
-            const userAgent = request.headers.get("user-agent") || undefined;
-            const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-                       request.headers.get("x-real-ip") || undefined;
-            await trackTikTokCAPISignUp({
-              eventId: `signup_${user.id}_${Date.now()}`,
+            trackTikTokCAPISignUp({
+              eventId: signupEventId,
               email: user.email || undefined,
               ttclid,
-              userAgent,
-              ip,
-            });
+              userAgent: capiUserAgent,
+              ip: capiIp,
+            }).catch((e: unknown) => console.error("[auth/callback] TikTok CAPI error:", e));
           }
 
-          // Facebook CAPI: track sign up server-side
           const cookieHeader = request.headers.get("cookie");
           const { fbclid, fbp, fbc } = getFacebookAdsIdsFromCookies(cookieHeader);
           if (fbclid || fbp || fbc) {
-            const userAgent = request.headers.get("user-agent") || undefined;
-            const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-                       request.headers.get("x-real-ip") || undefined;
-            await trackFacebookCAPISignUp({
-              eventId: `signup_${user.id}_${Date.now()}`,
+            trackFacebookCAPISignUp({
+              eventId: signupEventId,
               email: user.email || undefined,
               fbclid,
               fbp,
               fbc,
-              userAgent,
-              ip,
-            });
+              userAgent: capiUserAgent,
+              ip: capiIp,
+            }).catch((e: unknown) => console.error("[auth/callback] Facebook CAPI error:", e));
           }
         }
 
