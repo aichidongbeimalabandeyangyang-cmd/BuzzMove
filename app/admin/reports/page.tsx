@@ -1,10 +1,56 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { trpc } from "@/lib/trpc";
 import { ArrowLeft, RefreshCw, ChevronLeft, ChevronRight, Clock, BarChart3, TrendingUp, ChevronDown } from "lucide-react";
 
 const PAGE_SIZE = 10;
+
+/** Detect if content is HTML (has actual HTML tags) or markdown */
+function isHtmlContent(content: string): boolean {
+  // If it contains common HTML structural tags, it's HTML
+  return /<(?:h[1-6]|div|table|p|svg|ul|ol|hr|section)\b[^>]*>/i.test(content);
+}
+
+/** Convert markdown to styled HTML for legacy reports */
+function markdownToHtml(md: string): string {
+  let html = md;
+
+  // Escape HTML entities in raw text (but not if already HTML)
+  // Not needed if we only call this for markdown content
+
+  // Headings: ### → h3, ## → h2, # → h1
+  html = html.replace(/^### (.+)$/gm, '<h3 style="font-size:14px;font-weight:600;color:#FAFAF9;margin:18px 0 8px">$1</h3>');
+  html = html.replace(/^## (.+)$/gm, '<h2 style="font-size:17px;font-weight:700;color:#E8A838;margin:28px 0 12px">$1</h2>');
+  html = html.replace(/^# (.+)$/gm, '<h1 style="font-size:22px;font-weight:700;color:#FAFAF9;margin:28px 0 14px">$1</h1>');
+
+  // Bold: **text** → <strong>
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong style="color:#FAFAF9;font-weight:600">$1</strong>');
+
+  // Horizontal rule
+  html = html.replace(/^---+$/gm, '<hr style="border:none;border-top:1px solid #252530;margin:24px 0">');
+
+  // Unordered list items: - text or * text
+  // Group consecutive list items into <ul>
+  html = html.replace(/((?:^[ ]*[-*] .+\n?)+)/gm, (block) => {
+    const items = block.trim().split("\n").map((line) => {
+      const content = line.replace(/^[ ]*[-*] /, "");
+      return `<li style="font-size:14px;line-height:1.8;color:#C4C4C8;margin:4px 0">${content}</li>`;
+    }).join("");
+    return `<ul style="padding-left:20px;margin:10px 0">${items}</ul>`;
+  });
+
+  // Paragraphs: wrap remaining non-empty, non-tag lines
+  html = html.split("\n").map((line) => {
+    const trimmed = line.trim();
+    if (!trimmed) return "";
+    // Skip lines that are already HTML tags
+    if (/^<[a-z]/.test(trimmed)) return line;
+    return `<p style="font-size:14px;line-height:1.8;color:#C4C4C8;margin:10px 0">${trimmed}</p>`;
+  }).join("\n");
+
+  return html;
+}
 
 const REPORT_TYPE_LABELS: Record<string, string> = {
   half_day: "半日报告",
@@ -69,6 +115,16 @@ function extractSummary(content: string): string {
     }
   }
   return "";
+}
+
+/** Renders report content — auto-detects HTML vs legacy markdown */
+function ReportContent({ content }: { content: string }) {
+  const html = useMemo(() => {
+    if (isHtmlContent(content)) return content;
+    return markdownToHtml(content);
+  }, [content]);
+
+  return <div dangerouslySetInnerHTML={{ __html: html }} />;
 }
 
 type FilterType = "all" | "half_day" | "daily" | "manual";
@@ -153,7 +209,7 @@ export default function AdminReportsPage() {
                 {formatDate(reportData.period_start)} — {formatDate(reportData.period_end)}
               </span>
             </div>
-            <div dangerouslySetInnerHTML={{ __html: reportData.report_content }} />
+            <ReportContent content={reportData.report_content} />
           </div>
         ) : null}
       </div>
