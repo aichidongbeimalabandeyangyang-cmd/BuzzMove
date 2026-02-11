@@ -52,3 +52,13 @@ export function trackTikTokVideoGenerate() {
 export function trackTikTokViewContent(params?: { content_name?: string }) {
   ttq("ViewContent", params);
 }
+
+/** ClickButton - User clicks download button */
+export function trackTikTokVideoDownload() {
+  ttq("ClickButton", { button_name: "download_video" });
+}
+
+/** Share - User clicks share button */
+export function trackTikTokShare() {
+  ttq("Share", { content_type: "video" });
+}

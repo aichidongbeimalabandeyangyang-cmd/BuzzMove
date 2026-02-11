@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { createSupabaseBrowserClient } from "@/server/supabase/client";
 import { Play, Mail, ArrowLeft } from "lucide-react";
-import { trackSignUp, trackLoginModalView } from "@/lib/gtag";
+import { trackLoginModalView } from "@/lib/gtag";
 import { logEvent } from "@/lib/events";
 import { trpc } from "@/lib/trpc";
 import { getDeviceKey } from "@/components/tracking/device-key-ensurer";
@@ -116,7 +116,7 @@ export function LoginModal({ open, onClose, redirectTo }: LoginModalProps) {
       }
 
       logEvent("otp_verify_ok", { email: email.trim() });
-      trackSignUp("email");
+      // Note: sign_up/login tracking is handled by app-shell.tsx auth state listener
       onClose();
       window.location.href = redirectTo || "/";
     } catch (err: any) {

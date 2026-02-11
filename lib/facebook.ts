@@ -58,3 +58,13 @@ export function trackFacebookVideoGenerate() {
 export function trackFacebookViewContent(params?: { content_name?: string }) {
   fbq("track", "ViewContent", params);
 }
+
+/** Contact - User clicks download button (custom event) */
+export function trackFacebookVideoDownload() {
+  fbq("trackCustom", "VideoDownload");
+}
+
+/** Share - User clicks share button (custom event) */
+export function trackFacebookShare() {
+  fbq("trackCustom", "VideoShare");
+}

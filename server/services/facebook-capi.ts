@@ -106,9 +106,7 @@ function createUserData(opts: {
   fbc?: string;
   fbclid?: string;
 }): FacebookUserData {
-  const userData: FacebookUserData = {
-    action_source: "website" as const,
-  };
+  const userData: FacebookUserData = {};
 
   if (opts.email) userData.em = opts.email;
   if (opts.phone) userData.ph = opts.phone;

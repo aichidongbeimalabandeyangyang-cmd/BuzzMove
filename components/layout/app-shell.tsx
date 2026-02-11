@@ -8,7 +8,7 @@ import { Sidebar } from "./sidebar";
 import { LoginModal } from "@/components/auth/login-modal";
 import { ReferralLinker } from "@/components/tracking/referral-linker";
 import { UtmLinker } from "@/components/tracking/utm-linker";
-import { trackSignUp } from "@/lib/gtag";
+import { trackSignUp, trackLogin } from "@/lib/gtag";
 import { trackAdjustSignUp, trackAdjustLogin } from "@/lib/adjust";
 import { trackTikTokSignUp } from "@/lib/tiktok";
 import { trackFacebookSignUp } from "@/lib/facebook";
@@ -57,26 +57,19 @@ export function AppShell({ children }: { children: ReactNode }) {
         // Check if this is a new signup (cookie set by server)
         const isNewSignup = document.cookie.includes("buzzmove_new_signup=1");
         
-        // Track GA event
-        trackSignUp(loginMethod);
-        
-        // Track Adjust event (sign_up or login)
         if (isNewSignup) {
+          // Track sign_up events for all platforms
+          trackSignUp(loginMethod);
           trackAdjustSignUp();
+          trackTikTokSignUp(loginMethod);
+          trackFacebookSignUp(loginMethod);
+          
           // Clear the signup flag cookie
           document.cookie = "buzzmove_new_signup=; path=/; max-age=0";
         } else {
+          // Track login events for returning users
+          trackLogin(loginMethod);
           trackAdjustLogin();
-        }
-        
-        // Track TikTok event (CompleteRegistration)
-        if (isNewSignup) {
-          trackTikTokSignUp(loginMethod);
-        }
-        
-        // Track Facebook event (CompleteRegistration)
-        if (isNewSignup) {
-          trackFacebookSignUp(loginMethod);
         }
       }
     });
