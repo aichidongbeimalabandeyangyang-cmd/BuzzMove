@@ -192,6 +192,51 @@ export const adminRouter = router({
       };
     }),
 
+  // ---- Transactions ----
+  getTransactions: adminProcedure
+    .input(
+      z.object({
+        limit: z.number().min(1).max(100).default(50),
+        offset: z.number().min(0).default(0),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const supabase = ctx.adminSupabase;
+
+      const { data: transactions, count } = await supabase
+        .from("credit_transactions")
+        .select("id, user_id, type, amount, description, price_cents, stripe_payment_id, created_at", { count: "exact" })
+        .in("type", ["purchase", "subscription"])
+        .order("created_at", { ascending: false })
+        .range(input.offset, input.offset + input.limit - 1);
+
+      const userIds = [...new Set((transactions ?? []).map((t) => t.user_id))];
+      let emailMap: Record<string, string> = {};
+      if (userIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("id, email")
+          .in("id", userIds);
+        for (const p of profiles ?? []) {
+          emailMap[p.id] = p.email ?? "";
+        }
+      }
+
+      return {
+        transactions: (transactions ?? []).map((t) => ({
+          id: t.id,
+          email: emailMap[t.user_id] ?? "",
+          type: t.type,
+          amount: t.amount,
+          description: t.description,
+          priceCents: t.price_cents,
+          stripePaymentId: t.stripe_payment_id,
+          createdAt: t.created_at,
+        })),
+        total: count ?? 0,
+      };
+    }),
+
   // ---- Analytics Reports ----
   getReports: adminProcedure
     .input(z.object({
