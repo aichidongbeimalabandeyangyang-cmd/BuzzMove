@@ -274,12 +274,21 @@ export const adminRouter = router({
             amountCents = obj.amount ?? 0;
             currency = obj.currency ?? "usd";
             status = "succeeded";
+            // Resolve product name: try metadata first, then match by amount
             const packId = obj.metadata?.pack_id;
             const plan = obj.metadata?.plan;
-            const pack = packId ? CREDIT_PACKS.find((p) => p.id === packId) : null;
+            const pack = packId
+              ? CREDIT_PACKS.find((p) => p.id === packId)
+              : CREDIT_PACKS.find((p) => p.price === amountCents);
             const planConfig = plan && plan in PLANS ? (PLANS as any)[plan] : null;
+            const planByAmount = !pack && !planConfig
+              ? Object.values(PLANS).find((p: any) =>
+                  p.price_weekly === amountCents || p.price_yearly === amountCents || p.trial_price_weekly === amountCents
+                ) as any
+              : null;
             description = pack ? pack.name
               : planConfig ? `${planConfig.name} subscription`
+              : planByAmount ? `${planByAmount.name} subscription`
               : obj.description ?? "Payment";
             break;
           }
