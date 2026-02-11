@@ -201,7 +201,7 @@ export async function handleInvoicePaid(invoice: Stripe.Invoice) {
   // Look up subscription
   const { data: sub } = await supabase
     .from("subscriptions")
-    .select("user_id, plan, credits_per_period, created_at")
+    .select("user_id, plan, credits_per_period, billing_period, created_at")
     .eq("stripe_subscription_id", stripeSubId)
     .single();
 
@@ -220,11 +220,16 @@ export async function handleInvoicePaid(invoice: Stripe.Invoice) {
 
   const txKey = `invoice_${invoiceId}`;
 
-  // Look up plan config for price
+  // Look up plan config for price — use actual invoice amount when available
   const planKey = sub.plan as keyof typeof PLANS;
   const planConfig = planKey in PLANS ? (PLANS[planKey] as any) : null;
-  // Weekly renewals use price_weekly, yearly renewals use price_yearly / 12 (approx)
-  const priceCents = planConfig && "price_weekly" in planConfig ? planConfig.price_weekly : 0;
+  // Prefer Stripe's actual charge amount; fall back to config for logging
+  const invoiceAmountCents = invoice.amount_paid ?? 0;
+  const priceCents = invoiceAmountCents > 0
+    ? invoiceAmountCents
+    : planConfig
+      ? (sub.billing_period === "yearly" ? planConfig.price_yearly : planConfig.price_weekly)
+      : 0;
 
   const { error: txError } = await supabase.from("credit_transactions").insert({
     user_id: sub.user_id,

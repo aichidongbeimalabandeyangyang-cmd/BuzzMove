@@ -113,7 +113,7 @@ function VideoDetail({ videoId, onBack, isFirstCompletedVideo }: { videoId: stri
                   </div>
                   <span style={{ fontFamily: "Sora, sans-serif", fontSize: 18, fontWeight: 700, color: "#FAFAF9" }}>Video Locked</span>
                   <span style={{ fontSize: 13, color: "#9898A4", textAlign: "center", maxWidth: 240, lineHeight: 1.5 }}>
-                    Try Pro for $0.99/week — unlock all videos
+                    Try Pro for just $0.99 first week — unlock all videos
                   </span>
                   <button
                     onClick={() => setShowPaywall(true)}
@@ -183,7 +183,7 @@ function VideoDetail({ videoId, onBack, isFirstCompletedVideo }: { videoId: stri
                     <Lock style={{ width: 18, height: 18, color: "#0B0B0E" }} strokeWidth={1.5} />
                   )}
                   <span style={{ fontSize: 15, fontWeight: 700, color: "#0B0B0E" }}>
-                    {isPaid ? "Download" : "Unlock for $0.99"}
+                    {creditData === undefined ? "Download" : isPaid ? "Download" : "Unlock for $0.99"}
                   </span>
                 </button>
                 {!shouldBlur && (
@@ -435,8 +435,8 @@ function SearchParamsHandler({ onVideoId }: { onVideoId: (id: string) => void })
 
       if (type === "subscription" && planId) {
         const plan = PLANS[planId as keyof typeof PLANS];
-        itemId = `${planId}_${billing || "monthly"}`;
-        itemName = `BuzzMove ${plan?.name || planId} Plan (${billing || "monthly"})`;
+        itemId = `${planId}_${billing || "weekly"}`;
+        itemName = `BuzzMove ${plan?.name || planId} Plan (${billing || "weekly"})`;
         itemCategory = "subscription";
       } else if (type === "credit_pack" && packId) {
         const pack = CREDIT_PACKS.find((p) => p.id === packId);

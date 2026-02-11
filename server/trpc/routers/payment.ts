@@ -65,8 +65,17 @@ export const paymentRouter = router({
 
       // $0.99 trial: create a one-time Stripe coupon ($4.00 off first invoice)
       // Only for Pro plan, weekly billing, when withTrial is requested
-      const isTrialEligible =
-        input.withTrial && input.plan === "pro" && input.billingPeriod === "weekly";
+      // Server-side check: user must never have purchased before
+      let isTrialEligible = false;
+      if (input.withTrial && input.plan === "pro" && input.billingPeriod === "weekly") {
+        const { count } = await ctx.supabase
+          .from("credit_transactions")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", ctx.user.id)
+          .in("type", ["purchase", "subscription"])
+          .limit(1);
+        isTrialEligible = (count ?? 0) === 0;
+      }
       let discounts: { coupon: string }[] | undefined;
 
       if (isTrialEligible) {
@@ -74,6 +83,8 @@ export const paymentRouter = router({
           amount_off: planConfig.price_weekly - planConfig.trial_price_weekly, // $4.99 - $0.99 = $4.00
           currency: "usd",
           duration: "once",
+          max_redemptions: 1,
+          redeem_by: Math.floor(Date.now() / 1000) + 3600, // expires in 1 hour
           name: "Pro Trial - First Week $0.99",
         });
         discounts = [{ coupon: coupon.id }];
