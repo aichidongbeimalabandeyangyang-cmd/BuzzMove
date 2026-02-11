@@ -319,6 +319,45 @@ export const adminRouter = router({
       };
     }),
 
+  // ---- Paid Users Credit Monitor ----
+  getPaidUsers: adminProcedure.query(async ({ ctx }) => {
+    const supabase = ctx.adminSupabase;
+
+    // Get all purchase/subscription transactions grouped by user
+    const { data: transactions } = await supabase
+      .from("credit_transactions")
+      .select("user_id, amount, type")
+      .in("type", ["purchase", "subscription"]);
+
+    if (!transactions || transactions.length === 0) return { users: [] };
+
+    // Sum total credits purchased per user
+    const userCreditsMap: Record<string, number> = {};
+    for (const tx of transactions) {
+      userCreditsMap[tx.user_id] = (userCreditsMap[tx.user_id] || 0) + tx.amount;
+    }
+
+    const userIds = Object.keys(userCreditsMap);
+
+    // Get profiles for these users
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("id, email, credits_balance, subscription_plan")
+      .in("id", userIds);
+
+    const users = (profiles ?? []).map((p) => ({
+      email: p.email ?? "",
+      plan: p.subscription_plan ?? "free",
+      totalCredits: userCreditsMap[p.id] ?? 0,
+      balance: p.credits_balance ?? 0,
+    }));
+
+    // Sort by total credits descending
+    users.sort((a, b) => b.totalCredits - a.totalCredits);
+
+    return { users };
+  }),
+
   // ---- Analytics Reports ----
   getReports: adminProcedure
     .input(z.object({

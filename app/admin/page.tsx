@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { trpc } from "@/lib/trpc";
-import { Users, Video, DollarSign, UserPlus, CreditCard, FileText, BarChart3, Receipt } from "lucide-react";
+import { Users, Video, DollarSign, UserPlus, CreditCard, FileText, BarChart3, Receipt, Coins } from "lucide-react";
 
 function formatMoney(cents: number) {
   return `$${(cents / 100).toFixed(2)}`;
@@ -67,6 +67,14 @@ export default function AdminPage() {
           >
             <BarChart3 style={{ width: 14, height: 14, color: "#E8A838" }} strokeWidth={1.5} />
             <span style={{ fontSize: 13, fontWeight: 600, color: "#FAFAF9" }}>Reports</span>
+          </Link>
+          <Link
+            href="/admin/credits"
+            className="flex items-center transition-all active:scale-[0.97]"
+            style={{ gap: 6, borderRadius: 8, backgroundColor: "#16161A", padding: "6px 14px" }}
+          >
+            <Coins style={{ width: 14, height: 14, color: "#E8A838" }} strokeWidth={1.5} />
+            <span style={{ fontSize: 13, fontWeight: 600, color: "#FAFAF9" }}>Credits</span>
           </Link>
           <Link
             href="/admin/transactions"
