@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { trackPurchase, trackVideoDownload, trackShareClick } from "@/lib/gtag";
 import { trackAdjustPurchase } from "@/lib/adjust";
@@ -10,7 +10,6 @@ import { PLANS, CREDIT_PACKS } from "@/lib/constants";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Download, Share2, Trash2, X, Lock, CheckCircle, XCircle, Loader2, Copy, Check, RefreshCw, Pin, Sparkles, ImagePlus } from "lucide-react";
-import { SUPPORTED_FORMATS, MAX_FILE_SIZE } from "@/lib/constants";
 import { trpc } from "@/lib/trpc";
 import { PaywallModal } from "@/components/paywall-modal";
 
@@ -32,26 +31,6 @@ function VideoDetail({ videoId, onBack, isFirstCompletedVideo }: { videoId: stri
   const [showPaywall, setShowPaywall] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handlePickFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!SUPPORTED_FORMATS.includes(file.type)) { alert("Please upload a JPEG, PNG, or WebP image."); return; }
-    if (file.size > MAX_FILE_SIZE) { alert("File too large. Max 10MB."); return; }
-    setUploading(true);
-    const formData = new FormData();
-    formData.append("file", file);
-    fetch("/api/upload", { method: "POST", body: formData })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.url) router.push(`/?image=${encodeURIComponent(data.url)}`);
-        else setUploading(false);
-      })
-      .catch(() => setUploading(false));
-  };
-
   const isPaid = creditData?.hasPurchased ?? false;
   const isAdmin = creditData?.isAdmin ?? false;
   // Only apply blur once we have enough data to decide (avoid flash of blur)
@@ -241,15 +220,13 @@ function VideoDetail({ videoId, onBack, isFirstCompletedVideo }: { videoId: stri
             )}
 
             {/* Move Another Photo */}
-            <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={handlePickFile} className="hidden" />
             <button
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploading}
+              onClick={() => router.push("/")}
               className="flex w-full items-center justify-center transition-all active:scale-[0.98]"
               style={{ height: 48, borderRadius: 14, border: "1.5px solid #252530", gap: 8 }}
             >
               <ImagePlus style={{ width: 18, height: 18, color: "#E8A838" }} strokeWidth={1.5} />
-              <span style={{ fontSize: 15, fontWeight: 600, color: "#FAFAF9" }}>{uploading ? "Uploading..." : "Move Another Photo"}</span>
+              <span style={{ fontSize: 15, fontWeight: 600, color: "#FAFAF9" }}>Move Another Photo</span>
             </button>
 
             {/* Delete button — two-tap confirm */}
