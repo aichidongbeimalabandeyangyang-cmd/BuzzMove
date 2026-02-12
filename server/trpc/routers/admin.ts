@@ -36,8 +36,8 @@ export const adminRouter = router({
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     const since = thirtyDaysAgo.toISOString();
 
-    // Fetch all raw data for the 30-day window in parallel
-    const [profilesRes, videosRes, transactionsRes, deductionsRes] = await Promise.all([
+    // Fetch all raw data for the 30-day window + all-time profitability in parallel
+    const [profilesRes, videosRes, transactionsRes, deductionsRes, allProfilesFullRes, allTxRes, allDeductionsRes, allVideosRes] = await Promise.all([
       supabase
         .from("profiles")
         .select("id, email, created_at, initial_utm_source, initial_utm_campaign, initial_ref")
@@ -56,6 +56,21 @@ export const adminRouter = router({
         .select("id, user_id, amount, created_at")
         .gte("created_at", since)
         .eq("type", "deduction"),
+      // All-time data for user profitability
+      supabase
+        .from("profiles")
+        .select("id, email"),
+      supabase
+        .from("credit_transactions")
+        .select("user_id, type, amount, description, price_cents")
+        .in("type", ["purchase", "subscription"]),
+      supabase
+        .from("credit_transactions")
+        .select("user_id, amount")
+        .eq("type", "deduction"),
+      supabase
+        .from("videos")
+        .select("user_id"),
     ]);
 
     const allProfiles = profilesRes.data ?? [];
@@ -153,7 +168,64 @@ export const adminRouter = router({
       sourceBreakdown: totalSourceCounts,
     };
 
-    return { days: dailyStats, totals };
+    // User profitability (all-time)
+    const allProfilesFull = allProfilesFullRes.data ?? [];
+    const allProfileAdminIds = new Set(
+      allProfilesFull.filter((p) => ADMIN_EMAILS.includes(p.email ?? "")).map((p) => p.id)
+    );
+    const emailMap: Record<string, string> = {};
+    for (const p of allProfilesFull) {
+      if (!allProfileAdminIds.has(p.id)) emailMap[p.id] = p.email ?? "";
+    }
+
+    const allTx = (allTxRes.data ?? []).filter((t) => !allProfileAdminIds.has(t.user_id));
+    const allDed = (allDeductionsRes.data ?? []).filter((d) => !allProfileAdminIds.has(d.user_id));
+    const allVids = (allVideosRes.data ?? []).filter((v) => !allProfileAdminIds.has(v.user_id));
+
+    const profitMap: Record<string, {
+      totalRevenueCents: number; subRevenueCents: number; purchaseRevenueCents: number;
+      creditsConsumed: number; videoCount: number;
+    }> = {};
+
+    const ensureUser = (uid: string) => {
+      if (!profitMap[uid]) {
+        profitMap[uid] = { totalRevenueCents: 0, subRevenueCents: 0, purchaseRevenueCents: 0, creditsConsumed: 0, videoCount: 0 };
+      }
+    };
+
+    for (const tx of allTx) {
+      ensureUser(tx.user_id);
+      const rev = getRevenueCents(tx);
+      profitMap[tx.user_id].totalRevenueCents += rev;
+      if (tx.type === "subscription") profitMap[tx.user_id].subRevenueCents += rev;
+      else profitMap[tx.user_id].purchaseRevenueCents += rev;
+    }
+    for (const d of allDed) {
+      ensureUser(d.user_id);
+      profitMap[d.user_id].creditsConsumed += Math.abs(d.amount);
+    }
+    for (const v of allVids) {
+      ensureUser(v.user_id);
+      profitMap[v.user_id].videoCount++;
+    }
+
+    const userProfitability = Object.entries(profitMap)
+      .map(([uid, data]) => {
+        const costCents = Math.round(data.creditsConsumed * 0.2);
+        return {
+          email: emailMap[uid] ?? uid,
+          totalRevenueCents: data.totalRevenueCents,
+          subRevenueCents: data.subRevenueCents,
+          purchaseRevenueCents: data.purchaseRevenueCents,
+          videoCount: data.videoCount,
+          creditsConsumed: data.creditsConsumed,
+          costCents,
+          grossProfitCents: data.totalRevenueCents - costCents,
+        };
+      })
+      .sort((a, b) => b.totalRevenueCents - a.totalRevenueCents);
+
+    return { days: dailyStats, totals, userProfitability };
   }),
 
   // List video tasks with user email, input image, output video

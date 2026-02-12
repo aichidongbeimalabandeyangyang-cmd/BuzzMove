@@ -211,6 +211,58 @@ export default function AdminPage() {
           </div>
         </div>
       </div>
+
+      {/* User Profitability */}
+      {data.userProfitability && data.userProfitability.length > 0 && (
+        <div>
+          <span style={{ fontSize: 13, fontWeight: 600, color: "#6B6B70", letterSpacing: 1 }}>USER PROFITABILITY (ALL-TIME)</span>
+          <div style={{ marginTop: 8, borderRadius: 14, backgroundColor: "#16161A", overflow: "hidden" }}>
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr style={{ borderBottom: "1px solid #1E1E22" }}>
+                    {["Email", "Total Revenue", "Sub Revenue", "Purchase Revenue", "Videos", "Credits", "Cost", "Gross Profit"].map((h) => (
+                      <th key={h} style={{ padding: "10px 12px", fontSize: 11, fontWeight: 600, color: "#6B6B70", textAlign: "left", whiteSpace: "nowrap" }}>
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.userProfitability.map((u) => (
+                    <tr key={u.email} style={{ borderBottom: "1px solid #1E1E22" }}>
+                      <td style={{ padding: "10px 12px", fontSize: 13, fontWeight: 500, color: "#FAFAF9", whiteSpace: "nowrap" }}>
+                        {u.email}
+                      </td>
+                      <td style={{ padding: "10px 12px", fontSize: 13, fontWeight: 600, color: u.totalRevenueCents > 0 ? "#22C55E" : "#4A4A50" }}>
+                        {u.totalRevenueCents > 0 ? formatMoney(u.totalRevenueCents) : "-"}
+                      </td>
+                      <td style={{ padding: "10px 12px", fontSize: 13, color: u.subRevenueCents > 0 ? "#3B82F6" : "#4A4A50" }}>
+                        {u.subRevenueCents > 0 ? formatMoney(u.subRevenueCents) : "-"}
+                      </td>
+                      <td style={{ padding: "10px 12px", fontSize: 13, color: u.purchaseRevenueCents > 0 ? "#A855F7" : "#4A4A50" }}>
+                        {u.purchaseRevenueCents > 0 ? formatMoney(u.purchaseRevenueCents) : "-"}
+                      </td>
+                      <td style={{ padding: "10px 12px", fontSize: 13, color: u.videoCount > 0 ? "#E8A838" : "#4A4A50" }}>
+                        {u.videoCount}
+                      </td>
+                      <td style={{ padding: "10px 12px", fontSize: 13, color: u.creditsConsumed > 0 ? "#F97316" : "#4A4A50" }}>
+                        {u.creditsConsumed > 0 ? u.creditsConsumed.toLocaleString() : "-"}
+                      </td>
+                      <td style={{ padding: "10px 12px", fontSize: 13, fontWeight: 600, color: u.costCents > 0 ? "#EF4444" : "#4A4A50" }}>
+                        {u.costCents > 0 ? formatMoney(u.costCents) : "-"}
+                      </td>
+                      <td style={{ padding: "10px 12px", fontSize: 13, fontWeight: 700, color: u.grossProfitCents >= 0 ? "#22C55E" : "#EF4444" }}>
+                        {u.grossProfitCents >= 0 ? formatMoney(u.grossProfitCents) : `-${formatMoney(Math.abs(u.grossProfitCents))}`}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
