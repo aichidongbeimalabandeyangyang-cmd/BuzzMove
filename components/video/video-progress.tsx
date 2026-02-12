@@ -1,9 +1,11 @@
 "use client";
 
-import { memo, useEffect, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 
-import { Flame } from "lucide-react";
+import { ImagePlus } from "lucide-react";
 import { trpc } from "@/lib/trpc";
+import { SUPPORTED_FORMATS, MAX_FILE_SIZE } from "@/lib/constants";
 
 interface VideoProgressProps {
   videoId: string;
@@ -21,7 +23,27 @@ const PROGRESS_STAGES = [
 ];
 
 export const VideoProgress = memo(function VideoProgress({ videoId, imagePreview, onComplete, onError }: VideoProgressProps) {
+  const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [progress, setProgress] = useState(0);
+  const [uploading, setUploading] = useState(false);
+
+  const handlePickFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!SUPPORTED_FORMATS.includes(file.type)) { alert("Please upload a JPEG, PNG, or WebP image."); return; }
+    if (file.size > MAX_FILE_SIZE) { alert("File too large. Max 10MB."); return; }
+    setUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+    fetch("/api/upload", { method: "POST", body: formData })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.url) router.push(`/?image=${encodeURIComponent(data.url)}`);
+        else setUploading(false);
+      })
+      .catch(() => setUploading(false));
+  };
 
   const { data: video } = trpc.video.getStatus.useQuery(
     { videoId },
@@ -133,14 +155,16 @@ export const VideoProgress = memo(function VideoProgress({ videoId, imagePreview
           </p>
         </div>
 
-        {/* Back to Move */}
+        {/* Move Another Photo */}
+        <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" onChange={handlePickFile} className="hidden" />
         <button
-          onClick={() => { window.location.href = "/"; }}
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploading}
           className="flex w-full items-center justify-center transition-all active:scale-[0.98] lg:max-w-sm"
           style={{ height: 48, borderRadius: 14, border: "1.5px solid #252530", gap: 8 }}
         >
-          <Flame style={{ width: 18, height: 18, color: "#E8A838" }} strokeWidth={1.5} />
-          <span style={{ fontSize: 15, fontWeight: 600, color: "#FAFAF9" }}>Back to Move</span>
+          <ImagePlus style={{ width: 18, height: 18, color: "#E8A838" }} strokeWidth={1.5} />
+          <span style={{ fontSize: 15, fontWeight: 600, color: "#FAFAF9" }}>{uploading ? "Uploading..." : "Move Another Photo"}</span>
         </button>
       </div>
 
