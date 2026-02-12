@@ -85,6 +85,9 @@ export const adminRouter = router({
       days.push(utc8.toISOString().slice(0, 10));
     }
 
+    // Track users who paid before each day to identify first-time payers
+    const seenPaidUsers = new Set<string>();
+
     const dailyStats = days.map((day) => {
       const dayProfiles = profiles.filter((p) => toDateKey(p.created_at) === day);
       const dayVideos = videos.filter((v) => toDateKey(v.created_at) === day);
@@ -95,6 +98,13 @@ export const adminRouter = router({
       const paidUserIds = new Set(dayTx.map((t) => t.user_id));
 
       const creditsConsumed = dayDeductions.reduce((sum, d) => sum + Math.abs(d.amount), 0);
+      let newPaidUsers = 0;
+      for (const uid of paidUserIds) {
+        if (!seenPaidUsers.has(uid)) {
+          newPaidUsers++;
+          seenPaidUsers.add(uid);
+        }
+      }
       let revenueCents = 0;
       const packCounts: Record<string, number> = {};
 
@@ -118,6 +128,7 @@ export const adminRouter = router({
         videoCount: dayVideos.length,
         creditsConsumed,
         paidUsers: paidUserIds.size,
+        newPaidUsers,
         revenueCents,
         packBreakdown: packCounts,
         sourceBreakdown: sourceCounts,

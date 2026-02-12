@@ -155,7 +155,7 @@ export default function AdminPage() {
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr style={{ borderBottom: "1px solid #1E1E22" }}>
-                  {["Date", "New Users", "Source", "Active", "Videos", "Credits", "Paid", "Revenue", "Breakdown"].map((h) => (
+                  {["Date", "New Users", "Source", "Active", "Videos", "Credits", "Paid", "New Paid", "Revenue", "Breakdown"].map((h) => (
                     <th key={h} style={{ padding: "10px 12px", fontSize: 11, fontWeight: 600, color: "#6B6B70", textAlign: "left", whiteSpace: "nowrap" }}>
                       {h}
                     </th>
@@ -185,6 +185,9 @@ export default function AdminPage() {
                     </td>
                     <td style={{ padding: "10px 12px", fontSize: 13, color: day.paidUsers > 0 ? "#A855F7" : "#4A4A50" }}>
                       {day.paidUsers}
+                    </td>
+                    <td style={{ padding: "10px 12px", fontSize: 13, fontWeight: 600, color: day.newPaidUsers > 0 ? "#EC4899" : "#4A4A50" }}>
+                      {day.newPaidUsers > 0 ? day.newPaidUsers : "-"}
                     </td>
                     <td style={{ padding: "10px 12px", fontSize: 13, fontWeight: 600, color: day.revenueCents > 0 ? "#22C55E" : "#4A4A50" }}>
                       {day.revenueCents > 0 ? formatMoney(day.revenueCents) : "-"}
