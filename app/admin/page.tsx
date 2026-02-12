@@ -2,10 +2,14 @@
 
 import Link from "next/link";
 import { trpc } from "@/lib/trpc";
-import { Users, Video, DollarSign, UserPlus, CreditCard, FileText, BarChart3, Receipt, Coins, Zap } from "lucide-react";
+import { Users, Video, DollarSign, UserPlus, CreditCard, FileText, BarChart3, Receipt, Coins, Zap, CircleDollarSign } from "lucide-react";
 
 function formatMoney(cents: number) {
   return `$${(cents / 100).toFixed(2)}`;
+}
+
+function formatCost(credits: number) {
+  return `$${(credits * 0.002).toFixed(2)}`;
 }
 
 function StatCard({ label, value, sub, icon: Icon, color }: { label: string; value: string | number; sub?: string; icon: any; color: string }) {
@@ -103,6 +107,7 @@ export default function AdminPage() {
           <StatCard label="Active Users" value={today.activeUsers} icon={Users} color="#22C55E" />
           <StatCard label="Videos" value={today.videoCount} icon={Video} color="#E8A838" />
           <StatCard label="Credits Consumed" value={today.creditsConsumed.toLocaleString()} icon={Zap} color="#F97316" />
+          <StatCard label="Cost" value={formatCost(today.creditsConsumed)} icon={CircleDollarSign} color="#EF4444" />
           <StatCard label="Paid Users" value={today.paidUsers} icon={CreditCard} color="#A855F7" />
           <StatCard label="Revenue" value={formatMoney(today.revenueCents)} icon={DollarSign} color="#22C55E" />
         </div>
@@ -116,6 +121,7 @@ export default function AdminPage() {
           <StatCard label="Active Users" value={totals.activeUsers} icon={Users} color="#22C55E" />
           <StatCard label="Videos" value={totals.videoCount} icon={Video} color="#E8A838" />
           <StatCard label="Credits Consumed" value={totals.creditsConsumed.toLocaleString()} icon={Zap} color="#F97316" />
+          <StatCard label="Cost" value={formatCost(totals.creditsConsumed)} icon={CircleDollarSign} color="#EF4444" />
           <StatCard label="Paid Users" value={totals.paidUsers} icon={CreditCard} color="#A855F7" />
           <StatCard label="Revenue" value={formatMoney(totals.revenueCents)} icon={DollarSign} color="#22C55E" />
         </div>
@@ -155,7 +161,7 @@ export default function AdminPage() {
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr style={{ borderBottom: "1px solid #1E1E22" }}>
-                  {["Date", "New Users", "Source", "Active", "Videos", "Credits", "Paid", "New Paid", "Revenue", "Breakdown"].map((h) => (
+                  {["Date", "New Users", "Source", "Active", "Videos", "Credits", "Cost", "Paid", "New Paid", "Revenue", "Breakdown"].map((h) => (
                     <th key={h} style={{ padding: "10px 12px", fontSize: 11, fontWeight: 600, color: "#6B6B70", textAlign: "left", whiteSpace: "nowrap" }}>
                       {h}
                     </th>
@@ -182,6 +188,9 @@ export default function AdminPage() {
                     </td>
                     <td style={{ padding: "10px 12px", fontSize: 13, color: day.creditsConsumed > 0 ? "#F97316" : "#4A4A50" }}>
                       {day.creditsConsumed > 0 ? day.creditsConsumed.toLocaleString() : "-"}
+                    </td>
+                    <td style={{ padding: "10px 12px", fontSize: 13, fontWeight: 600, color: day.creditsConsumed > 0 ? "#EF4444" : "#4A4A50" }}>
+                      {day.creditsConsumed > 0 ? formatCost(day.creditsConsumed) : "-"}
                     </td>
                     <td style={{ padding: "10px 12px", fontSize: 13, color: day.paidUsers > 0 ? "#A855F7" : "#4A4A50" }}>
                       {day.paidUsers}
