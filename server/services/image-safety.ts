@@ -168,14 +168,6 @@ export async function checkImageSafety(
   userId: string
 ): Promise<SafetyResult> {
   const config = getConfig();
-  console.log("[image-safety] config:", JSON.stringify({
-    minorEnabled: config.minorEnabled,
-    nsfwEnabled: config.nsfwEnabled,
-    hasUrl: !!config.serviceUrl,
-    hasKey: !!config.authKey,
-    rawM: process.env["config_m"],
-    rawN: process.env["config_n"],
-  }));
 
   if (!config.minorEnabled && !config.nsfwEnabled) {
     return { safe: true, reason: "skipped" };

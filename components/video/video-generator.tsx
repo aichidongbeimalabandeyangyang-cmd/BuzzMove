@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { X } from "lucide-react";
+import { X, ShieldAlert, ImagePlus } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { getDeviceKey } from "@/components/tracking/device-key-ensurer";
 import { CREDIT_COSTS } from "@/lib/constants";
@@ -30,6 +30,7 @@ export function VideoGenerator({ imageUrl, imagePreview, onReset, onBackHome, in
   const [status, setStatus] = useState<string | null>(null);
   const [showPaywall, setShowPaywall] = useState(false);
   const [paywallContext, setPaywallContext] = useState<"credits" | "concurrent">("credits");
+  const [showSafetyModal, setShowSafetyModal] = useState(false);
   const { user, openLogin, setHomeView } = useApp();
   const { data: creditData } = trpc.credit.getBalance.useQuery(undefined, { enabled: !!user });
 
@@ -50,6 +51,11 @@ export function VideoGenerator({ imageUrl, imagePreview, onReset, onBackHome, in
       setStatus("error");
       // Roll back optimistic credit deduction
       utils.credit.getBalance.refetch();
+      // Safety check blocked
+      if (error.data?.code === "FORBIDDEN" && error.message.includes("safety")) {
+        setShowSafetyModal(true);
+        return;
+      }
       // Show concurrent paywall for non-premium users hitting the limit
       if (error.data?.code === "TOO_MANY_REQUESTS") {
         const plan = creditData?.plan ?? "free";
@@ -204,13 +210,38 @@ export function VideoGenerator({ imageUrl, imagePreview, onReset, onBackHome, in
             </span>
           </button>
 
-          {generateMutation.error && !(generateMutation.error.data?.code === "TOO_MANY_REQUESTS" && (creditData?.plan ?? "free") !== "premium") && (
+          {generateMutation.error && !showSafetyModal && !(generateMutation.error.data?.code === "TOO_MANY_REQUESTS" && (creditData?.plan ?? "free") !== "premium") && (
             <div style={{ borderRadius: 12, backgroundColor: "rgba(239,68,68,0.1)", padding: "12px 16px", textAlign: "center", fontSize: 14, color: "#EF4444" }}>
               {generateMutation.error.message}
             </div>
           )}
         </div>
       </div>
+
+      {/* Safety block modal */}
+      {showSafetyModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ backgroundColor: "rgba(0,0,0,0.7)" }}>
+          <div className="mx-5 w-full max-w-sm" style={{ borderRadius: 20, backgroundColor: "#1A1A1E", border: "1px solid #252530", padding: "32px 24px", textAlign: "center" }}>
+            <div className="flex justify-center" style={{ marginBottom: 16 }}>
+              <div className="flex items-center justify-center" style={{ width: 56, height: 56, borderRadius: 100, backgroundColor: "rgba(239,68,68,0.15)" }}>
+                <ShieldAlert style={{ width: 28, height: 28, color: "#EF4444" }} strokeWidth={1.5} />
+              </div>
+            </div>
+            <h3 style={{ fontSize: 18, fontWeight: 700, color: "#FAFAF9", marginBottom: 8 }}>Image Not Allowed</h3>
+            <p style={{ fontSize: 14, lineHeight: 1.6, color: "#6B6B70", marginBottom: 24 }}>
+              This image cannot be used for safety reasons. Please choose a different photo.
+            </p>
+            <button
+              onClick={() => { setShowSafetyModal(false); onReset(); }}
+              className="flex w-full items-center justify-center transition-all active:scale-[0.98]"
+              style={{ height: 48, borderRadius: 14, background: "linear-gradient(135deg, #F0C060, #E8A838)", gap: 8 }}
+            >
+              <ImagePlus style={{ width: 18, height: 18, color: "#0B0B0E" }} strokeWidth={1.5} />
+              <span style={{ fontSize: 15, fontWeight: 700, color: "#0B0B0E" }}>Upload Another Photo</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       <PaywallModal open={showPaywall} onClose={() => setShowPaywall(false)} context={paywallContext} userPlan={creditData?.plan} />
     </div>
