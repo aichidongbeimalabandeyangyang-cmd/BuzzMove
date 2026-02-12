@@ -14,10 +14,12 @@ import { getFacebookAdsIds } from "@/lib/facebook-ads-ids";
 interface PaywallModalProps {
   open: boolean;
   onClose: () => void;
-  context?: "download" | "credits";
+  context?: "download" | "credits" | "concurrent";
+  /** Current user plan — used to hide already-purchased tiers in concurrent context */
+  userPlan?: string;
 }
 
-export function PaywallModal({ open, onClose, context = "credits" }: PaywallModalProps) {
+export function PaywallModal({ open, onClose, context = "credits", userPlan }: PaywallModalProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
 
   const creditData = trpc.credit.getBalance.useQuery();
@@ -68,7 +70,7 @@ export function PaywallModal({ open, onClose, context = "credits" }: PaywallModa
           <div className="flex items-center" style={{ gap: 8 }}>
             <Zap style={{ width: 20, height: 20, color: "#E8A838" }} strokeWidth={1.5} />
             <span style={{ fontSize: 18, fontWeight: 700, color: "#FAFAF9" }}>
-              {context === "download" ? "Unlock Downloads" : "Get More Credits"}
+              {context === "concurrent" ? "Generate in Parallel" : context === "download" ? "Unlock Downloads" : "Get More Credits"}
             </span>
           </div>
           <button onClick={onClose} className="flex items-center justify-center" style={{ width: 32, height: 32, borderRadius: 100, backgroundColor: "#16161A" }}>
@@ -77,17 +79,21 @@ export function PaywallModal({ open, onClose, context = "credits" }: PaywallModa
         </div>
 
         <p style={{ fontSize: 14, fontWeight: 400, color: "#6B6B70", marginBottom: 20 }}>
-          {context === "download"
-            ? "Subscribe or purchase credits to download your videos."
-            : "Subscribe or purchase credits to keep generating."}
+          {context === "concurrent"
+            ? userPlan === "pro"
+              ? "You've hit the Pro plan limit. Upgrade to Premium for up to 10 parallel generations."
+              : "You're already generating a video. Subscribe to generate multiple videos at once."
+            : context === "download"
+              ? "Subscribe or purchase credits to download your videos."
+              : "Subscribe or purchase credits to keep generating."}
         </p>
 
         {/* ---- SUBSCRIPTIONS (priority) ---- */}
-        <div className="flex flex-col" style={{ gap: 8, marginBottom: 20 }}>
+        <div className="flex flex-col" style={{ gap: 8, marginBottom: context === "concurrent" ? 0 : 20 }}>
           <span style={{ fontSize: 12, fontWeight: 600, letterSpacing: 1, color: "#6B6B70" }}>SUBSCRIPTIONS</span>
 
-          {/* Pro */}
-          <button
+          {/* Pro — hide if user is already Pro in concurrent context */}
+          {!(context === "concurrent" && userPlan === "pro") && <button
             onClick={() => {
               const price = (!hasPurchased ? PLANS.pro.trial_price_weekly : PLANS.pro.price_weekly) / 100;
               trackClickCheckout({ type: "subscription", plan: "pro" });
@@ -139,12 +145,12 @@ export function PaywallModal({ open, onClose, context = "credits" }: PaywallModa
             </div>
             <div className="flex flex-wrap" style={{ gap: 4 }}>
               {["No watermark", "HD download", "3x parallel", "Commercial use"].map((b) => (
-                <span key={b} style={{ fontSize: 11, fontWeight: 500, color: "#6B6B70", backgroundColor: "#ffffff08", borderRadius: 6, padding: "2px 8px" }}>
+                <span key={b} style={{ fontSize: 11, fontWeight: 500, color: context === "concurrent" && b === "3x parallel" ? "#E8A838" : "#6B6B70", backgroundColor: context === "concurrent" && b === "3x parallel" ? "#E8A83820" : "#ffffff08", borderRadius: 6, padding: "2px 8px" }}>
                   {b}
                 </span>
               ))}
             </div>
-          </button>
+          </button>}
 
           {/* Premium */}
           <button
@@ -183,7 +189,7 @@ export function PaywallModal({ open, onClose, context = "credits" }: PaywallModa
             </div>
             <div className="flex flex-wrap" style={{ gap: 4 }}>
               {["No watermark", "HD download", "10x parallel", "Commercial use", "30% cheaper credits"].map((b) => (
-                <span key={b} style={{ fontSize: 11, fontWeight: 500, color: "#6B6B70", backgroundColor: "#ffffff08", borderRadius: 6, padding: "2px 8px" }}>
+                <span key={b} style={{ fontSize: 11, fontWeight: 500, color: context === "concurrent" && b === "10x parallel" ? "#E8A838" : "#6B6B70", backgroundColor: context === "concurrent" && b === "10x parallel" ? "#E8A83820" : "#ffffff08", borderRadius: 6, padding: "2px 8px" }}>
                   {b}
                 </span>
               ))}
@@ -191,8 +197,8 @@ export function PaywallModal({ open, onClose, context = "credits" }: PaywallModa
           </button>
         </div>
 
-        {/* ---- CREDIT PACKS ---- */}
-        <div className="flex flex-col" style={{ gap: 8 }}>
+        {/* ---- CREDIT PACKS (hidden for concurrent context) ---- */}
+        {context !== "concurrent" && <div className="flex flex-col" style={{ gap: 8 }}>
           <span style={{ fontSize: 12, fontWeight: 600, letterSpacing: 1, color: "#6B6B70" }}>ONE-TIME PACKS</span>
           {CREDIT_PACKS.map((pack) => {
             const isPopular = pack.id === "starter";
@@ -259,7 +265,7 @@ export function PaywallModal({ open, onClose, context = "credits" }: PaywallModa
               </button>
             );
           })}
-        </div>
+        </div>}
       </div>
     </div>
   );

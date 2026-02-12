@@ -56,7 +56,7 @@ export const videoRouter = router({
       if ((activeCount ?? 0) >= maxConcurrent) {
         throw new TRPCError({
           code: "TOO_MANY_REQUESTS",
-          message: `You can generate up to ${maxConcurrent} videos at a time. Please wait for current generations to finish.`,
+          message: `You can generate up to ${maxConcurrent} video${maxConcurrent === 1 ? "" : "s"} at a time. Please wait for current generations to finish.`,
         });
       }
 
@@ -132,7 +132,7 @@ export const videoRouter = router({
         });
         throw new TRPCError({
           code: "TOO_MANY_REQUESTS",
-          message: `You can generate up to ${maxConcurrent} videos at a time. Please wait for current generations to finish.`,
+          message: `You can generate up to ${maxConcurrent} video${maxConcurrent === 1 ? "" : "s"} at a time. Please wait for current generations to finish.`,
         });
       }
 

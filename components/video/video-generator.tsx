@@ -29,6 +29,7 @@ export function VideoGenerator({ imageUrl, imagePreview, onReset, onBackHome, in
   const [videoId, setVideoId] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
   const [showPaywall, setShowPaywall] = useState(false);
+  const [paywallContext, setPaywallContext] = useState<"credits" | "concurrent">("credits");
   const { user, openLogin, setHomeView } = useApp();
   const { data: creditData } = trpc.credit.getBalance.useQuery(undefined, { enabled: !!user });
 
@@ -45,10 +46,18 @@ export function VideoGenerator({ imageUrl, imagePreview, onReset, onBackHome, in
       // Force refetch balance from backend (not just invalidate)
       utils.credit.getBalance.refetch();
     },
-    onError() {
+    onError(error) {
       setStatus("error");
       // Roll back optimistic credit deduction
       utils.credit.getBalance.refetch();
+      // Show concurrent paywall for non-premium users hitting the limit
+      if (error.data?.code === "TOO_MANY_REQUESTS") {
+        const plan = creditData?.plan ?? "free";
+        if (plan !== "premium") {
+          setPaywallContext("concurrent");
+          setShowPaywall(true);
+        }
+      }
     },
   });
 
@@ -58,6 +67,7 @@ export function VideoGenerator({ imageUrl, imagePreview, onReset, onBackHome, in
     // Check if user has enough credits
     const cost = CREDIT_COSTS[mode][parseInt(duration) as 5 | 10];
     if (creditData && creditData.balance < cost) {
+      setPaywallContext("credits");
       setShowPaywall(true);
       return;
     }
@@ -194,7 +204,7 @@ export function VideoGenerator({ imageUrl, imagePreview, onReset, onBackHome, in
             </span>
           </button>
 
-          {generateMutation.error && (
+          {generateMutation.error && !(generateMutation.error.data?.code === "TOO_MANY_REQUESTS" && (creditData?.plan ?? "free") !== "premium") && (
             <div style={{ borderRadius: 12, backgroundColor: "rgba(239,68,68,0.1)", padding: "12px 16px", textAlign: "center", fontSize: 14, color: "#EF4444" }}>
               {generateMutation.error.message}
             </div>
@@ -202,7 +212,7 @@ export function VideoGenerator({ imageUrl, imagePreview, onReset, onBackHome, in
         </div>
       </div>
 
-      <PaywallModal open={showPaywall} onClose={() => setShowPaywall(false)} />
+      <PaywallModal open={showPaywall} onClose={() => setShowPaywall(false)} context={paywallContext} userPlan={creditData?.plan} />
     </div>
   );
 }
