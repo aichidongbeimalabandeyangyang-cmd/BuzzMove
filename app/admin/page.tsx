@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { trpc } from "@/lib/trpc";
-import { Users, Video, DollarSign, UserPlus, CreditCard, FileText, BarChart3, Receipt, Coins } from "lucide-react";
+import { Users, Video, DollarSign, UserPlus, CreditCard, FileText, BarChart3, Receipt, Coins, Zap } from "lucide-react";
 
 function formatMoney(cents: number) {
   return `$${(cents / 100).toFixed(2)}`;
@@ -102,6 +102,7 @@ export default function AdminPage() {
           <StatCard label="New Users" value={today.newUsers} icon={UserPlus} color="#3B82F6" />
           <StatCard label="Active Users" value={today.activeUsers} icon={Users} color="#22C55E" />
           <StatCard label="Videos" value={today.videoCount} icon={Video} color="#E8A838" />
+          <StatCard label="Credits Consumed" value={today.creditsConsumed.toLocaleString()} icon={Zap} color="#F97316" />
           <StatCard label="Paid Users" value={today.paidUsers} icon={CreditCard} color="#A855F7" />
           <StatCard label="Revenue" value={formatMoney(today.revenueCents)} icon={DollarSign} color="#22C55E" />
         </div>
@@ -114,6 +115,7 @@ export default function AdminPage() {
           <StatCard label="New Users" value={totals.newUsers} icon={UserPlus} color="#3B82F6" />
           <StatCard label="Active Users" value={totals.activeUsers} icon={Users} color="#22C55E" />
           <StatCard label="Videos" value={totals.videoCount} icon={Video} color="#E8A838" />
+          <StatCard label="Credits Consumed" value={totals.creditsConsumed.toLocaleString()} icon={Zap} color="#F97316" />
           <StatCard label="Paid Users" value={totals.paidUsers} icon={CreditCard} color="#A855F7" />
           <StatCard label="Revenue" value={formatMoney(totals.revenueCents)} icon={DollarSign} color="#22C55E" />
         </div>

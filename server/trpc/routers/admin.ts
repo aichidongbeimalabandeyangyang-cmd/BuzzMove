@@ -37,7 +37,7 @@ export const adminRouter = router({
     const since = thirtyDaysAgo.toISOString();
 
     // Fetch all raw data for the 30-day window in parallel
-    const [profilesRes, videosRes, transactionsRes] = await Promise.all([
+    const [profilesRes, videosRes, transactionsRes, deductionsRes] = await Promise.all([
       supabase
         .from("profiles")
         .select("id, email, created_at, initial_utm_source, initial_utm_campaign, initial_ref")
@@ -51,6 +51,11 @@ export const adminRouter = router({
         .select("id, user_id, type, amount, description, price_cents, created_at")
         .gte("created_at", since)
         .in("type", ["purchase", "subscription"]),
+      supabase
+        .from("credit_transactions")
+        .select("id, amount, created_at")
+        .gte("created_at", since)
+        .eq("type", "deduction"),
     ]);
 
     const allProfiles = profilesRes.data ?? [];
@@ -62,6 +67,7 @@ export const adminRouter = router({
     const profiles = allProfiles.filter((p) => !adminUserIds.has(p.id));
     const videos = (videosRes.data ?? []).filter((v) => !adminUserIds.has(v.user_id));
     const transactions = (transactionsRes.data ?? []).filter((t) => !adminUserIds.has(t.user_id));
+    const deductions = deductionsRes.data ?? [];
 
     // Group by date (YYYY-MM-DD) in UTC+8 so daily stats match local/business time
     const toDateKey = (ts: string) => {
@@ -84,9 +90,11 @@ export const adminRouter = router({
       const dayVideos = videos.filter((v) => toDateKey(v.created_at) === day);
       const dayTx = transactions.filter((t) => toDateKey(t.created_at) === day);
 
+      const dayDeductions = deductions.filter((d) => toDateKey(d.created_at) === day);
       const activeUserIds = new Set(dayVideos.map((v) => v.user_id));
       const paidUserIds = new Set(dayTx.map((t) => t.user_id));
 
+      const creditsConsumed = dayDeductions.reduce((sum, d) => sum + Math.abs(d.amount), 0);
       let revenueCents = 0;
       const packCounts: Record<string, number> = {};
 
@@ -108,6 +116,7 @@ export const adminRouter = router({
         newUsers: dayProfiles.length,
         activeUsers: activeUserIds.size,
         videoCount: dayVideos.length,
+        creditsConsumed,
         paidUsers: paidUserIds.size,
         revenueCents,
         packBreakdown: packCounts,
@@ -127,6 +136,7 @@ export const adminRouter = router({
       newUsers: profiles.length,
       activeUsers: new Set(videos.map((v) => v.user_id)).size,
       videoCount: videos.length,
+      creditsConsumed: deductions.reduce((sum, d) => sum + Math.abs(d.amount), 0),
       paidUsers: new Set(transactions.map((t) => t.user_id)).size,
       revenueCents: transactions.reduce((sum, t) => sum + getRevenueCents(t), 0),
       sourceBreakdown: totalSourceCounts,
