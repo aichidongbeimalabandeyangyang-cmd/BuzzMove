@@ -10,14 +10,18 @@
 
 import { logServerEvent } from "./events";
 
-const SERVICE_URL = process.env.config_service_url ?? "";
-const SERVICE_AUTH_KEY = process.env.config_service_key ?? "";
-
 /** Block age categories 0, 1 (0–9 years) — matches Go service threshold */
 const MAX_BLOCKED_AGE_CATEGORY = 1;
 
-const MINOR_ENABLED = process.env.config_m === "true";
-const NSFW_ENABLED = process.env.config_n === "true";
+/** Read env vars at runtime (not build time) */
+function getConfig() {
+  return {
+    serviceUrl: process.env.config_service_url ?? "",
+    authKey: process.env.config_service_key ?? "",
+    minorEnabled: process.env.config_m === "true",
+    nsfwEnabled: process.env.config_n === "true",
+  };
+}
 
 // ─── Types ───
 
@@ -39,9 +43,10 @@ async function checkMinor(
   userId: string
 ): Promise<SafetyResult> {
   try {
-    const res = await fetch(`${SERVICE_URL}/age_detect`, {
+    const { serviceUrl, authKey } = getConfig();
+    const res = await fetch(`${serviceUrl}/age_detect`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "X-Auth-Key": SERVICE_AUTH_KEY },
+      headers: { "Content-Type": "application/json", "X-Auth-Key": authKey },
       body: JSON.stringify({ image: imageUrl }),
       signal: AbortSignal.timeout(2_000),
     });
@@ -103,9 +108,10 @@ async function checkNsfw(
   userId: string
 ): Promise<SafetyResult> {
   try {
-    const res = await fetch(`${SERVICE_URL}/nsfw_detect`, {
+    const { serviceUrl, authKey } = getConfig();
+    const res = await fetch(`${serviceUrl}/nsfw_detect`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "X-Auth-Key": SERVICE_AUTH_KEY },
+      headers: { "Content-Type": "application/json", "X-Auth-Key": authKey },
       body: JSON.stringify({ image: imageUrl }),
       signal: AbortSignal.timeout(2_000),
     });
@@ -160,14 +166,16 @@ export async function checkImageSafety(
   imageUrl: string,
   userId: string
 ): Promise<SafetyResult> {
-  if (!MINOR_ENABLED && !NSFW_ENABLED) {
+  const { minorEnabled, nsfwEnabled } = getConfig();
+
+  if (!minorEnabled && !nsfwEnabled) {
     return { safe: true, reason: "skipped" };
   }
 
   // Run enabled checks in parallel
   const [minorResult, nsfwResult] = await Promise.all([
-    MINOR_ENABLED ? checkMinor(imageUrl, userId) : null,
-    NSFW_ENABLED ? checkNsfw(imageUrl, userId) : null,
+    minorEnabled ? checkMinor(imageUrl, userId) : null,
+    nsfwEnabled ? checkNsfw(imageUrl, userId) : null,
   ]);
 
   // Both fail-open: only block confirmed detections, allow on service errors
