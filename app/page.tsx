@@ -331,7 +331,7 @@ export default function HomePage() {
     if (!imageUrl && !imagePreview && showcase === "idle" && homeView !== "upload") {
       setHomeView("home");
     }
-  }, [imageUrl, imagePreview, showcase]);
+  }, [imageUrl, imagePreview, showcase, homeView]);
 
   // Reset showcase when navigating away (header back button / tab switch)
   useEffect(() => {
