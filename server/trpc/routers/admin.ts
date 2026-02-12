@@ -40,7 +40,7 @@ export const adminRouter = router({
     const [profilesRes, videosRes, transactionsRes] = await Promise.all([
       supabase
         .from("profiles")
-        .select("id, created_at, initial_utm_source, initial_utm_campaign, initial_ref")
+        .select("id, email, created_at, initial_utm_source, initial_utm_campaign, initial_ref")
         .gte("created_at", since),
       supabase
         .from("videos")
@@ -53,9 +53,15 @@ export const adminRouter = router({
         .in("type", ["purchase", "subscription"]),
     ]);
 
-    const profiles = profilesRes.data ?? [];
-    const videos = videosRes.data ?? [];
-    const transactions = transactionsRes.data ?? [];
+    const allProfiles = profilesRes.data ?? [];
+
+    // Exclude admin users from stats (admins do test transactions)
+    const adminUserIds = new Set(
+      allProfiles.filter((p) => ADMIN_EMAILS.includes(p.email ?? "")).map((p) => p.id)
+    );
+    const profiles = allProfiles.filter((p) => !adminUserIds.has(p.id));
+    const videos = (videosRes.data ?? []).filter((v) => !adminUserIds.has(v.user_id));
+    const transactions = (transactionsRes.data ?? []).filter((t) => !adminUserIds.has(t.user_id));
 
     // Group by date (YYYY-MM-DD) in UTC+8 so daily stats match local/business time
     const toDateKey = (ts: string) => {

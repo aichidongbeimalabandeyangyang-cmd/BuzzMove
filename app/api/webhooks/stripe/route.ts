@@ -30,7 +30,13 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  console.log(`[stripe] Received event: ${event.type} (${event.id})`);
+  console.log(`[stripe] Received event: ${event.type} (${event.id}) livemode=${event.livemode}`);
+
+  // Reject test-mode events so sandbox data never pollutes the production DB
+  if (!event.livemode) {
+    console.log(`[stripe] Skipping test-mode event: ${event.id}`);
+    return NextResponse.json({ received: true });
+  }
 
   // ═══════════════════════════════════════════════════════
   // Layer 1: Event ID dedup (atomic, zero race window)
