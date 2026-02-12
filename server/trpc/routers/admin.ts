@@ -53,7 +53,7 @@ export const adminRouter = router({
         .in("type", ["purchase", "subscription"]),
       supabase
         .from("credit_transactions")
-        .select("id, amount, created_at")
+        .select("id, user_id, amount, created_at")
         .gte("created_at", since)
         .eq("type", "deduction"),
     ]);
@@ -67,7 +67,7 @@ export const adminRouter = router({
     const profiles = allProfiles.filter((p) => !adminUserIds.has(p.id));
     const videos = (videosRes.data ?? []).filter((v) => !adminUserIds.has(v.user_id));
     const transactions = (transactionsRes.data ?? []).filter((t) => !adminUserIds.has(t.user_id));
-    const deductions = deductionsRes.data ?? [];
+    const deductions = (deductionsRes.data ?? []).filter((d) => !adminUserIds.has(d.user_id));
 
     // Group by date (YYYY-MM-DD) in UTC+8 so daily stats match local/business time
     const toDateKey = (ts: string) => {
