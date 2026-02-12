@@ -57,15 +57,20 @@ export const adminRouter = router({
     const videos = videosRes.data ?? [];
     const transactions = transactionsRes.data ?? [];
 
-    // Group by date (YYYY-MM-DD)
-    const toDateKey = (ts: string) => ts.slice(0, 10);
+    // Group by date (YYYY-MM-DD) in UTC+8 so daily stats match local/business time
+    const toDateKey = (ts: string) => {
+      const d = new Date(ts);
+      const utc8 = new Date(d.getTime() + 8 * 60 * 60 * 1000);
+      return utc8.toISOString().slice(0, 10);
+    };
 
-    // Build 30-day date range
+    // Build 30-day date range (UTC+8)
     const days: string[] = [];
     for (let i = 30; i >= 0; i--) {
       const d = new Date(now);
       d.setDate(d.getDate() - i);
-      days.push(d.toISOString().slice(0, 10));
+      const utc8 = new Date(d.getTime() + 8 * 60 * 60 * 1000);
+      days.push(utc8.toISOString().slice(0, 10));
     }
 
     const dailyStats = days.map((day) => {
