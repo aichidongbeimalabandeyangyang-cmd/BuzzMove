@@ -309,7 +309,13 @@ export default function HomePage() {
     const params = new URLSearchParams(window.location.search);
     const image = params.get("image");
     const prompt = params.get("prompt");
-    if (image) {
+    if (params.get("pick")) {
+      setImageUrl(null);
+      setImagePreview(null);
+      setInitialPrompt("");
+      setHomeView("upload");
+      window.history.replaceState({}, "", "/");
+    } else if (image) {
       setImageUrl(image);
       setImagePreview(image);
       if (prompt) setInitialPrompt(prompt);

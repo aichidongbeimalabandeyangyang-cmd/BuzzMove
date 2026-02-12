@@ -221,7 +221,7 @@ function VideoDetail({ videoId, onBack, isFirstCompletedVideo }: { videoId: stri
 
             {/* Move Another Photo */}
             <button
-              onClick={() => router.push("/")}
+              onClick={() => router.push("/?pick=1")}
               className="flex w-full items-center justify-center transition-all active:scale-[0.98]"
               style={{ height: 48, borderRadius: 14, border: "1.5px solid #252530", gap: 8 }}
             >

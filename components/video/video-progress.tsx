@@ -135,7 +135,7 @@ export const VideoProgress = memo(function VideoProgress({ videoId, imagePreview
 
         {/* Move Another Photo */}
         <button
-          onClick={() => { window.location.href = "/"; }}
+          onClick={() => { window.location.href = "/?pick=1"; }}
           className="flex w-full items-center justify-center transition-all active:scale-[0.98] lg:max-w-sm"
           style={{ height: 48, borderRadius: 14, border: "1.5px solid #252530", gap: 8 }}
         >
