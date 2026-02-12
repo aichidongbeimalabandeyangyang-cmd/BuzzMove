@@ -17,10 +17,10 @@ const MAX_BLOCKED_AGE_CATEGORY = 1;
 function getConfig() {
   const env = process.env;
   return {
-    serviceUrl: env["config_service_url"] ?? "",
-    authKey: env["config_service_key"] ?? "",
-    minorEnabled: env["config_m"] === "true",
-    nsfwEnabled: env["config_n"] === "true",
+    serviceUrl: (env["config_service_url"] ?? "").trim(),
+    authKey: (env["config_service_key"] ?? "").trim(),
+    minorEnabled: (env["config_m"] ?? "").trim() === "true",
+    nsfwEnabled: (env["config_n"] ?? "").trim() === "true",
   };
 }
 
