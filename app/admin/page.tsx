@@ -61,9 +61,9 @@ export default function AdminPage() {
   return (
     <div className="flex w-full flex-1 flex-col" style={{ padding: "20px", gap: 24, maxWidth: 1200, margin: "0 auto" }}>
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 style={{ fontSize: 22, fontWeight: 700, color: "#FAFAF9" }}>Admin Dashboard</h1>
-        <div className="flex items-center" style={{ gap: 8 }}>
+        <div className="flex flex-wrap items-center" style={{ gap: 8 }}>
           <Link
             href="/admin/reports"
             className="flex items-center transition-all active:scale-[0.97]"
