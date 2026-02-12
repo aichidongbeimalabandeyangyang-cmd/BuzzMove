@@ -47,7 +47,7 @@ export async function GET(request: Request) {
       // Optimistic lock: only update if still in active state
       const { data: updated } = await supabase
         .from("videos")
-        .update({ status: "failed" })
+        .update({ status: "failed", fail_reason: "Timed out (>2h)" })
         .eq("id", video.id)
         .in("status", ["generating", "pending"])
         .select("id")
@@ -76,7 +76,7 @@ export async function GET(request: Request) {
       if (video.created_at < thirtyMinAgo) {
         const { data: updated } = await supabase
           .from("videos")
-          .update({ status: "failed" })
+          .update({ status: "failed", fail_reason: "Stuck in pending (no Kling task)" })
           .eq("id", video.id)
           .eq("status", "pending")
           .select("id")
@@ -143,7 +143,7 @@ export async function GET(request: Request) {
       } else if (klingStatus === "failed") {
         const { data: updated } = await supabase
           .from("videos")
-          .update({ status: "failed" })
+          .update({ status: "failed", fail_reason: result.data.task_status_msg || "Kling rejected" })
           .eq("id", video.id)
           .eq("status", "generating")
           .select("id")

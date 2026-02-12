@@ -616,7 +616,7 @@ export default function MonitoringPage() {
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
                 <thead>
                   <tr>
-                    {["Email", "Mode", "Duration", "Prompt", "Time"].map((h) => (
+                    {["Email", "Mode", "Duration", "Prompt", "Fail Reason", "Time"].map((h) => (
                       <th
                         key={h}
                         style={{
@@ -652,6 +652,18 @@ export default function MonitoringPage() {
                         }}
                       >
                         {v.prompt || "—"}
+                      </td>
+                      <td
+                        style={{
+                          padding: "8px 12px",
+                          color: "#E87C7C",
+                          maxWidth: 200,
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {v.fail_reason || "—"}
                       </td>
                       <td style={{ padding: "8px 12px", color: "#6B6B70", whiteSpace: "nowrap" }}>
                         {formatTime(v.created_at)}

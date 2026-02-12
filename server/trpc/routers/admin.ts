@@ -623,7 +623,7 @@ export const adminRouter = router({
     // Recent failures (last 20)
     const { data: recentFailures } = await supabase
       .from("videos")
-      .select("id, user_id, mode, duration, created_at, prompt")
+      .select("id, user_id, mode, duration, created_at, prompt, fail_reason")
       .eq("status", "failed")
       .order("created_at", { ascending: false })
       .limit(20);

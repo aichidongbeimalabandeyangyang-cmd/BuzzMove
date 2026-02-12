@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
     // Optimistic lock: only update and refund if still generating
     const { data: updated } = await supabase
       .from("videos")
-      .update({ status: "failed" })
+      .update({ status: "failed", fail_reason: payload.task_status_msg || null })
       .eq("id", video.id)
       .eq("status", "generating")
       .select("id")
