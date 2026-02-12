@@ -666,6 +666,35 @@ export const adminRouter = router({
       recentEvents: (events24hRes.data ?? []).slice(0, 30),
     };
 
+    // Safety blocks (all time, last 50)
+    const { data: safetyBlocksRaw } = await supabase
+      .from("system_events")
+      .select("event, user_id, metadata, created_at")
+      .in("event", ["image_safety_blocked"])
+      .order("created_at", { ascending: false })
+      .limit(50);
+
+    const safetyBlockUserIds = [...new Set((safetyBlocksRaw ?? []).map((e) => e.user_id).filter(Boolean))];
+    let safetyEmailMap: Record<string, string> = {};
+    if (safetyBlockUserIds.length > 0) {
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, email")
+        .in("id", safetyBlockUserIds);
+      for (const p of profiles ?? []) {
+        safetyEmailMap[p.id] = p.email ?? "";
+      }
+    }
+
+    const safetyBlocks = (safetyBlocksRaw ?? []).map((e) => ({
+      email: (e.user_id ? safetyEmailMap[e.user_id] : null) ?? "",
+      userId: e.user_id ?? "",
+      check: (e.metadata as any)?.check ?? "",
+      imageUrl: (e.metadata as any)?.imageUrl ?? "",
+      ageCategory: (e.metadata as any)?.ageCategory,
+      createdAt: e.created_at,
+    }));
+
     // Totals
     const [totalUsersRes, totalVideosRes] = await Promise.all([
       supabase.from("profiles").select("id", { count: "exact", head: true }),
@@ -690,6 +719,7 @@ export const adminRouter = router({
         videos: totalVideosRes.count ?? 0,
       },
       eventStats,
+      safetyBlocks,
       checkedAt: now.toISOString(),
     };
   }),

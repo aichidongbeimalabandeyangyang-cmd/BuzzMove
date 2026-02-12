@@ -157,7 +157,7 @@ export default function MonitoringPage() {
     );
   }
 
-  const { healthChecks, videoStats, creditStats, stuckVideos, recentFailures, totals, eventStats } = data;
+  const { healthChecks, videoStats, creditStats, stuckVideos, recentFailures, totals, eventStats, safetyBlocks } = data;
 
   return (
     <div
@@ -421,6 +421,105 @@ export default function MonitoringPage() {
           </div>
         </div>
       )}
+
+      {/* Safety Blocks */}
+      <div className="flex flex-col" style={{ gap: 12 }}>
+        <SectionTitle>Content Safety</SectionTitle>
+        <div className="flex flex-wrap" style={{ gap: 12 }}>
+          <StatCard
+            label="Submissions (24h)"
+            value={videoStats.last24h.total + (eventStats.last24h["image_safety_blocked"] ?? 0)}
+            icon={Video}
+            color="#3B82F6"
+          />
+          <StatCard
+            label="Blocked (24h)"
+            value={eventStats.last24h["image_safety_blocked"] ?? 0}
+            sub={`${eventStats.last7d["image_safety_blocked"] ?? 0} in 7d`}
+            icon={ShieldAlert}
+            color="#EF4444"
+          />
+          <StatCard
+            label="Minor Blocked"
+            value={safetyBlocks.filter((b) => b.check === "minor").length}
+            sub="all time (last 50)"
+            icon={ShieldAlert}
+            color="#F59E0B"
+          />
+          <StatCard
+            label="NSFW Blocked"
+            value={safetyBlocks.filter((b) => b.check === "nsfw").length}
+            sub="all time (last 50)"
+            icon={ShieldAlert}
+            color="#A855F7"
+          />
+        </div>
+        {safetyBlocks.length > 0 && (
+          <div style={{ borderRadius: 14, backgroundColor: "#16161A", overflow: "hidden" }}>
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                <thead>
+                  <tr>
+                    {["Email", "Type", "Image", "Time"].map((h) => (
+                      <th
+                        key={h}
+                        style={{
+                          textAlign: "left",
+                          padding: "10px 12px",
+                          fontWeight: 500,
+                          color: "#6B6B70",
+                          borderBottom: "1px solid #252530",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {safetyBlocks.map((b, i) => (
+                    <tr key={i} style={{ borderBottom: "1px solid #1E1E22" }}>
+                      <td style={{ padding: "8px 12px", color: "#FAFAF9" }}>
+                        {b.email || b.userId.slice(0, 8)}
+                      </td>
+                      <td style={{ padding: "8px 12px" }}>
+                        <span
+                          style={{
+                            fontSize: 12,
+                            fontWeight: 500,
+                            padding: "2px 8px",
+                            borderRadius: 6,
+                            backgroundColor: b.check === "minor" ? "#F59E0B15" : "#A855F715",
+                            color: b.check === "minor" ? "#F59E0B" : "#A855F7",
+                          }}
+                        >
+                          {b.check}{b.ageCategory != null ? ` (age=${b.ageCategory})` : ""}
+                        </span>
+                      </td>
+                      <td style={{ padding: "8px 12px" }}>
+                        {b.imageUrl ? (
+                          <a
+                            href={b.imageUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ color: "#E8A838", fontSize: 12, textDecoration: "none" }}
+                          >
+                            View ↗
+                          </a>
+                        ) : "—"}
+                      </td>
+                      <td style={{ padding: "8px 12px", color: "#6B6B70", whiteSpace: "nowrap" }}>
+                        {formatTime(b.createdAt)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Recent Events Log */}
       {eventStats.recentEvents.length > 0 && (
