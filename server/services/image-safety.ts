@@ -13,13 +13,14 @@ import { logServerEvent } from "./events";
 /** Block age categories 0, 1 (0–9 years) — matches Go service threshold */
 const MAX_BLOCKED_AGE_CATEGORY = 1;
 
-/** Read env vars at runtime (not build time) */
+/** Read env vars at runtime via bracket notation to prevent Next.js build-time inlining */
 function getConfig() {
+  const env = process.env;
   return {
-    serviceUrl: process.env.config_service_url ?? "",
-    authKey: process.env.config_service_key ?? "",
-    minorEnabled: process.env.config_m === "true",
-    nsfwEnabled: process.env.config_n === "true",
+    serviceUrl: env["config_service_url"] ?? "",
+    authKey: env["config_service_key"] ?? "",
+    minorEnabled: env["config_m"] === "true",
+    nsfwEnabled: env["config_n"] === "true",
   };
 }
 
