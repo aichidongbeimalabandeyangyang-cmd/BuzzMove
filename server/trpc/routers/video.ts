@@ -9,6 +9,7 @@ import { after } from "next/server";
 import { logServerEvent } from "@/server/services/events";
 import { trackTikTokCAPIVideoGenerate } from "@/server/services/tiktok-capi";
 import { trackFacebookCAPIVideoGenerate } from "@/server/services/facebook-capi";
+import { checkImageSafety } from "@/server/services/image-safety";
 
 const MAX_CONCURRENT: Record<string, number> = {
   free: PLANS.free.max_concurrent,
@@ -70,6 +71,19 @@ export const videoRouter = router({
         deviceKey: input.deviceKey || profile.device_key || undefined,
         countryCode: profile.country_code,
       });
+
+      // 2b. Image safety check — block images containing minors
+      const safetyResult = await checkImageSafety(
+        input.imageUrl,
+        ctx.user.id
+      );
+
+      if (!safetyResult.safe) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "This image cannot be used because of safety reason. Please change to another image.",
+        });
+      }
 
       // 3. Atomic credit deduction (checks balance + deducts in one operation)
       const { error: deductError } = await ctx.adminSupabase.rpc(
