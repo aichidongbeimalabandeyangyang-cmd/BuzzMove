@@ -3,7 +3,6 @@
 import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { trackPurchase, trackVideoDownload, trackShareClick } from "@/lib/gtag";
-import { trackAdjustPurchase } from "@/lib/adjust";
 import { trackTikTokPurchase, trackTikTokVideoDownload, trackTikTokShare } from "@/lib/tiktok";
 import { trackFacebookPurchase, trackFacebookVideoDownload, trackFacebookShare } from "@/lib/facebook";
 import { PLANS, CREDIT_PACKS } from "@/lib/constants";
@@ -458,22 +457,23 @@ function SearchParamsHandler({ onVideoId }: { onVideoId: (id: string) => void })
         itemCategory = "credit_pack";
       }
 
-      // Track purchase across all platforms
+      // Track purchase across all platforms (Adjust is backend-only via purchase_server)
+      const eventId = sessionId || `txn_${Date.now()}`;
       trackPurchase({ value: amount, transactionId: sessionId, itemId, itemName, itemCategory });
-      trackAdjustPurchase(amount, sessionId);
       trackTikTokPurchase({
         content_type: itemCategory === "subscription" ? "subscription" : "product",
         content_name: itemName,
         value: amount,
         currency: "USD",
+        eventId,
       });
       trackFacebookPurchase({
         content_type: itemCategory === "subscription" ? "subscription" : "product",
         content_name: itemName,
         value: amount,
         currency: "USD",
+        eventId,
       });
-      
       window.history.replaceState({}, "", "/dashboard");
     }
     const videoId = searchParams.get("video");

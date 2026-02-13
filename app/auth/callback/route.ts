@@ -5,10 +5,6 @@ import { REFERRAL_REWARD_CREDITS } from "@/lib/constants";
 import { isDisposableEmail } from "@/server/services/email-validation";
 import { validateDeviceKey } from "@/server/services/device-fingerprint";
 import { logServerEvent } from "@/server/services/events";
-import { trackTikTokCAPISignUp } from "@/server/services/tiktok-capi";
-import { trackFacebookCAPISignUp } from "@/server/services/facebook-capi";
-import { getFacebookAdsIdsFromCookies } from "@/lib/facebook-ads-ids";
-import { getTikTokAdsIdsFromCookies } from "@/lib/tiktok-ads-ids";
 
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
@@ -74,38 +70,6 @@ export async function GET(request: NextRequest) {
             maxAge: 60,
             httpOnly: false,
           });
-
-          // CAPI: track sign up server-side (fire-and-forget, don't block redirect)
-          const capiUserAgent = request.headers.get("user-agent") || undefined;
-          const capiIp = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-                         request.headers.get("x-real-ip") || undefined;
-          const signupEventId = `signup_${user.id}_${Date.now()}`;
-
-          const cookieHeaderForTiktok = request.headers.get("cookie");
-          const { ttclid } = getTikTokAdsIdsFromCookies(cookieHeaderForTiktok);
-          if (ttclid) {
-            trackTikTokCAPISignUp({
-              eventId: signupEventId,
-              email: user.email || undefined,
-              ttclid,
-              userAgent: capiUserAgent,
-              ip: capiIp,
-            }).catch((e: unknown) => console.error("[auth/callback] TikTok CAPI error:", e));
-          }
-
-          const cookieHeader = request.headers.get("cookie");
-          const { fbclid, fbp, fbc } = getFacebookAdsIdsFromCookies(cookieHeader);
-          if (fbclid || fbp || fbc) {
-            trackFacebookCAPISignUp({
-              eventId: signupEventId,
-              email: user.email || undefined,
-              fbclid,
-              fbp,
-              fbc,
-              userAgent: capiUserAgent,
-              ip: capiIp,
-            }).catch((e: unknown) => console.error("[auth/callback] Facebook CAPI error:", e));
-          }
         }
 
         // Claim free signup credits (idempotent — safe to call for existing users too).

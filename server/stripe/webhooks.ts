@@ -1,8 +1,7 @@
 import type Stripe from "stripe";
 import { createSupabaseAdminClient } from "@/server/supabase/server";
 import { CREDIT_PACKS, PLANS, REFERRAL_REWARD_CREDITS } from "@/lib/constants";
-import { trackTikTokCAPIPurchase } from "@/server/services/tiktok-capi";
-import { trackFacebookCAPIPurchase } from "@/server/services/facebook-capi";
+import { trackPurchaseServer } from "@/server/services/purchase-server";
 
 // ═══════════════════════════════════════════════════════════════
 // Layer 2: Resource-level idempotency
@@ -95,7 +94,7 @@ async function handleCreditPackPurchase(
 
   console.log(`[stripe:credit_pack] +${pack.credits} credits for ${userId} (${pack.name}), new balance: ${newBalance}`);
 
-  // CAPI: track purchase server-side (fire-and-forget)
+  // purchase_server: backend conversion for all channels
   const { data: profile } = await supabase
     .from("profiles")
     .select("email")
@@ -104,31 +103,25 @@ async function handleCreditPackPurchase(
 
   if (profile?.email) {
     const meta = session.metadata || {};
-    trackTikTokCAPIPurchase({
-      userId,
+    trackPurchaseServer({
+      eventId: paymentIntentId,
       email: profile.email,
+      userId,
       contentType: "product",
       contentName: pack.name,
       value: pack.price / 100,
       currency: "USD",
       transactionId: paymentIntentId,
-      eventId: paymentIntentId,
-      ttclid: meta.ttclid || undefined,
-    }).catch((e: unknown) => console.error("[stripe:credit_pack] TikTok CAPI error:", e));
-
-    trackFacebookCAPIPurchase({
-      userId,
-      email: profile.email,
-      contentType: "product",
-      contentName: pack.name,
-      value: pack.price / 100,
-      currency: "USD",
-      transactionId: paymentIntentId,
-      eventId: paymentIntentId,
-      fbclid: meta.fbclid || undefined,
-      fbp: meta.fbp || undefined,
-      fbc: meta.fbc || undefined,
-    }).catch((e: unknown) => console.error("[stripe:credit_pack] Facebook CAPI error:", e));
+      attribution: {
+        gclid: meta.gclid || undefined,
+        gbraid: meta.gbraid || undefined,
+        wbraid: meta.wbraid || undefined,
+        ttclid: meta.ttclid || undefined,
+        fbclid: meta.fbclid || undefined,
+        fbp: meta.fbp || undefined,
+      },
+      deviceKey: meta.device_key || undefined,
+    }).catch((e: unknown) => console.error("[stripe:credit_pack] purchase_server error:", e));
   }
 }
 
@@ -223,7 +216,7 @@ async function handleSubscriptionCreated(
 
   console.log(`[stripe:subscription] ${plan} activated for ${userId}, +${initialCredits} credits${withTrial ? " (trial)" : ""}`);
 
-  // CAPI: track subscription purchase server-side (fire-and-forget)
+  // purchase_server: backend conversion for all channels
   const { data: subProfile } = await supabase
     .from("profiles")
     .select("email")
@@ -232,31 +225,26 @@ async function handleSubscriptionCreated(
 
   if (subProfile?.email) {
     const meta = session.metadata || {};
-    trackTikTokCAPIPurchase({
-      userId,
+    const eventId = `sub_activated_${stripeSubId}`;
+    trackPurchaseServer({
+      eventId,
       email: subProfile.email,
+      userId,
       contentType: "subscription",
       contentName: `${planConfig.name} ${billingPeriod}`,
       value: priceCents / 100,
       currency: "USD",
       transactionId: stripeSubId,
-      eventId: `sub_activated_${stripeSubId}`,
-      ttclid: meta.ttclid || undefined,
-    }).catch((e: unknown) => console.error("[stripe:subscription] TikTok CAPI error:", e));
-
-    trackFacebookCAPIPurchase({
-      userId,
-      email: subProfile.email,
-      contentType: "subscription",
-      contentName: `${planConfig.name} ${billingPeriod}`,
-      value: priceCents / 100,
-      currency: "USD",
-      transactionId: stripeSubId,
-      eventId: `sub_activated_${stripeSubId}`,
-      fbclid: meta.fbclid || undefined,
-      fbp: meta.fbp || undefined,
-      fbc: meta.fbc || undefined,
-    }).catch((e: unknown) => console.error("[stripe:subscription] Facebook CAPI error:", e));
+      attribution: {
+        gclid: meta.gclid || undefined,
+        gbraid: meta.gbraid || undefined,
+        wbraid: meta.wbraid || undefined,
+        ttclid: meta.ttclid || undefined,
+        fbclid: meta.fbclid || undefined,
+        fbp: meta.fbp || undefined,
+      },
+      deviceKey: meta.device_key || undefined,
+    }).catch((e: unknown) => console.error("[stripe:subscription] purchase_server error:", e));
   }
 }
 

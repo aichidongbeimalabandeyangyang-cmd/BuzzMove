@@ -11,6 +11,7 @@ import { trackFacebookInitiateCheckout } from "@/lib/facebook";
 import { getGoogleAdsIds } from "@/lib/google-ads-ids";
 import { getTikTokAdsIds } from "@/lib/tiktok-ads-ids";
 import { getFacebookAdsIds } from "@/lib/facebook-ads-ids";
+import { getDeviceKey } from "@/components/tracking/device-key-ensurer";
 
 export default function PricingPage() {
   const [billing, setBilling] = useState<"weekly" | "yearly">("weekly");
@@ -29,19 +30,13 @@ export default function PricingPage() {
   const handleSubscribe = (plan: "pro" | "premium") => {
     if (!user) { openLogin(); return; }
     const withTrial = plan === "pro" && billing === "weekly" && !hasPurchased;
-    
-    // Calculate price
     let price = 0;
     if (plan === "pro") {
-      price = withTrial 
-        ? PLANS.pro.trial_price_weekly / 100 
-        : (billing === "weekly" ? PLANS.pro.price_weekly / 100 : PLANS.pro.price_yearly / 100);
+      price = withTrial ? PLANS.pro.trial_price_weekly / 100 : (billing === "weekly" ? PLANS.pro.price_weekly / 100 : PLANS.pro.price_yearly / 100);
     } else {
       price = billing === "weekly" ? PLANS.premium.price_weekly / 100 : PLANS.premium.price_yearly / 100;
     }
-    
     const planName = `BuzzMove ${plan === "pro" ? "Pro" : "Premium"} Plan (${billing})`;
-    
     trackClickCheckout({ type: "subscription", plan });
     trackTikTokInitiateCheckout({
       content_type: "subscription",
@@ -55,7 +50,6 @@ export default function PricingPage() {
       value: price,
       currency: "USD",
     });
-    
     const gads = getGoogleAdsIds();
     const tads = getTikTokAdsIds();
     const fads = getFacebookAdsIds();
@@ -64,6 +58,7 @@ export default function PricingPage() {
       gclid: gads.gclid, gbraid: gads.gbraid, wbraid: gads.wbraid,
       ttclid: tads.ttclid,
       fbclid: fads.fbclid, fbp: fads.fbp, fbc: fads.fbc,
+      deviceKey: getDeviceKey() || undefined,
     });
   };
 
@@ -88,7 +83,6 @@ export default function PricingPage() {
       value: price,
       currency: "USD",
     });
-    
     const gads = getGoogleAdsIds();
     const tads = getTikTokAdsIds();
     const fads = getFacebookAdsIds();
@@ -97,6 +91,7 @@ export default function PricingPage() {
       gclid: gads.gclid, gbraid: gads.gbraid, wbraid: gads.wbraid,
       ttclid: tads.ttclid,
       fbclid: fads.fbclid, fbp: fads.fbp, fbc: fads.fbc,
+      deviceKey: getDeviceKey() || undefined,
     });
   };
 

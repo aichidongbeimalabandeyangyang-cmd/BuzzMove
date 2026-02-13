@@ -2,9 +2,6 @@ import { z } from "zod";
 import { router, publicProcedure, protectedProcedure } from "../trpc";
 import { resolveContentPolicy } from "@/server/services/content-policy";
 import { validateDeviceKey, normalizeDeviceKey } from "@/server/services/device-fingerprint";
-import { trackTikTokCAPISignUp } from "@/server/services/tiktok-capi";
-import { trackFacebookCAPISignUp } from "@/server/services/facebook-capi";
-
 export const trackingRouter = router({
   // Get content policy for a device (used by frontend to know what to show)
   getContentPolicy: publicProcedure
@@ -65,7 +62,7 @@ export const trackingRouter = router({
       return { ok: true };
     }),
 
-  // Server-side signup tracking for email OTP (CAPI)
+  // Server-side signup tracking (frontend-only; no backend CAPI)
   trackSignUp: protectedProcedure
     .input(
       z.object({
@@ -80,33 +77,7 @@ export const trackingRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       if (!input.isNewUser) return { ok: true };
-
-      const eventId = `signup_${ctx.user.id}_${Date.now()}`;
-
-      trackTikTokCAPISignUp({
-        userId: ctx.user.id,
-        email: ctx.user.email || undefined,
-        method: input.method,
-        userAgent: ctx.userAgent,
-        ip: ctx.ip,
-        url: input.url,
-        eventId,
-        ttclid: input.ttclid,
-      }).catch((e: unknown) => console.error("[tracking:signup] TikTok CAPI error:", e));
-
-      trackFacebookCAPISignUp({
-        userId: ctx.user.id,
-        email: ctx.user.email || undefined,
-        method: input.method,
-        userAgent: ctx.userAgent,
-        ip: ctx.ip,
-        url: input.url,
-        eventId,
-        fbclid: input.fbclid,
-        fbp: input.fbp,
-        fbc: input.fbc,
-      }).catch((e: unknown) => console.error("[tracking:signup] Facebook CAPI error:", e));
-
+      // Sign-up events are tracked on frontend only
       return { ok: true };
     }),
 });

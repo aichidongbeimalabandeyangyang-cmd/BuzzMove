@@ -15,12 +15,12 @@ function gtag(...args: unknown[]) {
   }
 }
 
-// 1. Sign-up
+// 1. Sign-up - 第一次登陆成功（新用户）
 export function trackSignUp(method: "google" | "email") {
   gtag("event", "sign_up", { method });
 }
 
-// 2. Login
+// 2. Login - 老用户登陆成功
 export function trackLogin(method: "google" | "email") {
   gtag("event", "login", { method });
 }
@@ -43,10 +43,12 @@ export function trackPurchase(params: {
   itemName: string;
   itemCategory: "subscription" | "credit_pack";
 }) {
+  const transactionId = params.transactionId || `txn_${Date.now()}`;
   gtag("event", "purchase", {
     currency: "USD",
     value: params.value,
-    transaction_id: params.transactionId || `txn_${Date.now()}`,
+    transaction_id: transactionId,
+    event_id: transactionId, // for deduplication with backend
     items: [
       {
         item_id: params.itemId,

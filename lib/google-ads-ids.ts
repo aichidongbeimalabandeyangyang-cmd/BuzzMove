@@ -5,6 +5,7 @@
  */
 
 const COOKIE_NAME = "buzzmove_google_ads";
+const STORAGE_KEY = "buzzmove_google_ads";
 const MAX_AGE_DAYS = 30;
 
 export interface GoogleAdsIds {
@@ -24,19 +25,22 @@ function setCookie(name: string, value: string, maxAgeDays: number) {
   document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${maxAgeDays * 24 * 60 * 60}; SameSite=Lax`;
 }
 
-/** Store gclid, gbraid, wbraid. Call when URL has these params. */
+/** Store gclid, gbraid, wbraid. Call when URL has these params. Persists to cookie + localStorage. */
 export function storeGoogleAdsIds(ids: GoogleAdsIds): void {
   const filtered: GoogleAdsIds = {};
   if (ids.gclid?.trim()) filtered.gclid = ids.gclid.trim();
   if (ids.gbraid?.trim()) filtered.gbraid = ids.gbraid.trim();
   if (ids.wbraid?.trim()) filtered.wbraid = ids.wbraid.trim();
   if (Object.keys(filtered).length === 0) return;
-  setCookie(COOKIE_NAME, JSON.stringify(filtered), MAX_AGE_DAYS);
+  const json = JSON.stringify(filtered);
+  setCookie(COOKIE_NAME, json, MAX_AGE_DAYS);
+  if (typeof localStorage !== "undefined") localStorage.setItem(STORAGE_KEY, json);
 }
 
-/** Read stored Google Ads click IDs. Use when firing conversion events. */
+/** Read stored Google Ads click IDs. Use when firing conversion events. Reads from cookie, fallback to localStorage. */
 export function getGoogleAdsIds(): GoogleAdsIds {
-  const raw = getCookie(COOKIE_NAME);
+  let raw = getCookie(COOKIE_NAME);
+  if (!raw && typeof localStorage !== "undefined") raw = localStorage.getItem(STORAGE_KEY);
   if (!raw) return {};
   try {
     const parsed = JSON.parse(raw) as Record<string, string>;

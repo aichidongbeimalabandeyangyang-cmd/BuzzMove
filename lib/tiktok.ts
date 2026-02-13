@@ -18,9 +18,14 @@ function ttq(event: string, params?: Record<string, unknown>) {
   }
 }
 
-/** CompleteRegistration - User signs up */
+/** CompleteRegistration - User signs up (first login, new user) */
 export function trackTikTokSignUp(method: "google" | "email") {
   ttq("CompleteRegistration", { method });
+}
+
+/** Login - Returning user logs in */
+export function trackTikTokLogin(method: "google" | "email") {
+  ttq("Login", { method });
 }
 
 /** InitiateCheckout - User starts checkout */
@@ -39,8 +44,10 @@ export function trackTikTokPurchase(params: {
   content_name: string;
   value: number;
   currency: string;
+  eventId?: string;
 }) {
-  ttq("CompletePayment", params);
+  const { eventId, ...rest } = params;
+  ttq("CompletePayment", eventId ? { ...rest, event_id: eventId } : rest);
 }
 
 /** SubmitForm - User generates video (custom conversion) */

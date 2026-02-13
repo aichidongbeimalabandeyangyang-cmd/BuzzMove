@@ -5,6 +5,7 @@
  */
 
 const COOKIE_NAME = "buzzmove_tiktok_ads";
+const STORAGE_KEY = "buzzmove_tiktok_ads";
 const MAX_AGE_DAYS = 30;
 
 export interface TikTokAdsIds {
@@ -25,23 +26,24 @@ function setCookie(name: string, value: string, maxAgeDays: number) {
   }; SameSite=Lax`;
 }
 
-/** Store ttclid. Call when URL has this param. */
+/** Store ttclid. Call when URL has this param. Persists to cookie + localStorage. */
 export function storeTikTokAdsIds(ids: TikTokAdsIds): void {
   const filtered: TikTokAdsIds = {};
   if (ids.ttclid?.trim()) filtered.ttclid = ids.ttclid.trim();
   if (Object.keys(filtered).length === 0) return;
-  setCookie(COOKIE_NAME, JSON.stringify(filtered), MAX_AGE_DAYS);
+  const json = JSON.stringify(filtered);
+  setCookie(COOKIE_NAME, json, MAX_AGE_DAYS);
+  if (typeof localStorage !== "undefined") localStorage.setItem(STORAGE_KEY, json);
 }
 
-/** Read stored TikTok Ads click ID. Use when firing conversion events. */
+/** Read stored TikTok Ads click ID. Use when firing conversion events. Reads from cookie, fallback to localStorage. */
 export function getTikTokAdsIds(): TikTokAdsIds {
-  const raw = getCookie(COOKIE_NAME);
+  let raw = getCookie(COOKIE_NAME);
+  if (!raw && typeof localStorage !== "undefined") raw = localStorage.getItem(STORAGE_KEY);
   if (!raw) return {};
   try {
     const parsed = JSON.parse(raw) as Record<string, string>;
-    return {
-      ttclid: parsed.ttclid || undefined,
-    };
+    return { ttclid: parsed.ttclid || undefined };
   } catch {
     return {};
   }
