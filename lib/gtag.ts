@@ -43,10 +43,12 @@ export function trackPurchase(params: {
   itemName: string;
   itemCategory: "subscription" | "credit_pack";
 }) {
+  const transactionId = params.transactionId || `txn_${Date.now()}`;
   gtag("event", "purchase", {
     currency: "USD",
     value: params.value,
-    transaction_id: params.transactionId || `txn_${Date.now()}`,
+    transaction_id: transactionId,
+    event_id: transactionId, // for deduplication with backend
     items: [
       {
         item_id: params.itemId,

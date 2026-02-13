@@ -40,13 +40,16 @@ export function trackFacebookPurchase(params: {
   content_name: string;
   value: number;
   currency: string;
+  eventId?: string;
 }) {
+  const { eventId, ...rest } = params;
+  const options = eventId ? { eventID: eventId } : undefined;
   fbq("track", "Purchase", {
-    content_type: params.content_type,
-    content_name: params.content_name,
-    value: params.value,
-    currency: params.currency,
-  });
+    content_type: rest.content_type,
+    content_name: rest.content_name,
+    value: rest.value,
+    currency: rest.currency,
+  }, options);
 }
 
 /** Lead - User generates video (custom conversion) */

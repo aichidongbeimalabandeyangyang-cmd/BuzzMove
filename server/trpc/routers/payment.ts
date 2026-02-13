@@ -3,9 +3,6 @@ import { TRPCError } from "@trpc/server";
 import { router, protectedProcedure } from "../trpc";
 import { stripe } from "@/server/stripe/client";
 import { PLANS, CREDIT_PACKS } from "@/lib/constants";
-import { trackTikTokCAPIInitiateCheckout } from "@/server/services/tiktok-capi";
-import { trackFacebookCAPIInitiateCheckout } from "@/server/services/facebook-capi";
-
 /** Validate or recreate Stripe customer. Handles stale/invalid customer IDs. */
 async function ensureStripeCustomer(
   supabase: any,
@@ -51,6 +48,7 @@ export const paymentRouter = router({
         fbclid: z.string().optional(),
         fbp: z.string().optional(),
         fbc: z.string().optional(),
+        deviceKey: z.string().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
@@ -158,6 +156,8 @@ export const paymentRouter = router({
           if (input.wbraid) adsParams.push(`wbraid=${encodeURIComponent(input.wbraid)}`);
           if (input.ttclid) adsParams.push(`ttclid=${encodeURIComponent(input.ttclid)}`);
           if (input.fbclid) adsParams.push(`fbclid=${encodeURIComponent(input.fbclid)}`);
+          if (input.fbp) adsParams.push(`fbp=${encodeURIComponent(input.fbp)}`);
+          if (input.fbc) adsParams.push(`fbc=${encodeURIComponent(input.fbc)}`);
           return adsParams.length > 0 ? `${base}&${adsParams.join("&")}` : base;
         })(),
         cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing?payment=cancelled`,
@@ -173,6 +173,7 @@ export const paymentRouter = router({
           fbclid: input.fbclid || "",
           fbp: input.fbp || "",
           fbc: input.fbc || "",
+          device_key: input.deviceKey || "",
         },
       });
 
@@ -191,6 +192,7 @@ export const paymentRouter = router({
       fbclid: z.string().optional(),
       fbp: z.string().optional(),
       fbc: z.string().optional(),
+      deviceKey: z.string().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
       const pack = CREDIT_PACKS.find((p) => p.id === input.packId);
@@ -208,37 +210,7 @@ export const paymentRouter = router({
         ctx.supabase, ctx.user.id, profile.stripe_customer_id, profile.email || ctx.user.email
       );
 
-      // CAPI: InitiateCheckout (fire-and-forget)
-      const checkoutEventId = `checkout_${ctx.user.id}_${Date.now()}`;
-      const packName = `${pack.name} (${pack.credits} credits)`;
-      trackTikTokCAPIInitiateCheckout({
-        userId: ctx.user.id,
-        email: ctx.user.email || undefined,
-        contentType: "product",
-        contentName: packName,
-        value: pack.price / 100,
-        currency: "USD",
-        userAgent: ctx.userAgent,
-        ip: ctx.ip,
-        eventId: checkoutEventId,
-        ttclid: input.ttclid,
-      }).catch((e: unknown) => console.error("[payment:pack] TikTok CAPI InitiateCheckout error:", e));
-
-      trackFacebookCAPIInitiateCheckout({
-        userId: ctx.user.id,
-        email: ctx.user.email || undefined,
-        contentType: "product",
-        contentName: packName,
-        value: pack.price / 100,
-        currency: "USD",
-        userAgent: ctx.userAgent,
-        ip: ctx.ip,
-        eventId: checkoutEventId,
-        fbclid: input.fbclid,
-        fbp: input.fbp,
-        fbc: input.fbc,
-      }).catch((e: unknown) => console.error("[payment:pack] Facebook CAPI InitiateCheckout error:", e));
-
+      // InitiateCheckout is tracked on frontend only
       const session = await stripe.checkout.sessions.create({
         customer: customerId,
         mode: "payment",
@@ -262,6 +234,8 @@ export const paymentRouter = router({
           if (input.wbraid) adsParams.push(`wbraid=${encodeURIComponent(input.wbraid)}`);
           if (input.ttclid) adsParams.push(`ttclid=${encodeURIComponent(input.ttclid)}`);
           if (input.fbclid) adsParams.push(`fbclid=${encodeURIComponent(input.fbclid)}`);
+          if (input.fbp) adsParams.push(`fbp=${encodeURIComponent(input.fbp)}`);
+          if (input.fbc) adsParams.push(`fbc=${encodeURIComponent(input.fbc)}`);
           return adsParams.length > 0 ? `${base}&${adsParams.join("&")}` : base;
         })(),
         cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing?payment=cancelled`,
@@ -277,6 +251,7 @@ export const paymentRouter = router({
           fbclid: input.fbclid || "",
           fbp: input.fbp || "",
           fbc: input.fbc || "",
+          device_key: input.deviceKey || "",
         },
       });
 

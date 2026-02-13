@@ -39,8 +39,10 @@ export function trackTikTokPurchase(params: {
   content_name: string;
   value: number;
   currency: string;
+  eventId?: string;
 }) {
-  ttq("CompletePayment", params);
+  const { eventId, ...rest } = params;
+  ttq("CompletePayment", eventId ? { ...rest, event_id: eventId } : rest);
 }
 
 /** SubmitForm - User generates video (custom conversion) */

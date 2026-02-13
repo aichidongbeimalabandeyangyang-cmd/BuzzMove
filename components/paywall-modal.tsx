@@ -10,6 +10,7 @@ import { trackFacebookInitiateCheckout } from "@/lib/facebook";
 import { getGoogleAdsIds } from "@/lib/google-ads-ids";
 import { getTikTokAdsIds } from "@/lib/tiktok-ads-ids";
 import { getFacebookAdsIds } from "@/lib/facebook-ads-ids";
+import { getDeviceKey } from "@/components/tracking/device-key-ensurer";
 
 interface PaywallModalProps {
   open: boolean;
@@ -117,6 +118,7 @@ export function PaywallModal({ open, onClose, context = "credits", userPlan }: P
                 gclid: gads.gclid, gbraid: gads.gbraid, wbraid: gads.wbraid,
                 ttclid: tads.ttclid,
                 fbclid: fads.fbclid, fbp: fads.fbp, fbc: fads.fbc,
+                deviceKey: getDeviceKey() || undefined,
               });
             }}
             disabled={isPending}
@@ -177,6 +179,7 @@ export function PaywallModal({ open, onClose, context = "credits", userPlan }: P
                 gclid: gads.gclid, gbraid: gads.gbraid, wbraid: gads.wbraid,
                 ttclid: tads.ttclid,
                 fbclid: fads.fbclid, fbp: fads.fbp, fbc: fads.fbc,
+                deviceKey: getDeviceKey() || undefined,
               });
             }}
             disabled={isPending}
@@ -228,6 +231,7 @@ export function PaywallModal({ open, onClose, context = "credits", userPlan }: P
                     gclid: gads.gclid, gbraid: gads.gbraid, wbraid: gads.wbraid,
                     ttclid: tads.ttclid,
                     fbclid: fads.fbclid, fbp: fads.fbp, fbc: fads.fbc,
+                    deviceKey: getDeviceKey() || undefined,
                   });
                 }}
                 disabled={isPending}

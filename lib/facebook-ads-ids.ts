@@ -5,6 +5,7 @@
  */
 
 const COOKIE_NAME = "buzzmove_facebook_ads";
+const STORAGE_KEY = "buzzmove_facebook_ads";
 const MAX_AGE_DAYS = 90; // Facebook recommends 90 days for fbclid
 
 export interface FacebookAdsIds {
@@ -28,35 +29,31 @@ function setCookie(name: string, value: string, maxAgeDays: number) {
   }; SameSite=Lax`;
 }
 
-/** Store fbclid. Call when URL has this param. */
+/** Store fbclid. Call when URL has this param. Persists to cookie + localStorage. */
 export function storeFacebookAdsIds(ids: FacebookAdsIds): void {
   const filtered: FacebookAdsIds = {};
   if (ids.fbclid?.trim()) filtered.fbclid = ids.fbclid.trim();
   if (Object.keys(filtered).length === 0) return;
-  setCookie(COOKIE_NAME, JSON.stringify(filtered), MAX_AGE_DAYS);
+  const json = JSON.stringify(filtered);
+  setCookie(COOKIE_NAME, json, MAX_AGE_DAYS);
+  if (typeof localStorage !== "undefined") localStorage.setItem(STORAGE_KEY, json);
 }
 
-/** Read stored Facebook Ads click ID. Use when firing conversion events. */
+/** Read stored Facebook Ads click ID. Use when firing conversion events. Reads from cookie, fallback to localStorage. */
 export function getFacebookAdsIds(): FacebookAdsIds {
-  const raw = getCookie(COOKIE_NAME);
+  let raw = getCookie(COOKIE_NAME);
+  if (!raw && typeof localStorage !== "undefined") raw = localStorage.getItem(STORAGE_KEY);
   const ids: FacebookAdsIds = {};
-  
-  // Get fbclid from our custom cookie
   if (raw) {
     try {
       const parsed = JSON.parse(raw) as Record<string, string>;
       if (parsed.fbclid) ids.fbclid = parsed.fbclid;
     } catch {}
   }
-  
-  // Get _fbp (Facebook browser ID) from Facebook's own cookie
   const fbp = getCookie("_fbp");
   if (fbp) ids.fbp = fbp;
-  
-  // Get _fbc (Facebook click tracking) from Facebook's own cookie
   const fbc = getCookie("_fbc");
   if (fbc) ids.fbc = fbc;
-  
   return ids;
 }
 
