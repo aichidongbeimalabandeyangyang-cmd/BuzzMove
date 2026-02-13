@@ -18,9 +18,14 @@ function ttq(event: string, params?: Record<string, unknown>) {
   }
 }
 
-/** CompleteRegistration - User signs up */
+/** CompleteRegistration - User signs up (first login, new user) */
 export function trackTikTokSignUp(method: "google" | "email") {
   ttq("CompleteRegistration", { method });
+}
+
+/** Login - Returning user logs in */
+export function trackTikTokLogin(method: "google" | "email") {
+  ttq("Login", { method });
 }
 
 /** InitiateCheckout - User starts checkout */

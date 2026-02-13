@@ -3,10 +3,10 @@
 import { useState, useEffect, useRef } from "react";
 import { createSupabaseBrowserClient } from "@/server/supabase/client";
 import { Play, Mail, ArrowLeft } from "lucide-react";
-import { trackSignUp, trackLoginModalView } from "@/lib/gtag";
+import { trackSignUp, trackLogin, trackLoginModalView } from "@/lib/gtag";
 import { trackAdjustSignUp, trackAdjustLogin } from "@/lib/adjust";
-import { trackTikTokSignUp } from "@/lib/tiktok";
-import { trackFacebookSignUp } from "@/lib/facebook";
+import { trackTikTokSignUp, trackTikTokLogin } from "@/lib/tiktok";
+import { trackFacebookSignUp, trackFacebookLogin } from "@/lib/facebook";
 import { logEvent } from "@/lib/events";
 import { trpc } from "@/lib/trpc";
 import { getDeviceKey } from "@/components/tracking/device-key-ensurer";
@@ -145,7 +145,10 @@ export function LoginModal({ open, onClose, redirectTo }: LoginModalProps) {
           fbc: fads.fbc,
         });
       } else {
+        trackLogin("email");
         trackAdjustLogin();
+        trackTikTokLogin("email");
+        trackFacebookLogin("email");
       }
       onClose();
       window.location.href = redirectTo || "/";

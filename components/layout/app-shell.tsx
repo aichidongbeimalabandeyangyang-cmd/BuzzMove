@@ -10,8 +10,8 @@ import { ReferralLinker } from "@/components/tracking/referral-linker";
 import { UtmLinker } from "@/components/tracking/utm-linker";
 import { trackSignUp, trackLogin } from "@/lib/gtag";
 import { trackAdjustSignUp, trackAdjustLogin } from "@/lib/adjust";
-import { trackTikTokSignUp } from "@/lib/tiktok";
-import { trackFacebookSignUp } from "@/lib/facebook";
+import { trackTikTokSignUp, trackTikTokLogin } from "@/lib/tiktok";
+import { trackFacebookSignUp, trackFacebookLogin } from "@/lib/facebook";
 import { SwRegister } from "@/components/pwa/sw-register";
 import { InstallPrompt } from "@/components/pwa/install-prompt";
 import { AdjustInit } from "@/components/tracking/adjust-init";
@@ -68,6 +68,8 @@ export function AppShell({ children }: { children: ReactNode }) {
         } else {
           trackLogin("google");
           trackAdjustLogin();
+          trackTikTokLogin("google");
+          trackFacebookLogin("google");
         }
       }
     });

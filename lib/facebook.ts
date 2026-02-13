@@ -14,9 +14,14 @@ function fbq(...args: unknown[]) {
   }
 }
 
-/** CompleteRegistration - User signs up */
+/** CompleteRegistration - User signs up (first login, new user) */
 export function trackFacebookSignUp(method: "google" | "email") {
   fbq("track", "CompleteRegistration", { method });
+}
+
+/** Login - Returning user logs in */
+export function trackFacebookLogin(method: "google" | "email") {
+  fbq("trackCustom", "Login", { method });
 }
 
 /** InitiateCheckout - User starts checkout */
